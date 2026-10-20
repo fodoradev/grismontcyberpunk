@@ -1,0 +1,209 @@
+/* The homepage follows the same thread: a little structure, a clearer flow. */
+#grismont-board .gm-home { --home-rule: #ccd0c5; }
+#grismont-board .home-section { padding-block: clamp(64px, 8vw, 112px); }
+#grismont-board .home-hero { display: grid; grid-template-columns: 1.2fr 1fr; align-items: center; gap: 54px; padding-block: 72px 64px; }
+#grismont-board .home-eyebrow { display: flex; align-items: center; gap: 10px; font-size: 10px; letter-spacing: 1.1px; }
+#grismont-board .home-eyebrow > span { width: 7px; height: 7px; border-radius: 50%; background: #61782d; flex-shrink: 0; }
+#grismont-board .home-hero h1 { font-size: clamp(48px, 5.7vw, 74px); font-weight: 500; line-height: 1.09; letter-spacing: -.065em; max-width: none; margin: 27px 0 32px; text-wrap: initial; }
+#grismont-board .home-tangles { position: relative; white-space: nowrap; }
+#grismont-board .home-tangles svg { position: absolute; left: 0; bottom: -12px; width: 100%; height: 15px; overflow: visible; }
+#grismont-board .home-tangles path { fill: none; stroke: #8da541; stroke-width: 4; stroke-linecap: round; }
+#grismont-board .home-intro { font-size: 20px; line-height: 1.6; letter-spacing: -.4px; }
+#grismont-board .home-hero .gm-hero-text { margin-top: 14px; font-size: 16px; max-width: 49ch; }
+#grismont-board .home-hero .gm-actions { margin-top: 28px; gap: 18px 24px; }
+#grismont-board .home-hero .gm-under { font-size: 11px; max-width: none; margin-top: 17px; }
+#grismont-board .home-art { position: relative; isolation: isolate; margin: 0; transform: rotate(1.5deg); }
+#grismont-board .home-art::before { content: ''; position: absolute; z-index: -1; right: 12px; bottom: 14px; width: min(40%, 320px); height: 20px; box-shadow: 0 14px 12px #202B2647; transform: rotate(3deg); pointer-events: none; }
+#grismont-board .home-art-paper { background: linear-gradient(to top left, #FFFFFF 0, #FFFFFFA6 9px, #202B2614 24px, #202B2600 60px) right bottom / 240px 58px no-repeat, linear-gradient(180deg, #dfd8eb 0%, #e6e1ef 16%, #e6e1ef 80%, #ece7f3 100%); border-radius: 2px 2px 140px 2px / 2px 2px 16px 2px; overflow: hidden; }
+#grismont-board .home-art-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 22px 22px 15px; }
+#grismont-board .home-art-top .gm-label { font-size: 10px; }
+#grismont-board .home-art svg { display: block; width: 100%; height: auto; }
+#grismont-board .home-art-static-dots { display: none; }
+@media (prefers-reduced-motion: reduce) {
+  #grismont-board .home-art-moving-dots { display: none; }
+  #grismont-board .home-art-static-dots { display: inline; }
+}
+#grismont-board .home-art figcaption { padding: 15px 23px 25px; font-size: 12px; }
+#grismont-board .home-credentials { display: grid; grid-template-columns: 1fr 1.1fr 1fr; padding-block: 25px; border-block: 1px solid var(--home-rule); gap: 26px; }
+#grismont-board .home-credentials p { display: flex; flex-direction: column; gap: 5px; }
+#grismont-board .home-credentials p + p { border-left: 1px solid var(--home-rule); padding-left: 28px; }
+#grismont-board .home-credentials strong { font-size: 14px; font-weight: 600; }
+#grismont-board .home-credentials span { font-size: 12px; color: var(--gm-muted); }
+#grismont-board .home-section-heading { display: grid; grid-template-columns: 1.3fr 1fr; gap: 55px; align-items: end; margin-bottom: 40px; }
+#grismont-board .home-section-heading h2 { margin-bottom: 0; }
+#grismont-board .gm-home h2 { font-size: clamp(30px, 3.5vw, 44px); font-weight: 500; line-height: 1.2; letter-spacing: -.05em; }
+#grismont-board .home-heading-note { color: var(--gm-muted); font-size: 15px; line-height: 1.8; max-width: 43ch; padding-bottom: 3px; }
+#grismont-board .home-services { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border: 1px solid var(--home-rule); border-radius: 4px; }
+#grismont-board .home-service { padding: 27px 25px 28px; display: flex; flex-direction: column; align-items: start; }
+#grismont-board .home-service + .home-service { border-left: 1px solid var(--home-rule); }
+#grismont-board .home-service:nth-child(2) { background: #eeece4; }
+#grismont-board .home-service-top { display: flex; align-items: center; justify-content: space-between; width: 100%; }
+#grismont-board .home-service .gm-label { font-size: 11px; }
+#grismont-board .home-index { font: 12px monospace; color: #65705f; }
+#grismont-board .home-service h3 { font-size: 27px; font-weight: 500; letter-spacing: -1px; margin: 35px 0 15px; }
+#grismont-board .home-service > p { font-size: 14px; line-height: 1.8; color: var(--gm-muted); }
+#grismont-board .home-service ul { margin: 24px 0; padding: 0; list-style: none; font-size: 13px; line-height: 1.7; width: 100%; }
+#grismont-board .home-service li { border-top: 1px solid var(--home-rule); padding: 12px 0 12px 15px; position: relative; }
+#grismont-board .home-service li::before { content: '↳'; position: absolute; left: 0; color: #61782d; }
+#grismont-board .home-service .home-outcome { margin-top: auto; padding-block: 0 25px; color: var(--gm-ink); font-size: 13px; }
+#grismont-board .home-service .gm-text-link { font-size: 13px; }
+/* Side by side, the cards share rows (top, title, text, 3 items, outcome, link) so each part lines up across all three. */
+@media (min-width: 761px) {
+  #grismont-board .home-service { display: grid; grid-row: span 8; grid-template-rows: subgrid; justify-items: start; align-items: start; }
+  #grismont-board .home-service ul { display: grid; grid-row: span 3; grid-template-rows: subgrid; align-self: stretch; }
+  #grismont-board .home-service .home-outcome { margin-top: 0; }
+}
+#grismont-board .home-method { background: var(--gm-ink); color: var(--gm-paper); }
+#grismont-board .home-method .gm-label { color: var(--gm-lime); }
+#grismont-board .home-method .home-heading-note { color: #c6cec3; }
+#grismont-board .home-method-list { margin: 0; padding: 0; list-style: none; }
+#grismont-board .home-method-list li { display: grid; grid-template-columns: 34px 1fr 1.3fr 106px; gap: 26px; align-items: center; border-top: 1px solid #4b574d; padding: 26px 0; }
+#grismont-board .home-method-number { color: var(--gm-lime); font: 12px monospace; }
+#grismont-board .home-method-list h3 { font-size: 22px; font-weight: 500; }
+#grismont-board .home-method-list p { color: #c6cec3; font-size: 14px; line-height: 1.75; }
+#grismont-board .home-method-tag { border: 1px solid #61705b; border-radius: 3px; font-size: 11px; padding: 6px 8px; justify-self: end; white-space: nowrap; }
+#grismont-board .home-method-foot { border-top: 1px solid #4b574d; padding-top: 24px; color: #c6cec3; font-size: 13px; display: flex; gap: 21px; }
+#grismont-board .home-method-foot > span { color: var(--gm-lime); font-size: 24px; line-height: 1; }
+#grismont-board .home-example-options { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border: 1px solid var(--home-rule); border-bottom: 0; }
+#grismont-board .home-example-options button { border: 0; background: transparent; color: var(--gm-ink); padding: 19px 20px; display: flex; gap: 12px; text-align: left; align-items: center; cursor: pointer; font-size: 14px; min-height: 60px; }
+#grismont-board .home-example-options button + button { border-left: 1px solid var(--home-rule); }
+#grismont-board .home-example-options button[aria-pressed='true'] { background: var(--gm-ink); color: var(--gm-paper); }
+#grismont-board .home-example-options button > span:last-child { margin-left: auto; }
+#grismont-board .home-option-number { font: 11px monospace; opacity: .75; }
+#grismont-board .home-example-options button[aria-pressed='true'] .home-option-number { color: var(--gm-lime); opacity: 1; }
+#grismont-board .home-example-panel { display: grid; grid-template-columns: 1.2fr 1fr; border: 1px solid var(--home-rule); }
+#grismont-board .home-example-diagram { background: #ebece4; padding: 32px; }
+#grismont-board .home-example-diagram .gm-label { font-size: 10px; }
+#grismont-board .home-example-diagram h3 { font-size: 26px; font-weight: 500; max-width: 25ch; min-height: 104px; margin: 17px 0 22px; letter-spacing: -.8px; }
+#grismont-board .home-flow-label { font: 10px/1.6 monospace; color: var(--gm-muted); text-transform: uppercase; letter-spacing: .7px; }
+#grismont-board .home-flow { display: flex; list-style: none; padding: 0; margin: 10px 0 0; gap: 13px; }
+#grismont-board .home-flow li { position: relative; flex: 1; border: 1px solid #b6bcae; border-radius: 3px; padding: 12px 6px; text-align: center; font-size: 11px; line-height: 1.6; display: grid; place-items: center; }
+#grismont-board .home-flow li + li::before { content: '→'; position: absolute; left: -12px; font-size: 12px; }
+#grismont-board .home-flow-before li:nth-child(even) { transform: translateY(6px); }
+#grismont-board .home-flow-divider { text-align: center; padding: 17px 0 8px; font-size: 24px; color: #61782d; }
+#grismont-board .home-flow-after li { background: var(--gm-lime); border-color: #a9bf62; }
+#grismont-board .home-example-caption { font: 11px/1.8 monospace; color: var(--gm-muted); margin-top: 24px; }
+#grismont-board .home-example-thinking { padding: 35px 32px; display: flex; flex-direction: column; }
+#grismont-board .home-example-thinking > .gm-label { font-size: 10px; }
+#grismont-board .home-example-thinking .home-example-question { font: 500 24px/1.4 'Manrope', sans-serif; letter-spacing: -.8px; color: var(--gm-ink); margin: 18px 0; }
+#grismont-board .home-example-thinking p { font-size: 14px; line-height: 1.8; color: var(--gm-muted); }
+#grismont-board .home-example-result { margin-top: auto; padding-top: 28px; }
+#grismont-board .home-example-result .gm-label { font-size: 10px; display: block; border-top: 1px solid var(--home-rule); padding-top: 18px; margin-bottom: 8px; }
+#grismont-board .home-scorecard { background: #eeece4; border-block: 1px solid #dddcd1; }
+#grismont-board .home-score-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: start; }
+#grismont-board .home-areas { padding-top: 8px; }
+#grismont-board .home-areas h3 { font-size: 20px; font-weight: 500; margin-bottom: 25px; }
+#grismont-board .home-areas summary { font-size: 15px; padding-block: 20px; }
+#grismont-board .home-areas summary > span { display: flex; align-items: baseline; gap: 19px; }
+#grismont-board .home-area-number { font: 11px monospace; color: var(--gm-muted); }
+#grismont-board .home-areas details { border-color: var(--home-rule); }
+#grismont-board .home-areas details > p { font-size: 14px; padding: 0 25px 20px 34px; }
+#grismont-board .home-report { padding: 30px; background: #f9f8f2; border: 1px solid var(--home-rule); border-radius: 4px; box-shadow: 8px 8px 0 #deded0; }
+#grismont-board .home-report-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+#grismont-board .home-report-top .gm-label { font-size: 10px; }
+#grismont-board .home-free { background: var(--gm-lime); padding: 4px 10px; border-radius: 2px; font-size: 11px; }
+#grismont-board .home-report h3 { font-size: 29px; font-weight: 500; letter-spacing: -1.1px; margin-top: 29px; }
+#grismont-board .home-report ul { list-style: none; padding: 0; margin: 24px 0; font-size: 14px; }
+#grismont-board .home-report li { padding: 12px 0 12px 22px; position: relative; border-top: 1px solid var(--home-rule); }
+#grismont-board .home-report li::before { content: '↗'; position: absolute; left: 0; color: #61782d; }
+#grismont-board .home-report .gm-cta { width: 100%; }
+#grismont-board .home-report-note { color: var(--gm-muted); font-size: 12px; line-height: 1.8; margin-top: 17px; }
+#grismont-board .home-score-note { max-width: 78ch; font-size: 12px; color: var(--gm-muted); line-height: 1.8; margin-top: 32px; }
+#grismont-board .home-about { display: grid; grid-template-columns: 1fr 1.1fr; gap: 85px; }
+#grismont-board .home-notebook { background: #e6e1ef; padding: 27px 30px; margin-top: 35px; border-radius: 3px; position: relative; }
+#grismont-board .home-notebook::before { content: ''; width: 36px; height: 8px; background: var(--gm-lime); position: absolute; top: -4px; left: 29px; }
+#grismont-board .home-notebook .gm-label { font-size: 10px; }
+#grismont-board .home-notebook p { font: 500 25px/1.45 'Manrope', sans-serif; letter-spacing: -.8px; margin-block: 20px 25px; }
+#grismont-board .home-signature { font: 11px monospace; }
+#grismont-board .home-about-copy { padding-top: 34px; }
+#grismont-board .home-about-copy > p { margin-bottom: 20px; color: var(--gm-muted); font-size: 15px; line-height: 1.9; }
+#grismont-board .home-about-copy > .home-intro { color: var(--gm-ink); font-size: 20px; line-height: 1.65; }
+#grismont-board .home-about-facts { display: flex; flex-wrap: wrap; gap: 8px; margin: 25px 0; }
+#grismont-board .home-about-facts span { font-size: 11px; padding: 5px 8px; border: 1px solid var(--home-rule); border-radius: 2px; }
+#grismont-board .home-faq { display: grid; grid-template-columns: .8fr 1.4fr; gap: 70px; padding-top: 0; }
+#grismont-board .home-faq-list summary { font-size: 15px; padding-block: 22px; }
+#grismont-board .home-faq-list details > p { font-size: 14px; line-height: 1.8; }
+#grismont-board .home-faq .home-heading-note { font-size: 14px; }
+#grismont-board .home-contact { background: var(--gm-ink); color: var(--gm-paper); }
+#grismont-board .home-contact-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 64px; align-items: end; }
+#grismont-board .home-contact .gm-label { color: var(--gm-lime); }
+#grismont-board .home-contact h2 { font-size: clamp(34px, 4vw, 50px); }
+#grismont-board .home-contact p:not(.gm-label) { color: #c6cec3; font-size: 15px; line-height: 1.8; }
+#grismont-board .home-email { font: 500 clamp(20px, 2.6vw, 30px)/1.6 'Manrope', sans-serif; display: inline-block; margin-top: 27px; text-decoration-thickness: 1px; text-underline-offset: 9px; letter-spacing: -.7px; }
+#grismont-board .home-email > span { color: var(--gm-lime); display: inline-block; margin-left: 8px; }
+#grismont-board .home-contact-aside { border-left: 1px solid #4b574d; padding-left: 40px; display: flex; flex-direction: column; align-items: start; gap: 18px; }
+#grismont-board .home-contact-symbol { font-size: 56px; line-height: 1; color: var(--gm-lime); margin-bottom: 13px; }
+#grismont-board .home-contact-small { font-size: 11px; color: #c6cec3; }
+@media (hover: hover) {
+  #grismont-board .home-example-options button:hover:not([aria-pressed='true']) { background: #e6e1ef; }
+  #grismont-board .home-service .gm-text-link:hover, #grismont-board .home-email:hover { text-decoration-color: #8da541; }
+}
+@media (max-width: 1000px) {
+  #grismont-board .home-hero { gap: 32px; }
+  #grismont-board .home-hero h1 { font-size: clamp(43px, 6vw, 62px); }
+  #grismont-board .home-eyebrow { font-size: 10px; letter-spacing: .4px; }
+  #grismont-board .home-service { padding: 24px 18px; }
+  #grismont-board .home-service h3 { font-size: 23px; }
+  #grismont-board .home-method-list li { grid-template-columns: 26px 1fr 1.2fr 85px; gap: 20px; }
+  #grismont-board .home-method-list h3 { font-size: 19px; }
+  #grismont-board .home-score-grid { gap: 35px; }
+  #grismont-board .home-about { gap: 45px; }
+  #grismont-board .home-example-diagram, #grismont-board .home-example-thinking { padding: 26px; }
+}
+@media (max-width: 760px) {
+  #grismont-board .home-hero { grid-template-columns: 1fr; gap: 42px; padding-top: 44px; padding-bottom: 40px; }
+  #grismont-board .home-hero h1 { font-size: clamp(46px, 9vw, 68px); }
+  #grismont-board .home-hero .gm-hero-text { max-width: 57ch; }
+  #grismont-board .home-art { max-width: 430px; width: calc(100% - 12px); justify-self: center; }
+  #grismont-board .home-credentials { gap: 15px; }
+  #grismont-board .home-credentials p + p { padding-left: 15px; }
+  #grismont-board .home-credentials strong { font-size: 12px; }
+  #grismont-board .home-credentials span { font-size: 11px; }
+  #grismont-board .home-section-heading { grid-template-columns: 1fr; gap: 20px; margin-bottom: 30px; }
+  #grismont-board .home-heading-note { max-width: 58ch; }
+  #grismont-board .home-services { grid-template-columns: 1fr; }
+  #grismont-board .home-service { padding: 27px; }
+  #grismont-board .home-service + .home-service { border-left: 0; border-top: 1px solid var(--home-rule); }
+  #grismont-board .home-service h3 { margin-top: 23px; font-size: 27px; }
+  #grismont-board .home-service ul { margin-block: 20px; }
+  #grismont-board .home-service .home-outcome { padding-bottom: 20px; }
+  #grismont-board .home-method-list li { grid-template-columns: 26px 1fr auto; gap: 10px 18px; padding-block: 24px; }
+  #grismont-board .home-method-list p { grid-column: 2 / -1; grid-row: 2; }
+  #grismont-board .home-method-tag { grid-column: 3; grid-row: 1; }
+  #grismont-board .home-example-panel { grid-template-columns: 1fr; }
+  #grismont-board .home-example-diagram h3 { min-height: 0; }
+  #grismont-board .home-example-options button { padding: 15px 12px; font-size: 12px; gap: 7px; }
+  #grismont-board .home-example-options button > span:last-child { display: none; }
+  #grismont-board .home-score-grid, #grismont-board .home-about, #grismont-board .home-faq, #grismont-board .home-contact-grid { grid-template-columns: 1fr; gap: 35px; }
+  #grismont-board .home-report { margin-right: 8px; }
+  #grismont-board .home-about-copy { padding-top: 0; }
+  #grismont-board .home-notebook { max-width: 450px; }
+  #grismont-board .home-contact-aside { border-left: 0; border-top: 1px solid #4b574d; padding: 26px 0 0; }
+  #grismont-board .home-contact-symbol { display: none; }
+}
+@media (max-width: 420px) {
+  #grismont-board .home-eyebrow { font-size: 10px; letter-spacing: .2px; gap: 7px; }
+  #grismont-board .home-hero h1 { font-size: clamp(40px, 11.4vw, 48px); letter-spacing: -.07em; }
+  #grismont-board .home-intro { font-size: 18px; }
+  #grismont-board .home-hero .gm-actions { gap: 18px; }
+  #grismont-board .home-hero .gm-under { max-width: 32ch; }
+  #grismont-board .home-credentials { grid-template-columns: 1fr; gap: 0; padding-block: 8px; }
+  #grismont-board .home-credentials p { padding-block: 14px; flex-direction: row; justify-content: space-between; align-items: center; gap: 18px; }
+  #grismont-board .home-credentials p + p { border-left: 0; border-top: 1px solid var(--home-rule); padding-left: 0; }
+  #grismont-board .home-credentials strong { max-width: 14ch; flex-shrink: 0; }
+  #grismont-board .home-credentials span { text-align: right; max-width: 22ch; }
+  #grismont-board .home-method-list h3 { font-size: 18px; }
+  #grismont-board .home-method-list li { column-gap: 10px; }
+  #grismont-board .home-method-tag { font-size: 10px; padding: 5px; }
+  #grismont-board .home-example-options { grid-template-columns: 1fr; }
+  #grismont-board .home-example-options button { padding: 14px 18px; min-height: 48px; font-size: 14px; gap: 14px; }
+  #grismont-board .home-example-options button + button { border-left: 0; border-top: 1px solid var(--home-rule); }
+  #grismont-board .home-example-options button > span:last-child { display: inline; }
+  #grismont-board .home-example-diagram, #grismont-board .home-example-thinking, #grismont-board .home-report { padding: 23px 20px; }
+  #grismont-board .home-flow { gap: 10px; }
+  #grismont-board .home-flow li { font-size: 10px; padding-inline: 3px; }
+  #grismont-board .home-flow li + li::before { left: -10px; font-size: 10px; }
+  #grismont-board .home-report h3 { font-size: 27px; }
+  #grismont-board .home-contact h2 { font-size: 33px; }
+  #grismont-board .home-email { font-size: 22px; }
+}

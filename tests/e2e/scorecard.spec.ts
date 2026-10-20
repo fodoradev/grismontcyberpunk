@@ -1,0 +1,160 @@
+import { existsSync, readdirSync } from "node:fs";
+import { expect, test, type Page } from "@playwright/test";
+
+const shots = process.env.SHOTS_DIR;
+const shot = async (page: Page, name: string) => { if (shots) await page.screenshot({ path: `${shots}/${name}.png`, fullPage: true }); };
+
+async function intake(page: Page, email: string) {
+  await page.goto("/scorecard");
+  await page.getByLabel("First name").fill("Anna");
+  await page.getByLabel("Work email").fill(email);
+  await page.getByLabel("Company size").selectOption("11-50");
+  await page.getByLabel("Type of work").selectOption("services");
+  await page.getByRole("checkbox").check();
+  await shot(page, "1-intake");
+  await page.getByRole("button", { name: /Start the questions/ }).click();
+  await expect(page).toHaveURL(/\/scorecard\/s\//);
+}
+
+const cardNumber = (page: Page) => page.locator(".sc-card-n").textContent();
+
+/** Presses a key and waits for the next card to appear. */
+async function pressAndAdvance(page: Page, key: string) {
+  const before = await cardNumber(page);
+  await page.keyboard.press(key);
+  await expect.poll(() => cardNumber(page)).not.toBe(before);
+}
+
+test("intake validates required fields", async ({ page }) => {
+  await page.goto("/scorecard");
+  await page.getByRole("button", { name: /Start the questions/ }).click();
+  await expect(page.getByText("Please tell us your first name.")).toBeVisible();
+  await expect(page.getByText("Please confirm you've read the privacy notice.")).toBeVisible();
+});
+
+test("keyboard flow: process, numbers, back, resume, submit, report, PDF, email", async ({ page }) => {
+  await intake(page, `e2e-${Date.now()}@example.test`);
+
+  // Card 1: the process. Enter on an empty field is refused.
+  await expect(page.getByRole("heading", { name: /Which one should it be/ })).toBeVisible();
+  await page.keyboard.press("Enter");
+  await expect(page.getByText("Type an answer to continue.")).toBeVisible();
+  await page.keyboard.type("Customer quotes");
+  await shot(page, "2-process");
+  await pressAndAdvance(page, "Enter");
+
+  // The process is piped into the next question; Enter without an answer is refused.
+  await expect(page.locator(".sc-pipe").first()).toHaveText("customer quotes"); // lowercased mid-sentence
+  await page.keyboard.press("Enter");
+  await expect(page.getByText(/Choose an answer to continue: press 1–5/)).toBeVisible();
+
+  // A number key picks the option and moves on.
+  await pressAndAdvance(page, "2");
+  await expect(page.locator(".sc-card-n")).toHaveText("3");
+  await shot(page, "3-choice");
+
+  // Backspace and ← go back with the earlier answer still selected; → moves on again.
+  await pressAndAdvance(page, "Backspace");
+  await expect(page.getByRole("radio", { checked: true })).toContainText("Within 1–2 weeks");
+  await pressAndAdvance(page, "ArrowRight");
+  await pressAndAdvance(page, "ArrowLeft");
+  await pressAndAdvance(page, "Enter");
+
+  // Answer through the first area, then reload: we resume at the first unanswered question.
+  for (let i = 0; i < 4; i++) await pressAndAdvance(page, "2");
+  const resumeAt = await cardNumber(page);
+  await page.waitForTimeout(500); // let the last background save land
+  await page.reload();
+  await expect(page.locator(".sc-card-n")).toHaveText(resumeAt!);
+
+  // Everything else by keyboard, up to the free-text question.
+  while (!(await page.locator("textarea").count())) await pressAndAdvance(page, "3");
+  await page.keyboard.type("Three people re-check the same numbers and it still slips.");
+  await page.keyboard.press("Enter"); // the closing card has no question number
+  await expect(page.getByRole("heading", { name: /That's everything, Anna/ })).toBeVisible();
+  await shot(page, "4-done");
+  await page.keyboard.press("Enter");
+
+  await expect(page).toHaveURL(/\/scorecard\/r\//, { timeout: 30_000 });
+  await expect(page.getByRole("heading", { name: "Anna, here's where you stand." })).toBeVisible();
+  await expect(page.getByText("Based on your answers about “Customer quotes”.", { exact: false })).toBeVisible();
+  await expect(page.getByText("Three people re-check", { exact: false })).toBeVisible();
+  await shot(page, "5-report");
+
+  const pdf = await page.request.get(page.url() + "/pdf");
+  expect(pdf.headers()["content-type"]).toBe("application/pdf");
+  await expect.poll(() => existsSync(".outbox") ? readdirSync(".outbox").filter(f => f.startsWith("report-")).length : 0, { timeout: 30_000 }).toBeGreaterThan(0);
+});
+
+test("mouse flow works too", async ({ page }) => {
+  await intake(page, `e2e-mouse-${Date.now()}@example.test`);
+  await page.getByRole("textbox").fill("Order to delivery");
+  await page.getByRole("button", { name: "OK" }).click();
+  await page.getByRole("radio", { name: /Within a few days/ }).click();
+  await expect(page.locator(".sc-card-n")).toHaveText("3");
+  await page.getByRole("button", { name: "Previous question" }).click();
+  await expect(page.getByRole("radio", { checked: true })).toContainText("Within a few days");
+  await page.getByRole("button", { name: "Next question" }).click();
+  await expect(page.locator(".sc-card-n")).toHaveText("3");
+});
+
+test("question layout matches the progress width and repositions for each viewport", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await intake(page, `e2e-layout-${Date.now()}@example.test`);
+  await expect(page.getByRole("textbox")).toBeFocused();
+  await page.getByRole("textbox").fill("Order to delivery");
+  await pressAndAdvance(page, "Enter");
+
+  const layout = () => page.evaluate(() => {
+    const rect = (selector: string) => document.querySelector(selector)!.getBoundingClientRect();
+    const progress = rect(".sc-progress-wrap");
+    const card = rect(".sc-card");
+    const choices = rect(".sc-choices");
+    const heading = rect(".sc-card-q");
+    return { progress, card, choices, heading, viewportHeight: innerHeight };
+  });
+
+  await expect.poll(async () => {
+    const { card, viewportHeight } = await layout();
+    return Math.abs(card.top + card.height / 2 - viewportHeight / 2);
+  }).toBeLessThan(8);
+  let geometry = await layout();
+  expect(Math.abs(geometry.choices.left - geometry.progress.left)).toBeLessThan(2);
+  expect(Math.abs(geometry.choices.right - geometry.progress.right)).toBeLessThan(2);
+  expect(Math.abs(geometry.heading.width - geometry.progress.width)).toBeLessThan(2);
+  await expect(page.locator("#sc-q")).toBeFocused();
+  await shot(page, "6-question-layout-desktop");
+
+  await page.setViewportSize({ width: 820, height: 1180 });
+  await page.evaluate(() => scrollTo(0, document.documentElement.scrollHeight));
+  await pressAndAdvance(page, "2");
+  await expect.poll(() => page.locator(".sc-progress-wrap").evaluate(element => Math.abs(element.getBoundingClientRect().top))).toBeLessThan(2);
+  geometry = await layout();
+  expect(geometry.heading.top).toBeGreaterThanOrEqual(geometry.progress.bottom);
+  expect(Math.abs(geometry.choices.left - geometry.progress.left)).toBeLessThan(2);
+  expect(Math.abs(geometry.choices.right - geometry.progress.right)).toBeLessThan(2);
+  await expect(page.locator("#sc-q")).toBeFocused();
+  await shot(page, "7-question-layout-tablet");
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.evaluate(() => scrollTo(0, document.documentElement.scrollHeight));
+  await pressAndAdvance(page, "2");
+  await expect.poll(() => page.locator(".sc-progress-wrap").evaluate(element => Math.abs(element.getBoundingClientRect().top))).toBeLessThan(2);
+  geometry = await layout();
+  expect(geometry.heading.top).toBeGreaterThanOrEqual(geometry.progress.bottom);
+  expect(Math.abs(geometry.choices.left - geometry.progress.left)).toBeLessThan(2);
+  expect(Math.abs(geometry.choices.right - geometry.progress.right)).toBeLessThan(2);
+  await expect(page.locator("#sc-q")).toBeFocused();
+  await shot(page, "8-question-layout-mobile");
+});
+
+test("delete flow requires confirmation", async ({ page }) => {
+  await intake(page, `e2e-del-${Date.now()}@example.test`);
+  const token = page.url().split("/s/")[1];
+  await page.goto(`/scorecard/delete/${token}`);
+  await expect(page.getByRole("heading", { name: "Delete your scorecard?" })).toBeVisible();
+  await page.getByRole("button", { name: "Delete permanently" }).click();
+  await expect(page.getByRole("heading", { name: "Deleted." })).toBeVisible();
+  await page.goto(`/scorecard/s/${token}`);
+  await expect(page.getByRole("heading", { name: "This link has expired." })).toBeVisible();
+});

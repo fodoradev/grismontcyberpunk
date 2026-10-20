@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1791901737168,
+      "tag": "0000_elite_spitfire",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1791904728122,
+      "tag": "0001_abandoned_blob",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792491196986,
+      "tag": "0002_complete_unicorn",
+      "breakpoints": true
+    }
+  ]
+}
