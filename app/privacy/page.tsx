@@ -23,7 +23,7 @@ export default async function PrivacyPage() {
         </section>
         <section>
           <h2>Milyen adatokat gyűjt a weboldal?</h2>
-          <p>A weboldal böngészése nem hoz létre fiókot vagy látogatói profilt. Nincs analitika, beágyazott időpontfoglaló vagy hirdetési nyomkövető, a betűkészletek pedig a weboldallal együtt töltődnek be, külső betűkészlet-szolgáltatás igénybevétele nélkül. Személyes adatokat csak a lent ismertetett folyamatfelmérő tárol.</p>
+          <p>A weboldal böngészése nem hoz létre fiókot vagy látogatói profilt. Nincs analitika, beágyazott időpontfoglaló vagy hirdetési nyomkövető, a betűkészletek pedig a weboldallal együtt töltődnek be, külső betűkészlet-szolgáltatás igénybevétele nélkül. A folyamatfelmérő és a részletes audit válaszait a szerveren tároljuk, hogy a kitöltés folytatható és az eredmény letölthető legyen.</p>
           <p>Egy weboldal betöltése ugyanakkor technikai adatok továbbításával jár a tárhely infrastruktúrája felé. Az éles tárhelyszolgáltatótól függően a hozzáférési vagy biztonsági naplók tartalmazhatják az IP-címet, a kérés időpontját, a kért oldalt, a böngésző adatait és a hibák részleteit. A tárhelyszolgáltató és a tényleges naplózási beállítások kiválasztása, illetve ellenőrzése még nem történt meg.</p>
           <dl className="legal-details">
             <div><dt>Tárhelyszolgáltató</dt><dd>{business.hostingProvider}</dd></div>
@@ -32,6 +32,16 @@ export default async function PrivacyPage() {
             <div><dt>A tárhelynaplók célja és jogalapja</dt><dd>[Az éles tárhelyszolgáltató és az alkalmazandó jog alapján tisztázandó]</dd></div>
           </dl>
           <p>Az indulás előtt tisztázni kell a tárhelyszolgáltató által igénybe vett további adatfeldolgozókat, az érintett joghatóságon kívülre történő adattovábbításokat és az ezekhez szükséges garanciákat is.</p>
+        </section>
+        <section id="advanced-audit">
+          <h2>Részletes audit</h2>
+          <p>Az audit indításakor véletlenszerű, privát folytatási hivatkozást hozunk létre. A folyamat nevét, az audit kérdéseire adott válaszokat, a szabályalapú értékelést és a modell verzióját tároljuk. Nem kérünk nevet vagy e-mail-címet, és az alkalmazás nem rögzít IP-címet az audit válaszaihoz. A szabad szöveges mezőkbe ne írj személyes vagy bizalmas adatot.</p>
+          <dl className="legal-details">
+            <div><dt>Cél</dt><dd>A válaszok automatikus mentése és folytatása a privát hivatkozással, valamint az értékelés és a letölthető PDF/JSON riport elkészítése.</dd></div>
+            <div><dt>Megőrzés</dt><dd>A befejezetlen auditokat 30 nap, a befejezett auditokat és riportokat 12 hónap után automatikusan töröljük.</dd></div>
+            <div><dt>Megosztás és értékelés</dt><dd>A privát folytatási és riportlinket bárki használhatja, aki ismeri. A keresők nem indexelik ezeket az oldalakat. Az értékelés előre rögzített szabályokkal történik, és nem jár rád nézve joghatással vagy hasonlóan jelentős hatással járó döntéssel.</dd></div>
+          </dl>
+          <p>A tárhely- és adatbázis-szolgáltatókat a fenti tárhely-információk ismertetik. Az auditot folytatáshoz őrizd meg a privát hivatkozást; a megőrzési időn belül törlési kérelmet a {business.email} címen is benyújthatsz.</p>
         </section>
         <section id="scorecard">
           <h2>A folyamatfelmérő</h2>
@@ -69,7 +79,7 @@ export default async function PrivacyPage() {
       </section>
       <section>
         <h2>What the website collects</h2>
-        <p>Browsing the website does not create an account or a visitor profile. There is no analytics, embedded booking tool or advertising tracker, and fonts are served with the website rather than fetched from a third-party font service. The only feature that stores personal data is the Discovery Scorecard, described below.</p>
+        <p>Browsing the website does not create an account or a visitor profile. There is no analytics, embedded booking tool or advertising tracker, and fonts are served with the website rather than fetched from a third-party font service. The Discovery Scorecard and Advanced Audit store answers on the server so progress can be resumed and reports downloaded.</p>
         <p>Loading a website still involves sending technical information to its hosting infrastructure. Depending on the production host, access or security logs may include an IP address, request time, requested page, browser information, and error details. The hosting provider and its actual logging settings have not yet been selected or verified.</p>
         <dl className="legal-details">
           <div><dt>Hosting provider</dt><dd>{business.hostingProvider}</dd></div>
@@ -78,6 +88,16 @@ export default async function PrivacyPage() {
           <div><dt>Purpose and legal basis for hosting logs</dt><dd>[To be confirmed against the production host and applicable law]</dd></div>
         </dl>
         <p>Any hosting subprocessors, transfers outside the relevant jurisdiction, and applicable transfer safeguards must also be confirmed before launch.</p>
+      </section>
+      <section id="advanced-audit">
+        <h2>The Advanced Audit</h2>
+        <p>Starting the audit creates a random private resume link. We store the process name, questionnaire answers, rule-based assessment, and model version. The audit does not ask for a name or email address, and the application does not attach an IP address to audit answers. Please keep personal or confidential information out of the free-text fields.</p>
+        <dl className="legal-details">
+          <div><dt>Purpose</dt><dd>Saving answers so you can resume with the private link, and generating the assessment and downloadable PDF/JSON report.</dd></div>
+          <div><dt>Retention</dt><dd>Unfinished audits are deleted after 30 days. Completed audits and reports are deleted after 12 months.</dd></div>
+          <div><dt>Sharing and assessment</dt><dd>Anyone who has your private resume or report link can use it. Search engines are instructed not to index these pages. The assessment applies fixed rules and does not make a decision with legal or similarly significant effect about you.</dd></div>
+        </dl>
+        <p>Hosting and database providers are listed in the hosting information above. Keep your private link to resume; you can also request deletion within the retention period by contacting {business.email}.</p>
       </section>
       <section id="scorecard">
         <h2>The Discovery Scorecard</h2>

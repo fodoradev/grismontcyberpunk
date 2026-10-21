@@ -1,4 +1,5 @@
 import { runDaily } from "../../../../lib/scorecard/delivery";
+import { purgeExpiredAdvancedAudits } from "../../../../lib/advanced-audit/store";
 
 export const maxDuration = 300;
 
@@ -6,7 +7,8 @@ export const maxDuration = 300;
 export async function GET(request: Request) {
   const secret = process.env.CRON_SECRET;
   if (!secret || request.headers.get("authorization") !== `Bearer ${secret}`) return new Response("Unauthorized", { status: 401 });
-  const result = await runDaily();
-  console.log("[cron] daily", result);
-  return Response.json(result);
+  const [result, advancedAuditPurged] = await Promise.all([runDaily(), purgeExpiredAdvancedAudits()]);
+  const combined = { ...result, advancedAuditPurged };
+  console.log("[cron] daily", combined);
+  return Response.json(combined);
 }

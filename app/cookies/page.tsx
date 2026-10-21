@@ -20,7 +20,7 @@ export default async function CookiesPage() {
           <h2>A weboldal sütihasználata</h2>
           <p>A Grismont jelenlegi alkalmazása nem helyez el sütiket, és nem használja a böngésző helyi vagy munkamenet-tárolóját. Nincs benne analitika, hirdetés, beágyazott időpontfoglaló vagy látogatói fiók.</p>
           <p>Az oldal animációi, a szakaszok megjelenése, a lenyíló tartalmak és a gombok fényhatása csak addig működnek a memóriában, amíg az oldal nyitva van. Nem mentenek látogatói profilt vagy beállítást a böngészőbe.</p>
-          <p>A folyamatfelmérő sem használ sütiket. A kitöltés állapotát a szerveren tároljuk, a böngésző címsorában látható privát linkhez kötve, így ugyanazzal a linkkel bármelyik eszközön folytathatod. A folyamatfelmérő által tárolt adatokat az <a href={localizePath(locale, '/privacy#scorecard')}>adatkezelési tájékoztató</a> ismerteti.</p>
+          <p>A folyamatfelmérő és a részletes audit sem használ sütiket vagy böngészőtárhelyet. A kitöltés állapotát a szerveren tároljuk, és a böngésző címsorában látható privát linkhez kötjük, így ugyanazzal a linkkel folytathatod. A tárolt adatokat az <a href={localizePath(locale, '/privacy#scorecard')}>adatkezelési tájékoztató</a> ismerteti.</p>
         </section>
         <section>
           <h2>A tárhely infrastruktúrája</h2>
@@ -41,7 +41,7 @@ export default async function CookiesPage() {
         <h2>Cookies used by this website</h2>
         <p>The current Grismont application does not set cookies or use local storage or session storage. It has no analytics, advertising, embedded booking tools, or visitor accounts.</p>
         <p>The page animation, section entrances, expandable content, and button shimmer work in memory while the page is open. They do not save a visitor profile or a preference in browser storage.</p>
-        <p>The Discovery Scorecard does not use cookies either. Your progress is saved on our server and linked to the private address in your browser bar, which is why you can resume on any device with the same link. What the scorecard stores is described in the <a href={localizePath(locale, '/privacy#scorecard')}>privacy notice</a>.</p>
+        <p>The Discovery Scorecard and Advanced Audit do not use cookies or browser storage. Your progress is saved on our server and linked to the private address in your browser bar, which is why you can resume on any device with the same link. What the assessments store is described in the <a href={localizePath(locale, '/privacy#scorecard')}>privacy notice</a>.</p>
       </section>
       <section>
         <h2>Hosting infrastructure</h2>

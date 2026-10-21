@@ -1,5 +1,7 @@
-import { integer, jsonb, pgEnum, pgTable, text, timestamp, unique, uuid } from "drizzle-orm/pg-core";
+import { check, integer, jsonb, pgEnum, pgTable, text, timestamp, unique, uuid } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
 import type { Answers, ReportModel } from "../lib/scorecard/types";
+import type { AdvancedAuditAnswers, AdvancedAuditReport } from "../lib/advanced-audit/types";
 import type { Locale } from "../lib/i18n";
 
 export const submissionStatus = pgEnum("submission_status", ["in_progress", "superseded", "completed"]);
@@ -33,6 +35,36 @@ export const reports = pgTable("reports", {
   result: jsonb("result").$type<ReportModel>().notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
+
+export const advancedAuditStatus = pgEnum("advanced_audit_status", ["in_progress", "completed"]);
+
+export const advancedAuditSubmissions = pgTable("advanced_audit_submissions", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  resumeToken: text("resume_token").notNull().unique(),
+  contentVersion: text("content_version").notNull(),
+  status: advancedAuditStatus("status").notNull().default("in_progress"),
+  answers: jsonb("answers").$type<AdvancedAuditAnswers>().notNull().default({}),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  completedAt: timestamp("completed_at", { withTimezone: true }),
+}, t => [
+  check("advanced_audit_resume_token_format", sql`${t.resumeToken} ~ '^[A-Za-z0-9_-]{22}$'`),
+  check("advanced_audit_content_version_nonempty", sql`length(trim(${t.contentVersion})) > 0`),
+  check("advanced_audit_answers_object", sql`jsonb_typeof(${t.answers}) = 'object'`),
+  check("advanced_audit_submission_completion_state", sql`(${t.status} = 'in_progress' AND ${t.completedAt} IS NULL) OR (${t.status} = 'completed' AND ${t.completedAt} IS NOT NULL)`),
+]);
+
+export const advancedAuditReports = pgTable("advanced_audit_reports", {
+  submissionId: uuid("submission_id").primaryKey().references(() => advancedAuditSubmissions.id, { onDelete: "cascade" }),
+  reportToken: text("report_token").notNull().unique(),
+  contentVersion: text("content_version").notNull(),
+  result: jsonb("result").$type<AdvancedAuditReport>().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+}, t => [
+  check("advanced_audit_report_token_format", sql`${t.reportToken} ~ '^[A-Za-z0-9_-]{22}$'`),
+  check("advanced_audit_report_content_version_nonempty", sql`length(trim(${t.contentVersion})) > 0`),
+  check("advanced_audit_report_result_object", sql`jsonb_typeof(${t.result}) = 'object'`),
+]);
 
 export const emailLog = pgTable("email_log", {
   id: uuid("id").primaryKey().defaultRandom(),

@@ -62,6 +62,7 @@ Keep this terminal running, then open:
 
 - Homepage: <http://127.0.0.1:3100>
 - Scorecard: <http://127.0.0.1:3100/scorecard>
+- Advanced Audit: <http://127.0.0.1:3100/advanced-audit>
 - Hungarian homepage: <http://127.0.0.1:3100/hu>
 - Hungarian scorecard: <http://127.0.0.1:3100/hu/scorecard>
 
