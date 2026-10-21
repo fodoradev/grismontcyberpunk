@@ -444,6 +444,7 @@ html{scroll-behavior:smooth}body{margin:0;background:#F5F4EE}*{box-sizing:border
 
 /* Advanced Audit: shares the scorecard interaction and Grismont report system. */
 #grismont-board .sc-audit-intro{grid-template-columns:1fr 1fr;gap:56px}
+#grismont-board .sc-audit-intro .sc-alert{grid-column:1 / -1;background:#F6E3DC;color:#6E2A1E;border-radius:8px;padding:12px 14px;font-size:14px;margin:0}
 #grismont-board .sc-audit-start{align-self:start;margin-top:28px}
 #grismont-board .sc-audit-start h2{font-size:25px;margin:10px 0}
 #grismont-board .sc-audit-start>p:not(.gm-label):not(.sc-small){color:var(--gm-muted);line-height:1.7;margin:12px 0 20px}

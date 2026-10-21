@@ -12,9 +12,24 @@ import { validateAdvancedAuditAnswer } from "../../lib/advanced-audit/validation
 const validToken = (token: unknown): token is string => typeof token === "string" && /^[A-Za-z0-9_-]{22}$/.test(token);
 export type AuditActionResult = { ok: true } | { ok: false; message: string };
 
+function logAdvancedAuditFailure(action: string, error: unknown) {
+  const name = error instanceof Error ? error.name : "UnknownError";
+  const code = typeof error === "object" && error !== null && "code" in error && typeof error.code === "string"
+    ? error.code
+    : undefined;
+  // Database errors can contain query parameters, including bearer resume tokens.
+  console.error(`[advanced-audit] ${action} failed`, { name, code });
+}
+
 export async function startAdvancedAuditAction() {
   const locale = await getLocale();
-  const token = await createAdvancedAudit(AUDIT_CONTENT_VERSION);
+  let token: string | undefined;
+  try {
+    token = await createAdvancedAudit(AUDIT_CONTENT_VERSION);
+  } catch (error) {
+    logAdvancedAuditFailure("start", error);
+  }
+  if (!token) redirect(localizePath(locale, "/advanced-audit?error=start"));
   redirect(localizePath(locale, `/advanced-audit/s/${token}`));
 }
 
@@ -26,7 +41,7 @@ export async function saveAdvancedAuditAnswerAction(token: unknown, questionId: 
     const saved = await saveAdvancedAuditAnswers(token, { [questionId]: answer.value });
     return saved ? {ok:true} : {ok:false,message:"This audit can no longer be edited. Reload the page or start a new audit."};
   } catch (error) {
-    console.error("[advanced-audit] answer save failed", error);
+    logAdvancedAuditFailure("answer save", error);
     return {ok:false,message:"We couldn't save that answer. Check your connection and try again."};
   }
 }
@@ -45,7 +60,7 @@ export async function completeAdvancedAuditAction(token: unknown): Promise<Audit
     // Next.js redirect is framework control flow and must not be swallowed.
     if (error instanceof Error && "digest" in error && typeof error.digest === "string" && error.digest.startsWith("NEXT_REDIRECT")) throw error;
     if (error instanceof Error && error.message === "ADVANCED_AUDIT_INCOMPLETE") return {ok:false,message:"A few required answers are missing. Go back to the first unanswered question."};
-    console.error("[advanced-audit] completion failed", error);
+    logAdvancedAuditFailure("completion", error);
     return {ok:false,message:"We couldn't finish your report. Your saved answers are safe; please try again."};
   }
 }

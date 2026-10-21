@@ -46,11 +46,11 @@ English keeps the existing URLs. Hungarian pages use the `/hu` prefix, including
 
 Hungarian wording is adapted to meaning and context. Public homepage copy lives in `content/site/home.ts`; scorecard questions, findings and shared copy have matching `en` and `hu` directories. Advanced Audit questions and form/report labels are bilingual in `lib/advanced-audit/questions.ts` and its report components. Keep question IDs, option scores, finding IDs and placeholders aligned. Scores and finding selection do not depend on language. New reports preserve their language snapshot; saved language also controls scorecard reminder and report emails.
 
-Apply database migrations before running the bilingual scorecard (`npm run db:migrate`); migration `0002` adds the submission language with English as the default for existing records, and `0003` adds the three reminder stages. The chosen production domain is `grismont.hu`: set `APP_URL=https://grismont.hu` in production and verify that domain in Resend before enabling email delivery. Keep localhost and test email recipients for local testing.
+Apply database migrations before running schema-dependent features; `0002` adds the submission language, `0003` adds the three reminder stages, and `0004` creates the Advanced Audit tables. The chosen production domain is `grismont.hu`: set `APP_URL=https://grismont.hu` in production and verify that domain in Resend before enabling email delivery. Keep localhost and test email recipients for local testing.
 
 ## Production services
 
-For a small Vercel deployment, provision an EU PostgreSQL database through the Vercel Marketplace (Neon is the simplest fit for the existing Drizzle/Postgres code). Set Vercel's `DATABASE_URL` to the provider's pooled connection string, then run `npm run db:migrate` against that production database before deploying schema-dependent code. Keep a separate database for local development and previews.
+For a small Vercel deployment, provision an EU PostgreSQL database through the Vercel Marketplace (Neon is the simplest fit for the existing Drizzle/Postgres code). Set Vercel's `DATABASE_URL` to the provider's pooled connection string, then run `npm run db:migrate` against that exact production database before deploying schema-dependent code. Confirm the migration history and required tables on the same database before accepting traffic. The migration script can load `.env.local`; a production migration command must explicitly target the production `DATABASE_URL` and must not silently fall back to local settings. Keep separate databases for local development and previews.
 
 Use Resend for the transactional report and reminder emails already implemented here. Verify the sending domain in Resend, publish its SPF/DKIM DNS records, and set `RESEND_API_KEY`, `EMAIL_FROM`, `OWNER_NOTIFY_EMAIL`, `APP_URL`, `CRON_SECRET`, and `IP_HASH_SALT` in Vercel's Production environment. The Vercel daily cron sends reminders near the 1/3/5-day targets; Hobby scheduling is daily, so each may arrive up to about a day after its target.
 
@@ -85,7 +85,7 @@ No analytics, booking embeds, accounts, browser cookies, local storage, or sessi
 
 The scorecard is free. Contact and review requests open an email to `hello@grismont.hu`; there is no booking calendar. The public email is centralized in `data/business.ts`. Other legal and hosting fields remain unresolved.
 
-Pages use `noindex,nofollow` while business details and legal content are incomplete. Before launch: complete the legal fields in `data/business.ts` (including the processors), confirm the legal basis wording on `/privacy`, verify the email sending domain in Resend, set the environment variables on Vercel, replace remaining bracketed copy, and adjust indexing in `app/layout.tsx`. Add canonical/social metadata when production hosting for `grismont.hu` is configured. No deployment has been performed.
+Pages use `noindex,nofollow` while business details and legal content are incomplete. Before launch: complete the legal fields in `data/business.ts` (including the processors), confirm the legal basis wording on `/privacy`, verify the email sending domain in Resend, set the environment variables on Vercel, replace remaining bracketed copy, and adjust indexing in `app/layout.tsx`. Add canonical/social metadata when production hosting for `grismont.hu` is configured.
 
 ## Checks performed
 

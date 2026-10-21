@@ -12,6 +12,14 @@ test("Advanced Audit landing is linked from the shared footer in both locales", 
   }
 });
 
+test("Advanced Audit start failures show a localized retry message", async ({page}) => {
+  for (const [path,message] of [["/advanced-audit?error=start","We couldn't start the audit just now. Please try again in a moment."],["/hu/advanced-audit?error=start","Most nem sikerült elindítani az auditot. Kérlek, próbáld újra később."]] as const) {
+    await page.goto(path);
+    await expect(page.locator(".sc-audit-intro [role=alert]")).toHaveText(message);
+    await expect(page.getByRole("button",{name:/Start the audit|Audit indítása/})).toBeVisible();
+  }
+});
+
 test("Advanced Audit saves, resumes, completes, and downloads report formats", async ({page}) => {
   await page.goto("/advanced-audit");
   await page.getByRole("button",{name:"Start the audit"}).click();

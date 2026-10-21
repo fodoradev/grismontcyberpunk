@@ -8,9 +8,11 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title:hu?"Részletes folyamat-audit":"Advanced audit", description:hu?"Részletes, szabályalapú folyamatfelmérés és 90 napos fejlesztési terv.":"A detailed, rule-based process assessment with a prioritised 90-day improvement plan.", robots:{index:false,follow:false} };
 }
 
-export default async function AdvancedAuditPage() {
+export default async function AdvancedAuditPage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
   const hu = await getLocale() === "hu";
+  const { error } = await searchParams;
   return <main id="main-content" className="gm-shell sc-page sc-audit-intro">
+    {error === "start" && <p className="sc-alert" role="alert">{hu?"Most nem sikerült elindítani az auditot. Kérlek, próbáld újra később.":"We couldn't start the audit just now. Please try again in a moment."}</p>}
     <div className="sc-intro">
       <div className="gm-label">{hu?"Részletes folyamat-audit":"Advanced audit"}</div>
       <h1>{hu?"A folyamat teljesebb képe.":"A deeper look at how work gets done."}</h1>
