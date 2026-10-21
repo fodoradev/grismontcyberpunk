@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import { startAdvancedAuditAction } from "./actions";
 import { AUDIT_SECTIONS } from "../../lib/advanced-audit/questions";
 import { getLocale } from "../../lib/i18n-server";
+import AdvancedAuditIntake from "../../components/advanced-audit/AdvancedAuditIntake";
 
 export async function generateMetadata(): Promise<Metadata> {
   const hu = await getLocale() === "hu";
@@ -20,12 +20,6 @@ export default async function AdvancedAuditPage({ searchParams }: { searchParams
       <ol className="sc-areas">{AUDIT_SECTIONS.map((section,index)=><li key={section.id}><span>{String(index+1).padStart(2,"0")} /</span>{hu?section.nameHu:section.name}</li>)}</ol>
       <p className="sc-hint">{hu?"44 kérdés · Kb. 8 perc · A válaszokat mentjük, így a privát hivatkozással később folytathatod.":"44 questions · About 8 minutes · Answers are saved, so you can resume later with your private link."}<br/>{hu?"Személyes adatot ne írj a szabad szöveges válaszokba. A becslésed is megfelelő; bizalmas információt ne adj meg.":"Avoid personal or confidential details in free-text answers. Your best estimate is fine."}</p>
     </div>
-    <form action={startAdvancedAuditAction} className="sc-intake sc-audit-start">
-      <p className="gm-label">{hu?"A kitöltés menete":"Before you begin"}</p>
-      <h2>{hu?"Egy folyamatra gondolj.":"Pick one process to assess."}</h2>
-      <p>{hu?"A teljes felmérés során erről az egy folyamatról válaszolj. A jelentés automatikusan elkészül, és letölthető lesz.":"Keep your answers focused on this one process throughout. Your report is generated when you finish and is available to download."}</p>
-      <button className="gm-cta" type="submit">{hu?"Audit indítása":"Start the audit"} <span aria-hidden="true">→</span></button>
-      <p className="sc-small">{hu?"A privát hivatkozást őrizd meg, ha később folytatni szeretnéd.":"Keep your private link if you may want to continue later."}</p>
-    </form>
+    <AdvancedAuditIntake locale={hu?"hu":"en"} />
   </main>;
 }

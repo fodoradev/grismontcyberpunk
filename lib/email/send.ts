@@ -13,7 +13,7 @@ export type Email = {
 };
 
 /** Sends through Resend. Without RESEND_API_KEY (local dev) the email is written to .outbox/ instead. */
-async function deliver(email: Email, idempotencyKey: string): Promise<string> {
+export async function deliverEmail(email: Email, idempotencyKey: string): Promise<string> {
   const key = process.env.RESEND_API_KEY;
   if (!key) {
     if (process.env.NODE_ENV === "production" && !process.env.EMAIL_OUTBOX_DIR) throw new Error("RESEND_API_KEY is not set");
@@ -63,7 +63,7 @@ export async function sendOnce(submissionId: string, kind: Kind, build: () => Pr
     .returning();
   if (!claimed) return "skipped";
   try {
-    const providerId = await deliver(await build(), `${kind}-${submissionId}`);
+    const providerId = await deliverEmail(await build(), `${kind}-${submissionId}`);
     await db.update(emailLog).set({ status: "sent", providerId, lastError: null, updatedAt: new Date() }).where(eq(emailLog.id, claimed.id));
     return "sent";
   } catch (err) {

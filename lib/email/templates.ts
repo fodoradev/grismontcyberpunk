@@ -22,6 +22,27 @@ const deleteFooter = (deleteUrl: string, locale: Locale = "en") => locale === "h
   ? `Azért kapod ezt az e-mailt, mert elkezdted kitölteni a Grismont folyamatfelmérőjét. <a href="${esc(deleteUrl)}" style="color:#536057">Válaszaim és riportom törlése</a>.`
   : `You're receiving this because you started the Grismont Discovery Scorecard. <a href="${esc(deleteUrl)}" style="color:#536057">Delete my answers and report</a>.`;
 
+export function advancedAuditResumeEmail(resumeUrl: string, privacyUrl: string, locale: Locale = "en") {
+  locale = normalizeLocale(locale);
+  const hu = locale === "hu";
+  const subject = hu ? "A privát hivatkozásod a Grismont részletes auditjához" : "Your private link to the Grismont Advanced Audit";
+  const html = layout(hu ? `
+<p>Szia!</p>
+<p>Elmentettük az első válaszodat a Grismont részletes auditjában. Ezzel a privát hivatkozással később, akár másik eszközön is folytathatod.</p>
+${button(resumeUrl, "Audit folytatása")}
+<p>Őrizd biztonságban ezt a hivatkozást: bárki megnyithatja, aki hozzáfér. Nem küldünk emlékeztetőket, és nem teszünk marketinglistára. Az audit az adatkezelési tájékoztatóban leírt idő után automatikusan törlődik.</p>
+<p>Attila<br><span style="color:#536057">Grismont</span></p>` : `
+<p>Hello,</p>
+<p>We've saved your first answer in the Grismont Advanced Audit. Use this private link to continue later, including on another device.</p>
+${button(resumeUrl, "Continue your audit")}
+<p>Keep this link private: anyone with access to it can open your saved audit. We won't send reminders or add you to a marketing list. Your audit is deleted automatically after the period described in the privacy notice.</p>
+<p>Attila<br><span style="color:#536057">Grismont</span></p>`, `<a href="${esc(privacyUrl)}" style="color:#536057">${hu ? "Adatkezelési tájékoztató" : "Privacy notice"}</a>`, locale);
+  const text = hu
+    ? `Szia!\n\nElmentettük az első válaszodat a Grismont részletes auditjában. Ezzel a privát hivatkozással később, akár másik eszközön is folytathatod:\n${resumeUrl}\n\nŐrizd biztonságban ezt a hivatkozást: bárki megnyithatja, aki hozzáfér. Nem küldünk emlékeztetőket, és nem teszünk marketinglistára. Az audit az adatkezelési tájékoztatóban leírt idő után automatikusan törlődik.`
+    : `Hello,\n\nWe've saved your first answer in the Grismont Advanced Audit. Use this private link to continue later, including on another device:\n${resumeUrl}\n\nKeep this link private: anyone with access to it can open your saved audit. We won't send reminders or add you to a marketing list. Your audit is deleted automatically after the period described in the privacy notice.`;
+  return { subject, html, text };
+}
+
 export function reportEmail(r: ReportModel, links: { report: string; delete: string }) {
   const locale = normalizeLocale(r.locale ?? "en");
   if (locale === "hu") {

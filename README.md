@@ -35,7 +35,7 @@ Schema changes: edit `db/schema.ts`, then `npm run db:generate` and `npm run db:
 - `/privacy`: privacy notice for the current minimal application.
 - `/cookies`: actual application cookies/storage policy.
 - `/scorecard`: Discovery Scorecard intake; `/scorecard/s/{token}` questionnaire (resumable); `/scorecard/r/{token}` report (`/pdf` for the PDF); `/scorecard/delete/{token}` deletion.
-- `/advanced-audit`: anonymous, resumable 44-item expert process questionnaire; `/advanced-audit/s/{token}` saves each answer; `/advanced-audit/r/{token}` immutable report with `/json` and `/pdf` downloads. Draft answers expire after 30 days; completed reports expire after 12 months.
+- `/advanced-audit`: resumable 44-item expert process questionnaire; the respondent provides an email address and confirms they want one resume-link email after their first answer is saved. `/advanced-audit/s/{token}` saves each answer; `/advanced-audit/r/{token}` immutable report with `/json` and `/pdf` downloads. No reminders or marketing emails are sent. Draft answers expire after 30 days; completed reports expire after 12 months.
 - `/api/cron/daily`: three-stage inactivity reminders, report-email retries and data retention (Vercel Cron, `vercel.json`).
 
 All pages share the header and footer; legal links are working routes. Legal information remains clearly marked as a draft because registered business identity, country, address, identifiers, and hosting practices have not been provided.
@@ -46,7 +46,7 @@ English keeps the existing URLs. Hungarian pages use the `/hu` prefix, including
 
 Hungarian wording is adapted to meaning and context. Public homepage copy lives in `content/site/home.ts`; scorecard questions, findings and shared copy have matching `en` and `hu` directories. Advanced Audit questions and form/report labels are bilingual in `lib/advanced-audit/questions.ts` and its report components. Keep question IDs, option scores, finding IDs and placeholders aligned. Scores and finding selection do not depend on language. New reports preserve their language snapshot; saved language also controls scorecard reminder and report emails.
 
-Apply database migrations before running schema-dependent features; `0002` adds the submission language, `0003` adds the three reminder stages, and `0004` creates the Advanced Audit tables. The chosen production domain is `grismont.hu`: set `APP_URL=https://grismont.hu` in production and verify that domain in Resend before enabling email delivery. Keep localhost and test email recipients for local testing.
+Apply database migrations before running schema-dependent features; `0002` adds the submission language, `0003` adds the three reminder stages, `0004` creates the Advanced Audit tables, and `0005` adds consented email capture and first-answer resume-link delivery for Advanced Audit. The chosen production domain is `grismont.hu`: set `APP_URL=https://grismont.hu` in production and verify that domain in Resend before enabling email delivery. Keep localhost and test email recipients for local testing.
 
 ## Production services
 
@@ -81,7 +81,7 @@ The scorecard is not a newsletter signup. If you later want a marketing list, ad
 
 ## Current scope
 
-No analytics, booking embeds, accounts, browser cookies, local storage, or session storage are used. The scorecard and Advanced Audit store form data in PostgreSQL, as described in `/privacy`. Advanced Audit uses anonymous bearer links and does not collect email or IP addresses. Fonts and their licenses are bundled locally. No runtime third-party font service is used.
+No analytics, booking embeds, accounts, browser cookies, local storage, or session storage are used. The scorecard and Advanced Audit store form data in PostgreSQL, as described in `/privacy`. Advanced Audit stores the email address provided with consent to send one private resume link after the first answer; it does not attach an IP address to audit answers or send reminders/marketing emails. Fonts and their licenses are bundled locally. No runtime third-party font service is used.
 
 The scorecard is free. Contact and review requests open an email to `hello@grismont.hu`; there is no booking calendar. The public email is centralized in `data/business.ts`. Other legal and hosting fields remain unresolved.
 

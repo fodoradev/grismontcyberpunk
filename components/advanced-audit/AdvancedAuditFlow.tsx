@@ -7,10 +7,6 @@ import { firstOpenAdvancedAuditIndex } from "../../lib/advanced-audit/validation
 import type { AdvancedAuditAnswers } from "../../lib/advanced-audit/types";
 import type { Locale } from "../../lib/i18n";
 
-function countAnswered(answers: AdvancedAuditAnswers, current: number) {
-  return ADVANCED_AUDIT_QUESTIONS.filter((q,index) => q.id in answers || (q.kind === "text" && !q.required && index < current)).length;
-}
-
 export default function AdvancedAuditFlow({ token, initialAnswers, locale }: { token:string; initialAnswers:AdvancedAuditAnswers; locale:Locale }) {
   const hu=locale==="hu";
   const [answers,setAnswers]=useState(initialAnswers);
@@ -20,6 +16,14 @@ export default function AdvancedAuditFlow({ token, initialAnswers, locale }: { t
   const [saving,setSaving]=useState(false);
   const [completing,setCompleting]=useState(false);
   const [copied,setCopied]=useState(false);
+  const [resumeEmailQueued,setResumeEmailQueued]=useState(false);
+  const [dir,setDir]=useState<1|-1>(1);
+  const flow=useRef<HTMLElement>(null);
+  const stage=useRef<HTMLDivElement>(null);
+  const heading=useRef<HTMLHeadingElement>(null);
+  const textField=useRef<HTMLTextAreaElement>(null);
+  const firstRender=useRef(true);
+  const doneAtMount=useRef<Set<string>|null>(null);
   const pending=useRef(new Map<string,string|number>());
   const flushing=useRef<Promise<void>>(Promise.resolve());
   const timer=useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
@@ -36,7 +40,7 @@ export default function AdvancedAuditFlow({ token, initialAnswers, locale }: { t
         for(let attempt=0;attempt<3&&!saved;attempt++){
           try{
             const result=await saveAdvancedAuditAnswerAction(token,id,value);
-            if(result.ok){saved=true;if(pending.current.get(id)===value)pending.current.delete(id);}
+            if(result.ok){saved=true;if(result.resumeEmailPending)setResumeEmailQueued(true);if(pending.current.get(id)===value)pending.current.delete(id);}
             else {setMessage(result.message);break;}
           }catch{if(attempt===2)setMessage(hu?"Nem sikerült menteni. Ellenőrizd a kapcsolatot, majd próbáld újra.":"We couldn't save that answer. Check your connection and try again.");else await new Promise(resolve=>setTimeout(resolve,350*(attempt+1)));}
         }
@@ -60,10 +64,10 @@ export default function AdvancedAuditFlow({ token, initialAnswers, locale }: { t
     clearTimeout(timer.current);
     if(pending.current.size)await flush();
     if(pending.current.size)return;
-    setMessage("");setIndex(to);
+    setDir(to>index?1:-1);setMessage("");setIndex(to);
   };
   const next=async()=>{
-    if(!q)return;
+    if(!q){await finish();return;}
     const value=answers[q.id];
     const required=q.kind==="text"?q.required:true;
     if(required&&(value===undefined||(typeof value==="string"&&!value.trim()))){setMessage(hu?"A folytatáshoz válaszolj erre a kérdésre.":"Answer this question before continuing.");return;}
@@ -88,12 +92,18 @@ export default function AdvancedAuditFlow({ token, initialAnswers, locale }: { t
     const onKey=(event:KeyboardEvent)=>{
       if(event.defaultPrevented||event.metaKey||event.ctrlKey||event.altKey)return;
       const target=event.target as HTMLElement;
-      if(target.closest("button,a,[role=button],[role=radio]"))return;
       if(target.matches("input,textarea,select,[contenteditable]")){if(event.key==="Enter"&&!event.shiftKey&&q?.kind==="text"){event.preventDefault();void next();}return;}
-      if(event.key==="ArrowLeft"||event.key==="Backspace"){event.preventDefault();void go(index-1);return;}
-      if(event.key==="ArrowRight"||event.key==="Enter"){event.preventDefault();void next();return;}
       if(q?.kind==="choice"&&/^[1-9]$/.test(event.key)){
         const option=q.options[Number(event.key)-1];if(option){event.preventDefault();setAnswer(q.id,option.code);window.setTimeout(()=>void go(index+1),250);}
+        return;
+      }
+      const onControl=target.matches("button,a");
+      if(event.key==="Enter"||event.key===" "){if(onControl)return;event.preventDefault();void next();return;}
+      if(event.key==="ArrowLeft"||event.key==="Backspace"){event.preventDefault();void go(index-1);return;}
+      if(event.key==="ArrowRight"){event.preventDefault();void next();return;}
+      if(event.key==="ArrowDown"||event.key==="ArrowUp"){
+        const options=[...document.querySelectorAll<HTMLButtonElement>(".sc-audit-flow .sc-choice")];if(!options.length)return;
+        event.preventDefault();const at=options.indexOf(document.activeElement as HTMLButtonElement);const to=at===-1?(event.key==="ArrowDown"?0:options.length-1):(at+(event.key==="ArrowDown"?1:-1)+options.length)%options.length;options[to].focus();
       }
     };
     window.addEventListener("keydown",onKey);return()=>window.removeEventListener("keydown",onKey);
@@ -101,25 +111,42 @@ export default function AdvancedAuditFlow({ token, initialAnswers, locale }: { t
 
   const sectionQuestions=currentSection?ADVANCED_AUDIT_QUESTIONS.filter(item=>item.section===currentSection.id):[];
   const localPrompt=(question:AuditQuestion)=>hu?question.promptHu:question.prompt;
-  const position=q?String(index+1):undefined;
+  const posInSection=q?sectionQuestions.indexOf(q)+1:0;
+  const answered=ADVANCED_AUDIT_QUESTIONS.filter(item=>(item.id in answers&&!(item.kind==="text"&&item.id===q?.id)&&(item.kind!=="text"||!item.required||String(answers[item.id]??"").trim()))||(item.kind==="text"&&!item.required&&ADVANCED_AUDIT_QUESTIONS.indexOf(item)<index));
+  doneAtMount.current??=AUDIT_SECTIONS.filter(section=>{const list=ADVANCED_AUDIT_QUESTIONS.filter(item=>item.section===section.id);return list.length>0&&list.every(item=>item.id in initialAnswers||(item.kind==="text"&&!item.required&&ADVANCED_AUDIT_QUESTIONS.indexOf(item)<index));}).map(section=>section.id).reduce((set,id)=>set.add(id),new Set<string>());
+  const position=q&&sectionQuestions.length>1?(hu?`${posInSection}/${sectionQuestions.length}`:`${posInSection} of ${sectionQuestions.length}`):undefined;
   const copyLink=async()=>{try{await navigator.clipboard.writeText(location.href);setCopied(true);setTimeout(()=>setCopied(false),1800);}catch{setMessage(hu?"Másold ki a hivatkozást a böngésző címsorából.":"Copy the link from your browser address bar.");}};
 
-  return <section className="sc-flow sc-audit-flow" aria-label={hu?"Részletes audit kérdőív":"Advanced audit questionnaire"}>
-    <div className="sc-resume-bar"><span>{hu?"A válaszaid mentése":"Your answers are saved as you go"}{saving?` · ${hu?"Mentés…":"Saving…"}`:""}</span><button type="button" className="gm-text-link" onClick={copyLink}>{copied?(hu?"Hivatkozás másolva":"Link copied"):hu?"Privát hivatkozás másolása":"Copy private link"}</button></div>
+  useEffect(()=>{
+    const shouldFocus=!firstRender.current||q?.kind==="text"; firstRender.current=false;
+    if(shouldFocus)(q?.kind==="text"?textField.current:heading.current)?.focus({preventScroll:true});
+    const frame=requestAnimationFrame(()=>{
+      const mobile=window.matchMedia("(max-width: 1000px)").matches;
+      const viewportHeight=window.visualViewport?.height??window.innerHeight;
+      const rect=(mobile?flow.current:stage.current)?.getBoundingClientRect(); if(!rect)return;
+      const target=mobile?window.scrollY+rect.top:window.scrollY+rect.top+rect.height/2-viewportHeight/2;
+      const top=Math.min(Math.max(0,target),Math.max(0,document.documentElement.scrollHeight-viewportHeight));
+      window.scrollTo({top,behavior:window.matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"});
+    });
+    return()=>cancelAnimationFrame(frame);
+  },[index,q?.kind]);
+
+  return <section ref={flow} className="sc-flow sc-audit-flow" aria-label={hu?"Részletes audit kérdőív":"Advanced audit questionnaire"} aria-busy={completing}>
+    <div className="sc-resume-bar"><span>{hu?"A válaszaid mentése":"Your answers are saved as you go"}{saving?` · ${hu?"Mentés…":"Saving…"}`:""}{resumeEmailQueued?<span role="status"> · {hu?"Hamarosan e-mailben elküldjük a folytatáshoz szükséges hivatkozást.":"We’ll email your personal resume link shortly."}</span>:null}</span><button type="button" className="gm-text-link" onClick={copyLink}>{copied?(hu?"Hivatkozás másolva":"Link copied"):hu?"Privát hivatkozás másolása":"Copy private link"}</button></div>
     <div className="sc-progress-wrap">
-      <div className="sc-progress" role="progressbar" aria-label={hu?"Audit előrehaladása":"Audit progress"} aria-valuemin={0} aria-valuemax={ADVANCED_AUDIT_QUESTIONS.length} aria-valuenow={countAnswered(answers,index)}>
-        {AUDIT_SECTIONS.map((section,i)=>{const questions=ADVANCED_AUDIT_QUESTIONS.filter(item=>item.section===section.id);const done=questions.every(item=>item.id in answers||(item.kind==="text"&&!item.required&&ADVANCED_AUDIT_QUESTIONS.indexOf(item)<index));const fraction=questions.filter(item=>item.id in answers).length/Math.max(1,questions.length);return <div key={section.id} className={`sc-seg ${done?"sc-seg-done":""} ${i===sectionIndex?"sc-seg-current":""}`} title={hu?section.nameHu:section.name}><span style={{transform:`scaleX(${done?1:fraction})`}}/></div>;})}
+      <div className="sc-progress" role="progressbar" aria-label={hu?"A folyamatfelmérő előrehaladása":"Scorecard progress"} aria-valuemin={0} aria-valuemax={ADVANCED_AUDIT_QUESTIONS.length} aria-valuenow={answered.length}>
+        {AUDIT_SECTIONS.map((section,i)=>{const questions=ADVANCED_AUDIT_QUESTIONS.filter(item=>item.section===section.id);const fraction=answered.filter(item=>item.section===section.id).length/Math.max(1,questions.length);const done=fraction===1;const cls=["sc-seg",done?"sc-seg-done":"",done&&!doneAtMount.current?.has(section.id)?"sc-seg-sweep":"",i===sectionIndex?"sc-seg-current":""].join(" ");return <div key={section.id} className={cls} style={{flexGrow:questions.length}} title={hu?section.nameHu:section.name}><span style={{transform:`scaleX(${fraction})`}}/></div>;})}
       </div>
-      <div className="sc-progress-meta"><span>{currentSection?(hu?currentSection.nameHu:currentSection.name):hu?"Befejezés":"Complete"}{q?<span className="sc-progress-pos"> · {hu?`kérdés ${position}`:`question ${position}`}</span>:null}</span><span>{countAnswered(answers,index)} / {ADVANCED_AUDIT_QUESTIONS.length} {hu?"megválaszolva":"answered"}</span></div>
+      <div className="sc-progress-meta" aria-hidden="true"><span>{currentSection?(hu?currentSection.nameHu:currentSection.name):hu?"Minden kész":"All done"}{position?<span className="sc-progress-pos">{hu?`, ${position}. kérdés`:`, question ${position}`}</span>:null}</span><span>{hu?`${answered.length}/${ADVANCED_AUDIT_QUESTIONS.length} megválaszolva`:`${answered.length} of ${ADVANCED_AUDIT_QUESTIONS.length} answered`}</span></div>
     </div>
-    <div className="sc-stage"><div className="sc-card" key={index}>
+    <div ref={stage} className="sc-stage"><div className={`sc-card ${dir===1?"sc-in-fwd":"sc-in-back"}`} key={index}>
       {currentSection?.intro?<p className="sc-card-help">{hu?currentSection.introHu:currentSection.intro}</p>:null}
       {q?<>
-        <h1 className="sc-card-q" id="audit-question">{String(index+1).padStart(2,"0")}<span className="sc-card-n">/{ADVANCED_AUDIT_QUESTIONS.length}</span> {localPrompt(q)}{q.kind==="text"&&!q.required?<em className="sc-optional">{hu?"nem kötelező":"optional"}</em>:null}</h1>
+        <h1 ref={heading} tabIndex={-1} className="sc-card-q" id="audit-question">{String(index+1).padStart(2,"0")}<span className="sc-card-n">/{ADVANCED_AUDIT_QUESTIONS.length}</span> {localPrompt(q)}{q.kind==="text"&&!q.required?<em className="sc-optional">{hu?"nem kötelező":"optional"}</em>:null}</h1>
         {q.help?<p className="sc-card-help">{hu&&q.helpHu?q.helpHu:q.help}</p>:null}
-        {q.kind==="text"?<div className="sc-text"><textarea id="audit-answer" maxLength={q.maxLength} rows={q.id==="P1_process"?2:3} value={typeof answers[q.id]==="string"?answers[q.id] as string:""} onChange={event=>setAnswer(q.id,event.target.value,true)} placeholder={hu?q.placeholderHu:q.placeholder} aria-labelledby="audit-question" autoFocus/><div className="sc-ok"><span className="sc-keyhint">{(typeof answers[q.id]==="string"?answers[q.id] as string:"").length}/{q.maxLength}</span><button type="button" className="gm-cta" onClick={()=>void next()}>{hu?"Rendben":"OK"} <span aria-hidden="true">→</span></button></div></div>:<div className="sc-choices" role="radiogroup" aria-labelledby="audit-question">{q.options.map((option,i)=><button type="button" role="radio" aria-checked={answers[q.id]===option.code} className="sc-choice" key={option.code} onClick={()=>{setAnswer(q.id,option.code);window.setTimeout(()=>void go(index+1),260);}}><kbd>{i+1}</kbd><span>{hu?option.labelHu:option.label}</span>{answers[q.id]===option.code?<span aria-hidden="true">✓</span>:null}</button>)}</div>}
+        {q.kind==="text"?<div className="sc-text"><textarea ref={textField} id="audit-answer" maxLength={q.maxLength} rows={q.id==="P1_process"?2:3} value={typeof answers[q.id]==="string"?answers[q.id] as string:""} onChange={event=>setAnswer(q.id,event.target.value,true)} placeholder={hu?q.placeholderHu:q.placeholder} aria-labelledby="audit-question"/><div className="sc-ok"><span className="sc-keyhint">{(typeof answers[q.id]==="string"?answers[q.id] as string:"").length}/{q.maxLength}</span><button type="button" className="gm-cta" onClick={()=>void next()}>{hu?"Rendben":"OK"} <span aria-hidden="true">→</span></button></div></div>:<div className="sc-choices" role="radiogroup" aria-labelledby="audit-question">{q.options.map((option,i)=><button type="button" role="radio" aria-checked={answers[q.id]===option.code} className="sc-choice" key={option.code} onClick={()=>{setAnswer(q.id,option.code);window.setTimeout(()=>void go(index+1),260);}}><kbd>{i+1}</kbd><span>{hu?option.labelHu:option.label}</span>{answers[q.id]===option.code?<span aria-hidden="true">✓</span>:null}</button>)}</div>}
       </>:<div className="sc-audit-finish"><h1 className="sc-card-q">{hu?"Minden kötelező kérdésre válaszoltál.":"You’ve answered every required question."}</h1><p className="sc-card-help">{hu?"Készítsd el a jelentést. Bármikor visszaléphetsz és módosíthatsz egy választ.":"Generate your report now. You can go back and change any answer first."}</p><button type="button" className="gm-cta" onClick={()=>void finish()} disabled={completing}>{completing?(hu?"Jelentés készül…":"Generating report…"):hu?"Jelentés készítése":"Generate report"} <span aria-hidden="true">→</span></button></div>}
     </div></div>
-    <div className="sc-flow-foot"><p className="sc-flow-msg" role="status" aria-live="polite">{message|| (saving?(hu?"Válasz mentése…":"Saving answer…"):"")}</p><div className="sc-flow-nav"><button type="button" onClick={()=>void go(index-1)} disabled={index<=0||completing} aria-label={hu?"Előző kérdés":"Previous question"}>←</button>{q?<button type="button" onClick={()=>void next()} disabled={completing} aria-label={hu?"Következő kérdés":"Next question"}>→</button>:null}</div></div>
+    <div className="sc-flow-foot"><p className="sc-flow-msg" role="status" aria-live="polite">{message|| (saving?(hu?"Válasz mentése…":"Saving answer…"):"")}</p><span className="sc-keyhint sc-keyhint-nav">{q?.kind==="choice"?<><kbd>1</kbd>–<kbd>{q.options.length}</kbd>{hu?" választás · ":" choose · "}</>:null}<kbd>Enter</kbd>{hu?" tovább · ":" next · "}<kbd>←</kbd>{hu?" vissza":" back"}</span><nav className="sc-flow-nav" aria-label={hu?"Navigáció a kérdések között":"Question navigation"}><button type="button" onClick={()=>void go(index-1)} disabled={index<=0||completing} aria-label={hu?"Előző kérdés":"Previous question"}>←</button><button type="button" onClick={()=>void next()} disabled={!q||completing} aria-label={hu?"Következő kérdés":"Next question"}>→</button></nav></div>
   </section>;
 }

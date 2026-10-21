@@ -2,6 +2,7 @@ import { randomBytes } from "node:crypto";
 import { and, eq, lt, or, sql } from "drizzle-orm";
 import { getDb, schema } from "../../db";
 import type { AdvancedAuditAnswers, AdvancedAuditReport, CompleteAdvancedAuditResult } from "./types";
+import type { Locale } from "../i18n";
 
 const { advancedAuditSubmissions: submissions, advancedAuditReports: reports } = schema;
 
@@ -30,11 +31,11 @@ function requireContentVersion(version: string): void {
   }
 }
 
-/** Create an anonymous resumable audit. Keep the returned resume token private. */
-export async function createAdvancedAudit(contentVersion: string): Promise<string> {
+/** Create a resumable audit. Keep the returned resume token private. */
+export async function createAdvancedAudit(contentVersion: string, email: string, locale: Locale): Promise<string> {
   requireContentVersion(contentVersion);
   const resumeToken = newAdvancedAuditToken();
-  await getDb().insert(submissions).values({ resumeToken, contentVersion });
+  await getDb().insert(submissions).values({ resumeToken, contentVersion, email, locale, emailConsentAt: new Date() });
   return resumeToken;
 }
 
@@ -45,14 +46,25 @@ export async function getAdvancedAuditByResumeToken(token: string) {
 }
 
 /** Atomically merge validated answers; completed audits cannot be changed. */
-export async function saveAdvancedAuditAnswers(token: string, answers: AdvancedAuditAnswers): Promise<boolean> {
+export async function saveAdvancedAuditAnswers(token: string, answers: AdvancedAuditAnswers, locale: Locale): Promise<{ saved: boolean; resumeEmailPending: boolean; submissionId?: string }> {
   if (!isAnswerMap(answers)) throw new TypeError("Answers must be an object of string or finite number values");
-  if (Object.keys(answers).length === 0) return false;
-  const changed = await getDb().update(submissions).set({
-    answers: sql`${submissions.answers} || ${JSON.stringify(answers)}::jsonb`,
-    updatedAt: new Date(),
-  }).where(and(eq(submissions.resumeToken, token), eq(submissions.status, "in_progress"))).returning({ id: submissions.id });
-  return changed.length > 0;
+  if (Object.keys(answers).length === 0) return { saved: false, resumeEmailPending: false };
+  return getDb().transaction(async tx => {
+    const [submission] = await tx.select({ id: submissions.id, answers: submissions.answers, email: submissions.email })
+      .from(submissions).where(and(eq(submissions.resumeToken, token), eq(submissions.status, "in_progress"))).for("update");
+    if (!submission) return { saved: false, resumeEmailPending: false };
+    const merged = { ...submission.answers, ...answers };
+    await tx.update(submissions).set({ answers: merged, locale, updatedAt: new Date() })
+      .where(and(eq(submissions.id, submission.id), eq(submissions.status, "in_progress")));
+    if (submission.email && Object.keys(merged).length > 0) {
+      await tx.insert(schema.advancedAuditEmailLog).values({ submissionId: submission.id }).onConflictDoNothing();
+      const [email] = await tx.select({ status: schema.advancedAuditEmailLog.status, attempts: schema.advancedAuditEmailLog.attempts })
+        .from(schema.advancedAuditEmailLog).where(eq(schema.advancedAuditEmailLog.submissionId, submission.id));
+      const resumeEmailPending = email?.status !== "sent" && (email?.attempts ?? 0) < 3;
+      return { saved: true, resumeEmailPending, submissionId: resumeEmailPending ? submission.id : undefined };
+    }
+    return { saved: true, resumeEmailPending: false };
+  });
 }
 
 /**

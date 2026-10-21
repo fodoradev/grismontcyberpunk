@@ -35,9 +35,11 @@ export default async function PrivacyPage() {
         </section>
         <section id="advanced-audit">
           <h2>Részletes audit</h2>
-          <p>Az audit indításakor véletlenszerű, privát folytatási hivatkozást hozunk létre. A folyamat nevét, az audit kérdéseire adott válaszokat, a szabályalapú értékelést és a modell verzióját tároljuk. Nem kérünk nevet vagy e-mail-címet, és az alkalmazás nem rögzít IP-címet az audit válaszaihoz. A szabad szöveges mezőkbe ne írj személyes vagy bizalmas adatot.</p>
+          <p>Az audit indításakor e-mail-címet kérünk a privát folytatási hivatkozás elküldéséhez, és véletlenszerű hivatkozást hozunk létre. A megadott e-mail-címet, a választott nyelvet, a hozzájárulás időpontját, a kérdésekre adott válaszokat, a szabályalapú értékelést és a modell verzióját tároljuk. Az alkalmazás nem rögzít IP-címet az audit válaszaihoz. A szabad szöveges mezőkbe ne írj személyes vagy bizalmas adatot.</p>
           <dl className="legal-details">
-            <div><dt>Cél</dt><dd>A válaszok automatikus mentése és folytatása a privát hivatkozással, valamint az értékelés és a letölthető PDF/JSON riport elkészítése.</dd></div>
+            <div><dt>Cél</dt><dd>A válaszok mentése és folytatása, az első válasz mentése után egy e-mail küldése a személyes folytatási hivatkozással, valamint az értékelés és a letölthető PDF/JSON riport elkészítése. Nem küldünk emlékeztetőt vagy marketing e-mailt.</dd></div>
+            <div><dt>E-mailek</dt><dd>A megadott címre egyetlen, a folytatási hivatkozást tartalmazó e-mailt küldünk az első válasz mentése után. Az e-mail-kézbesítést a {business.emailProvider} végzi. A hivatkozás birtokában bárki megnyithatja az auditot.</dd></div>
+            <div><dt>Jogalap</dt><dd>Az e-mail elküldéséhez adott, az első oldalon rögzített hozzájárulás. [A jogalapot az üzemeltetőnek még meg kell erősítenie.]</dd></div>
             <div><dt>Megőrzés</dt><dd>A befejezetlen auditokat 30 nap, a befejezett auditokat és riportokat 12 hónap után automatikusan töröljük.</dd></div>
             <div><dt>Megosztás és értékelés</dt><dd>A privát folytatási és riportlinket bárki használhatja, aki ismeri. A keresők nem indexelik ezeket az oldalakat. Az értékelés előre rögzített szabályokkal történik, és nem jár rád nézve joghatással vagy hasonlóan jelentős hatással járó döntéssel.</dd></div>
           </dl>
@@ -91,9 +93,11 @@ export default async function PrivacyPage() {
       </section>
       <section id="advanced-audit">
         <h2>The Advanced Audit</h2>
-        <p>Starting the audit creates a random private resume link. We store the process name, questionnaire answers, rule-based assessment, and model version. The audit does not ask for a name or email address, and the application does not attach an IP address to audit answers. Please keep personal or confidential information out of the free-text fields.</p>
+        <p>We ask for your email address when you start so we can send a private resume link, and create a random link for your audit. We store the email address, your chosen language, the time you consented, questionnaire answers, rule-based assessment, and model version. The application does not attach an IP address to audit answers. Please keep personal or confidential information out of the free-text fields.</p>
         <dl className="legal-details">
-          <div><dt>Purpose</dt><dd>Saving answers so you can resume with the private link, and generating the assessment and downloadable PDF/JSON report.</dd></div>
+          <div><dt>Purpose</dt><dd>Saving answers so you can resume, sending one email with your personal resume link after your first answer is saved, and generating the assessment and downloadable PDF/JSON report. We do not send reminders or marketing email.</dd></div>
+          <div><dt>Emails</dt><dd>We send one resume-link email to the address you provide after your first answer is saved. {business.emailProvider} delivers it. Anyone with the link can open your audit.</dd></div>
+          <div><dt>Legal basis</dt><dd>Your recorded consent to receive the link email, given on the first page. [Legal basis to be confirmed by the operator.]</dd></div>
           <div><dt>Retention</dt><dd>Unfinished audits are deleted after 30 days. Completed audits and reports are deleted after 12 months.</dd></div>
           <div><dt>Sharing and assessment</dt><dd>Anyone who has your private resume or report link can use it. Search engines are instructed not to index these pages. The assessment applies fixed rules and does not make a decision with legal or similarly significant effect about you.</dd></div>
         </dl>

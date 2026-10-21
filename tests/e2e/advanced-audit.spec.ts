@@ -22,11 +22,15 @@ test("Advanced Audit start failures show a localized retry message", async ({pag
 
 test("Advanced Audit saves, resumes, completes, and downloads report formats", async ({page}) => {
   await page.goto("/advanced-audit");
+  await expect(page.getByLabel("Email address")).toBeVisible();
+  await page.getByLabel("Email address").fill("audit-test@example.com");
+  await page.getByLabel(/I've read the privacy notice/).check();
   await page.getByRole("button",{name:"Start the audit"}).click();
   await expect(page).toHaveURL(/\/advanced-audit\/s\/[A-Za-z0-9_-]{22}$/);
 
   await page.getByRole("textbox").fill("Supplier invoice approval");
   await page.getByRole("button",{name:"OK"}).click();
+  await expect(page.locator(".sc-resume-bar")).toContainText("We’ll email your personal resume link shortly.");
   await page.getByRole("radio").nth(0).click();
   await expect(page.locator(".sc-card-q")).toContainText("How many times does this process run");
   await page.reload();

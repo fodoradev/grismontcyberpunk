@@ -839,7 +839,7 @@ This shows the client what the roadmap is expected to achieve. Run it after the 
 ### 7.1 Current Grismont implementation
 
 - The entry page is `/advanced-audit`; the footer link is labelled **Advanced audit** (Hungarian: **Részletes audit**).
-- The implementation keeps the form anonymous. It does not collect checkout, client-name, company, email, or IP-hash fields, and it does not send reminder or report emails. The completed report is available at its private report link and as PDF and JSON downloads.
+- The implementation asks for an email address and explicit consent to send one private resume link after the first answer is saved. It does not collect a client name, company, or IP hash, and does not send reminders, marketing, or report emails. The completed report is available at its private report link and as PDF and JSON downloads. Draft progress and the email delivery log are deleted with the audit after 30 days; completed audit data and reports expire after 12 months.
 - A 128-bit random resume token links the server-stored draft. Each answer is validated and saved as entered; unfinished audits expire after 30 days and completed audits/reports after 12 months.
 - Site locale controls the question and option language (English/Hungarian); question IDs and numeric option codes stay language-independent.
 - The versioned report is rule-based and downloadable. Its JSON is the lossless structured export; the PDF is the readable presentation.
