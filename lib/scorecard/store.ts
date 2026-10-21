@@ -1,9 +1,10 @@
 import { randomBytes } from "node:crypto";
-import { and, eq, gt, inArray, isNull, lt, or, sql } from "drizzle-orm";
+import { and, eq, gt, inArray, lt, or, sql } from "drizzle-orm";
 import { getDb, schema } from "../../db";
 import { buildReport, translateReport } from "./report";
 import { normalizeLocale, type Locale } from "../i18n";
 import { isComplete, type IntakeInput } from "./validation";
+import { nextReminderStage } from "./reminders";
 import type { Answers, Intake, SizeBand, Industry } from "./types";
 
 const { submissions, reports } = schema;
@@ -96,18 +97,38 @@ export async function deleteByResumeToken(token: string): Promise<boolean> {
   return deleted.length > 0;
 }
 
-/** Unfinished submissions idle for 24h that haven't had their one reminder. */
-export async function dueForReminder() {
-  return getDb().select().from(submissions).where(and(
+/** One next reminder per unfinished submission, measured from the last saved activity. */
+export async function dueForReminders() {
+  const db = getDb();
+  const candidates = await db.select().from(submissions).where(and(
     eq(submissions.status, "in_progress"),
-    isNull(submissions.reminderSentAt),
-    lt(submissions.updatedAt, sql`now() - interval '24 hours'`),
+    lt(submissions.updatedAt, sql`now() - interval '1 day'`),
     gt(submissions.createdAt, sql`now() - interval '30 days'`),
   ));
-}
+  if (candidates.length === 0) return [];
 
-export async function markReminded(id: string) {
-  await getDb().update(submissions).set({ reminderSentAt: new Date() }).where(eq(submissions.id, id));
+  const logs = await db.select({ submissionId: schema.emailLog.submissionId, kind: schema.emailLog.kind, status: schema.emailLog.status })
+    .from(schema.emailLog).where(inArray(schema.emailLog.submissionId, candidates.map(s => s.id)));
+  const sentBySubmission = new Map<string, Set<string>>();
+  for (const log of logs) {
+    if (log.status !== "sent") continue;
+    const kinds = sentBySubmission.get(log.submissionId) ?? new Set<string>();
+    kinds.add(log.kind);
+    // Preserve the old single-reminder state after deploying the new staged schedule.
+    if (log.kind === "reminder") kinds.add("reminder_1");
+    sentBySubmission.set(log.submissionId, kinds);
+  }
+  for (const submission of candidates) {
+    if (submission.reminderSentAt) {
+      const kinds = sentBySubmission.get(submission.id) ?? new Set<string>();
+      kinds.add("reminder_1");
+      sentBySubmission.set(submission.id, kinds);
+    }
+  }
+  return candidates.flatMap(submission => {
+    const stage = nextReminderStage(submission.updatedAt, sentBySubmission.get(submission.id) ?? new Set());
+    return stage ? [{ submission, reminderNumber: stage.afterDays, reminderKind: stage.kind }] : [];
+  });
 }
 
 /** Retention: unfinished after 30 days, completed after 12 months. Returns the number of deleted submissions. */

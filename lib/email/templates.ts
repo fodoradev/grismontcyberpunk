@@ -81,8 +81,15 @@ Delete my answers and report: ${links.delete}`;
   return { subject, html, text };
 }
 
-export function reminderEmail(firstName: string, answered: number, total: number, links: { resume: string; delete: string }, locale: Locale = "en") {
+export function reminderEmail(firstName: string, answered: number, total: number, links: { resume: string; delete: string }, locale: Locale = "en", reminderNumber = 1) {
   locale = normalizeLocale(locale);
+  const stageNotice = locale === "hu"
+    ? reminderNumber >= 5
+      ? "Ez az utolsó emlékeztetőnk. Ha nem fejezed be, a válaszaidat 30 nap után automatikusan töröljük."
+      : "Ha még nem fejezted be, küldünk még egy emlékeztetőt. Ha nem fejezed be, a válaszaidat 30 nap után automatikusan töröljük."
+    : reminderNumber >= 5
+      ? "This is our last reminder. Unfinished answers are deleted automatically after 30 days."
+      : "If you haven't finished yet, we'll send one more reminder. Unfinished answers are deleted automatically after 30 days.";
   const minutesLeft = Math.max(1, Math.round(((total - answered) * 14) / 60)); // ~14 seconds a question
   if (locale === "hu") {
     const subject = "Folytasd a Grismont folyamatfelmérőjét";
@@ -94,7 +101,7 @@ export function reminderEmail(firstName: string, answered: number, total: number
 <p>Elkezdted kitölteni a Grismont folyamatfelmérőjét, de még nem fejezted be. ${esc(progress)}</p>
 <p>Ha beküldöd, azonnal megkapod a riportot: hat terület értékelését, három gyorsan megvalósítható javaslatot, a legnagyobb kockázatot és egy 90 napos ütemtervet.</p>
 ${button(links.resume, "Folytasd a kitöltést")}
-<p style="color:#536057">Ez az egyetlen emlékeztető, amit küldünk. Ha nem fejezed be, a válaszaidat 30 nap után automatikusan töröljük.</p>`, deleteFooter(links.delete, locale), locale);
+<p style="color:#536057">${esc(stageNotice)}</p>`, deleteFooter(links.delete, locale), locale);
     const text = `Kedves ${firstName}!
 
 Elkezdted kitölteni a Grismont folyamatfelmérőjét, de még nem fejezted be. ${progress}
@@ -103,7 +110,7 @@ Ha beküldöd, azonnal megkapod a riportot: hat terület értékelését, három
 
 Folytasd a kitöltést: ${links.resume}
 
-Ez az egyetlen emlékeztető, amit küldünk. Ha nem fejezed be, a válaszaidat 30 nap után automatikusan töröljük.
+${stageNotice}
 
 Azért kapod ezt az e-mailt, mert elkezdted kitölteni a Grismont folyamatfelmérőjét.
 Válaszaim és riportom törlése: ${links.delete}`;
@@ -118,14 +125,14 @@ Válaszaim és riportom törlése: ${links.delete}`;
 <p>You started the Grismont Discovery Scorecard but didn't finish it. ${esc(progress)}</p>
 <p>When you submit, you'll get your report straight away: your profile across six areas, three quick wins, your biggest risk and a 90-day roadmap.</p>
 ${button(links.resume, "Continue where you left off")}
-<p style="color:#536057">This is the only reminder we'll send. Unfinished answers are deleted automatically after 30 days.</p>`, deleteFooter(links.delete));
+<p style="color:#536057">${esc(stageNotice)}</p>`, deleteFooter(links.delete));
   const text = `Hi ${firstName},
 
 You started the Grismont Discovery Scorecard but didn't finish it. ${progress}
 
 Continue where you left off: ${links.resume}
 
-This is the only reminder we'll send. Unfinished answers are deleted automatically after 30 days.
+${stageNotice}
 
 Delete my answers: ${links.delete}`;
   return { subject, html, text };

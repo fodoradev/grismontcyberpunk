@@ -77,12 +77,12 @@ export default function IntakeForm({ locale = "en" }: { locale?: Locale }) {
       <label className="sc-hp" aria-hidden="true">{hu ? "Weboldal" : "Website"}<input name="website" tabIndex={-1} autoComplete="off" /></label>
       <label className="sc-consent">
         <input type="checkbox" name="consent" required defaultChecked={v.consent === "on"} {...describe("consent")} />
-        <span>{hu ? "Elolvastam az " : "I've read the "}<a href={localizePath(locale, "/privacy")} target="_blank">{hu ? "adatkezelési tájékoztatót" : "privacy notice"}<span className="sc-sr">{hu ? " (új lapon nyílik meg)" : " (opens in a new tab)"}</span></a>{hu ? ". Hozzájárulok, hogy e-mailt kapjak erről a felmérésről, és egy emlékeztetőt, ha nem fejezem be." : ". You may email me about this scorecard, including one reminder if I don't finish."}</span>
+        <span>{hu ? "Elolvastam az " : "I've read the "}<a href={localizePath(locale, "/privacy")} target="_blank">{hu ? "adatkezelési tájékoztatót" : "privacy notice"}<span className="sc-sr">{hu ? " (új lapon nyílik meg)" : " (opens in a new tab)"}</span></a>{hu ? ". Hozzájárulok, hogy e-mailt kapjak erről a felmérésről, és legfeljebb három emlékeztetőt, ha nem fejezem be." : ". You may email me about this scorecard, including up to three reminders if I don't finish."}</span>
       </label>
       <FieldError id="consent" message={err("consent")} />
       <div className="sc-actions">
         <button className="gm-cta" type="submit" disabled={pending}>{pending ? (hu ? "Mentés…" : "Saving…") : (hu ? "Kezdjük a kérdéseket" : "Start the questions")} <span aria-hidden="true">→</span></button>
-        <span className="sc-hint">{hu ? "A válaszaidat menet közben folyamatosan mentjük." : "Your answers are saved after every section."}</span>
+        <span className="sc-hint">{hu ? "A válaszaidat minden kérdés után mentjük." : "Your answers are saved after every question."}</span>
       </div>
     </form>
   );

@@ -35,7 +35,7 @@ Schema changes: edit `db/schema.ts`, then `npm run db:generate` and `npm run db:
 - `/privacy`: privacy notice for the current minimal application.
 - `/cookies`: actual application cookies/storage policy.
 - `/scorecard`: Discovery Scorecard intake; `/scorecard/s/{token}` questionnaire (resumable); `/scorecard/r/{token}` report (`/pdf` for the PDF); `/scorecard/delete/{token}` deletion.
-- `/api/cron/daily`: reminder emails, email retries and data retention (Vercel Cron, `vercel.json`).
+- `/api/cron/daily`: three-stage inactivity reminders, report-email retries and data retention (Vercel Cron, `vercel.json`).
 
 All pages share the header and footer; legal links are working routes. Legal information remains clearly marked as a draft because registered business identity, country, address, identifiers, and hosting practices have not been provided.
 
@@ -45,7 +45,15 @@ English keeps the existing URLs. Hungarian pages use the `/hu` prefix, including
 
 Hungarian wording is adapted to meaning and context. Public homepage copy lives in `content/site/home.ts`; scorecard questions, findings and shared copy have matching `en` and `hu` directories. Keep question IDs, option scores, finding IDs and placeholders aligned. Scores and finding selection do not depend on language. New reports preserve both language snapshots; saved language also controls reminder and report emails.
 
-Apply database migrations before running the bilingual scorecard (`npm run db:migrate`); migration `0002` adds the submission language with English as the default for existing records. The chosen production domain is `grismont.hu`: set `APP_URL=https://grismont.hu` in production and verify that domain in Resend before enabling email delivery. Keep localhost and test email recipients for local testing.
+Apply database migrations before running the bilingual scorecard (`npm run db:migrate`); migration `0002` adds the submission language with English as the default for existing records, and `0003` adds the three reminder stages. The chosen production domain is `grismont.hu`: set `APP_URL=https://grismont.hu` in production and verify that domain in Resend before enabling email delivery. Keep localhost and test email recipients for local testing.
+
+## Production services
+
+For a small Vercel deployment, provision an EU PostgreSQL database through the Vercel Marketplace (Neon is the simplest fit for the existing Drizzle/Postgres code). Set Vercel's `DATABASE_URL` to the provider's pooled connection string, then run `npm run db:migrate` against that production database before deploying schema-dependent code. Keep a separate database for local development and previews.
+
+Use Resend for the transactional report and reminder emails already implemented here. Verify the sending domain in Resend, publish its SPF/DKIM DNS records, and set `RESEND_API_KEY`, `EMAIL_FROM`, `OWNER_NOTIFY_EMAIL`, `APP_URL`, `CRON_SECRET`, and `IP_HASH_SALT` in Vercel's Production environment. The Vercel daily cron sends reminders near the 1/3/5-day targets; Hobby scheduling is daily, so each may arrive up to about a day after its target.
+
+The scorecard is not a newsletter signup. If you later want a marketing list, add a separate optional checkbox and signup flow with its own recorded consent and unsubscribe handling; do not copy scorecard addresses into a mailing list.
 
 ## Edit
 
@@ -63,10 +71,10 @@ Apply database migrations before running the bilingual scorecard (`npm run db:mi
 
 ## Discovery Scorecard
 
-- The questionnaire is one question per card, Typeform-style, fully usable from the keyboard (number keys choose, Enter continues, Backspace goes back). It opens by asking which process to assess and pipes that name into the questions about it. Every answer is saved as it is given.
+- The questionnaire is one question per card, Typeform-style, fully usable from the keyboard (number keys choose, Enter continues, Backspace goes back). It opens by asking which process to assess and pipes that name into the questions about it. Intake details are saved when the user starts questions, and every answer is saved as it is given.
 - Content lives in `content/scorecard/en/` and `content/scorecard/hu/`: `questions.ts` (the process question, 30 scored questions, one diagnostic, one free text) and `findings.ts` (the rule-based findings library). Bump `CONTENT_VERSION` when changing either; stored reports keep their snapshot.
 - Scoring and selection: `lib/scorecard/scoring.ts` and `lib/scorecard/report.ts`. AI readiness is capped at one level above the weaker of stability and data; automation readiness is capped at that weaker score itself.
-- Storage: Postgres (`db/schema.ts`), via Drizzle. Emails: Resend over HTTPS (`lib/email/`). PDF: `@react-pdf/renderer` (`lib/pdf/`).
+- Storage: Postgres (`db/schema.ts`), via Drizzle. Emails: Resend over HTTPS (`lib/email/`). Completed reports are emailed immediately in the saved language; the daily Vercel Cron sends up to three reminders 1, 3 and 5 days after last saved activity, and retries failed delivery. The scorecard does not subscribe people to a newsletter or marketing list. PDF: `@react-pdf/renderer` (`lib/pdf/`).
 - Planned production setup: Vercel (fra1), Neon Postgres (EU), Resend. Environment variables are listed in `.env.example`.
 - Design spec: `docs/superpowers/specs/2026-10-13-discovery-scorecard-design.md`.
 

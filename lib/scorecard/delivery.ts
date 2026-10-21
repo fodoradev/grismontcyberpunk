@@ -5,7 +5,7 @@ import { MAX_ATTEMPTS, sendOnce } from "../email/send";
 import { ownerNotifyEmail, reminderEmail, reportEmail } from "../email/templates";
 import { renderReportPdf } from "../pdf/ReportDocument";
 import { profileString } from "./scoring";
-import { dueForReminder, markReminded, purgeExpired } from "./store";
+import { dueForReminders, purgeExpired } from "./store";
 import { answeredCount } from "./validation";
 import type { Submission } from "../../db/schema";
 import { business } from "../../data/business";
@@ -50,22 +50,19 @@ export async function sendReportEmails(submissionId: string) {
   }
 }
 
-async function sendReminder(s: Submission) {
+async function sendReminder(s: Submission, reminderNumber: number, reminderKind: "reminder_1" | "reminder_3" | "reminder_5") {
   const locale = normalizeLocale(s.locale);
-  const result = await sendOnce(s.id, "reminder", async () => ({
+  return sendOnce(s.id, reminderKind, async () => ({
     to: s.email,
-    ...reminderEmail(s.firstName, answeredCount(s.answers), QUESTIONS.length, { resume: urls.resume(s.resumeToken, locale), delete: urls.delete(s.resumeToken, locale) }, locale),
+    ...reminderEmail(s.firstName, answeredCount(s.answers), QUESTIONS.length, { resume: urls.resume(s.resumeToken, locale), delete: urls.delete(s.resumeToken, locale) }, locale, reminderNumber),
   }));
-  if (result !== "failed") await markReminded(s.id);
-  return result;
 }
 
-/** Daily job: one reminder per abandoned submission, retry report emails, enforce retention. */
+/** Daily job: schedule three inactivity reminders, retry report emails, enforce retention. */
 export async function runDaily() {
-  // A failed reminder keeps reminder_sent_at empty, so dueForReminder() retries it on the next run.
   const reminders = { sent: 0, failed: 0 };
-  for (const s of await dueForReminder()) {
-    const r = await sendReminder(s);
+  for (const { submission, reminderNumber, reminderKind } of await dueForReminders()) {
+    const r = await sendReminder(submission, reminderNumber, reminderKind);
     if (r === "sent") reminders.sent++;
     if (r === "failed") reminders.failed++;
   }

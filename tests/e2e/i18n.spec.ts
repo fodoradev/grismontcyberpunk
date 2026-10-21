@@ -1,7 +1,7 @@
 import { expect, test, type APIResponse, type Page } from "@playwright/test";
 
 const publicPages = [
-  { path: "", title: "Gördülékeny munka.Kevesebb gubanc." },
+  { path: "", title: "Folytonos munka.Kevesebb fennakadás." },
   { path: "/privacy", title: "Adatkezelés." },
   { path: "/cookies", title: "Sütik." },
   { path: "/impressum", title: "Impresszum." },

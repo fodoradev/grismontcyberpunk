@@ -3,7 +3,7 @@ import type { Answers, ReportModel } from "../lib/scorecard/types";
 import type { Locale } from "../lib/i18n";
 
 export const submissionStatus = pgEnum("submission_status", ["in_progress", "superseded", "completed"]);
-export const emailKind = pgEnum("email_kind", ["report", "reminder", "owner_notify"]);
+export const emailKind = pgEnum("email_kind", ["report", "reminder", "reminder_1", "reminder_3", "reminder_5", "owner_notify"]);
 export const emailStatus = pgEnum("email_status", ["pending", "sent", "failed"]);
 
 export const submissions = pgTable("submissions", {

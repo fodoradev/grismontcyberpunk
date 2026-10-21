@@ -24,7 +24,7 @@ The homepage sells the Discovery Scorecard as the entry point to every engagemen
 | Intake | First name, email, company size band, industry (required); company name, role (optional); privacy consent |
 | Language | English at launch; all copy in locale-keyed content files so Hungarian is translation-only |
 | Question format | Observable-state options scored 0–4, a few rough-number band questions, one free text |
-| Reminder | Exactly one, ≥24 h after last activity |
+| Reminder | Up to three, around 1, 3 and 5 days after last saved activity |
 | Retention | Unfinished: deleted after 30 days. Completed: 12 months |
 
 ## 2. User flow
@@ -32,7 +32,7 @@ The homepage sells the Discovery Scorecard as the entry point to every engagemen
 ```
 /scorecard (intake) ──Next──▶ /scorecard/s/{resumeToken}  step 1..6 (saved per step)
                                      │
-                                     ├─ abandoned ≥24h ─▶ cron sends 1 reminder ─▶ same link resumes
+                                     ├─ inactive ~1/3/5d ─▶ cron sends up to 3 reminders ─▶ same link resumes
                                      │
                                   Submit
                                      ▼
@@ -41,10 +41,10 @@ The homepage sells the Discovery Scorecard as the entry point to every engagemen
                           + email to owner (summary + link)
 ```
 
-1. **Intake** (`/scorecard`). Fields per §1. Consent checkbox text: "I've read the [privacy notice]. You may email me about this scorecard, including one reminder if I don't finish." Server action validates, creates a `submissions` row (`in_progress`), redirects to `/scorecard/s/{resumeToken}`. If the same email already has an `in_progress` submission, that one is marked `superseded` (no reminder) and a fresh one is created; the response never reveals whether the email existed.
+1. **Intake** (`/scorecard`). Fields per §1. Consent checkbox permits the report and up to three scorecard reminders. Server action validates, creates a `submissions` row (`in_progress`), redirects to `/scorecard/s/{resumeToken}`. If the same email already has an `in_progress` submission, that one is marked `superseded` (no reminder) and a fresh one is created; the response never reveals whether the email existed.
 2. **Questionnaire** (`/scorecard/s/{resumeToken}`). Six steps, one per area, progress bar, Back/Next. Each Next calls a server action that validates the step against the question bank and persists `answers` + `current_step`. Opening the link anywhere resumes at `current_step`. The free-text question sits on the last step.
 3. **Submit.** Idempotent: if already `completed`, redirect to the existing report. Otherwise compute scores → select findings → write `reports` row with a frozen snapshot (`content_version`) → set `completed` → redirect to report → send submitter email (PDF attached) and owner notification. Email failure never blocks the redirect; failed sends are retried by cron.
-4. **Reminder.** Daily Vercel Cron (Hobby plan allows daily only, so reminders land 24–48 h after last activity). Selects `in_progress` rows with `updated_at < now − 24h` and `reminder_sent_at IS NULL`; sends one email ("You're 3 of 6 areas in…" + resume link + delete link); sets `reminder_sent_at`.
+4. **Reminders.** Daily Vercel Cron (Vercel Hobby runs daily, so delivery can be up to roughly one day after each target). Selects `in_progress` rows and sends up to three localized emails at 1, 3 and 5 days since last saved activity. Each email is independently logged and retried; new saved activity postpones the next unsent reminder. Completion or deletion stops the sequence.
 5. **Deletion.** `/scorecard/delete/{resumeToken}` confirms and deletes the submission, its report and email logs. Linked from every email and the report page.
 6. **Retention.** The same cron deletes `in_progress`/`superseded` rows older than 30 days and `completed` rows older than 12 months.
 
@@ -61,7 +61,7 @@ submissions
   ip_hash          text          -- sha256(ip + IP_HASH_SALT), rate limiting only
   answers          jsonb not null default '{}'   -- { [questionId]: optionId | string }
   current_step     int not null default 0
-  reminder_sent_at timestamptz null
+  reminder_sent_at timestamptz null -- legacy one-reminder marker; staged reminders use email_log
   created_at, updated_at, completed_at
 
 reports
@@ -73,7 +73,7 @@ reports
 
 email_log
   id, submission_id fk on delete cascade
-  kind             enum(report, reminder, owner_notify, deletion_confirm)
+  kind             enum(report, reminder, reminder_1, reminder_3, reminder_5, owner_notify)
   status           enum(pending, sent, failed)
   provider_id      text null
   attempts         int
