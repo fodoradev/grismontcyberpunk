@@ -286,7 +286,7 @@ describe("localized emails", () => {
     report.freeText = unsafe;
     const url = `https://example.test/${locale === "hu" ? "hu/" : ""}scorecard/r/token?a=1&b="'<>`;
     const expectedUrl = url.replace('&b="\'<>', "&amp;b=&quot;&#39;&lt;&gt;");
-    const result = reportEmail(report, { report: url, delete: url });
+    const result = reportEmail(report, { report: url, delete: url, audit: url, booking: url });
     const reminder = reminderEmail(report.intake.firstName, 5, 32, { resume: url, delete: url }, locale);
     const owner = ownerNotifyEmail(report, { email: "anna@example.test", role: unsafe, companyName: unsafe, profile: unsafe, reportUrl: url });
     for (const email of [result, reminder, owner]) {
@@ -301,15 +301,16 @@ describe("localized emails", () => {
       expect(email.html).toContain(escaped);
       expect(email.text).toContain(unsafe);
     }
-    expect(result.subject).toBe(locale === "hu" ? "Elkészült a folyamatfelmérőd eredménye" : "Your Discovery Scorecard report");
-    expect(reminder.subject).toBe(locale === "hu" ? "Folytasd a Grismont folyamatfelmérőjét" : "Your Discovery Scorecard is waiting");
+    expect(result.subject).toBe(locale === "hu" ? "A Folyamat-pontozó eredményed (PDF)" : "Your scorecard report (PDF)");
+    expect(reportEmail(report, { report: url, delete: url, audit: url }).text).toContain(locale === "hu" ? "Válaszolj erre az e-mailre" : "Reply to this email");
+    expect(reminder.subject).toBe(locale === "hu" ? "Folytasd a Grismont Folyamat-pontozóját" : "Your Discovery Scorecard is waiting");
     expect(owner.subject).toContain(locale === "hu" ? hu.INDUSTRY_LABELS.services : "services");
   });
 
   it("defaults legacy report and reminder emails to English", () => {
     const report = buildReport(uniformAnswers(2), intake, now);
     delete report.locale;
-    const links = { report: "https://example.test/report", delete: "https://example.test/delete", resume: "https://example.test/resume" };
+    const links = { report: "https://example.test/report", delete: "https://example.test/delete", resume: "https://example.test/resume", audit: "https://example.test/advanced-audit" };
     expect(reportEmail(report, links).html).toContain('<html lang="en">');
     expect(reminderEmail("Anna", 0, 32, links).html).toContain('<html lang="en">');
   });

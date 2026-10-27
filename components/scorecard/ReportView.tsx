@@ -1,7 +1,7 @@
 import { getScorecardCopy } from "../../content/scorecard/copy";
 import { getQuestionContent } from "../../content/scorecard/questions";
-import { business } from "../../data/business";
-import { formatNumber, levelLabel, normalizeLocale, type Locale } from "../../lib/i18n";
+import { known, site } from "../../data/site";
+import { formatNumber, levelLabel, localizePath, normalizeLocale, type Locale } from "../../lib/i18n";
 import { profileBars, quadrantCells, quadrantPoint, type Cell } from "../../lib/scorecard/chart-geometry";
 import { AREAS, type FindingText, type Quadrant as QuadrantId, type ReportModel } from "../../lib/scorecard/types";
 
@@ -19,11 +19,12 @@ const labels = {
     wins: "Three quick wins", roadmap: "Your 90-day roadmap", order: "In the order that works",
     areas: "Area by area", meaning: "What each score means for you", focus: "Focus:",
     call: "We'll start our call here.", next: "Suggested next step",
-    review: "Arrange a 30-minute review", subject: "Discovery Scorecard review",
-    final: "This is a starting point. In the call I'll add my own recommendation. The link to delete your data is in your email.",
+    helpTitle: "Want help with the first quick win?", helpText: "In a free 20-minute call we go through your scores and agree the first step. No sales pitch.",
+    book: "Book a 20-minute review", deeper: "Want a deeper look? Take the Advanced audit (44 questions, about 8 minutes)",
+    final: "The link to delete your data is in your email.",
   },
   hu: {
-    report: "Folyamatfelmérő – eredmény", greeting: "itt tartasz most.",
+    report: "Folyamat-pontozó – eredmény", greeting: "itt tartasz most.",
     intro: "Minden, amit itt olvasol, a válaszaidon alapul.",
     download: "PDF letöltése", jump: "Ugrás a következő lépéshez ↓",
     profile: "Az eredményeid", profileTitle: "Hat terület, egy átfogó kép", scores: "Pontszámok területenként, 0–4 pontos skálán",
@@ -33,8 +34,9 @@ const labels = {
     wins: "Három gyorsan megvalósítható javítás", roadmap: "A 90 napos ütemterved", order: "Javasolt sorrendben",
     areas: "Területenkénti értékelés", meaning: "Mit jelentenek a pontszámok a gyakorlatban?", focus: "Erre figyelj:",
     call: "Ha beszélünk, ezzel kezdjük.", next: "Javasolt következő lépés",
-    review: "Foglalj egy 30 perces beszélgetést", subject: "A folyamatfelmérő eredményének átbeszélése",
-    final: "Ez egy kiindulópont. Ha beszélünk, a saját javaslataimmal is kiegészítem. Az adataid törléséhez szükséges linket az e-mailben találod.",
+    helpTitle: "Segítsek az első gyors javításban?", helpText: "Egy ingyenes, 20 perces beszélgetésben átnézzük a pontszámaidat, és megbeszéljük az első lépést. Nincs értékesítési rizsa.",
+    book: "Foglalok egy 20 perces átnézést", deeper: "Részletesebb képet szeretnél? Töltsd ki a Részletes folyamat-auditot (44 kérdés, kb. 8 perc)",
+    final: "Az adataid törléséhez szükséges linket az e-mailben találod.",
   },
 } satisfies Record<Locale, Record<string, string>>;
 
@@ -112,8 +114,12 @@ function Finding({ f, locale, className = "" }: { f: FindingText; locale: Locale
   );
 }
 
-export default function ReportView({ r, pdfHref, locale = normalizeLocale(r.locale) }: { r: ReportModel; pdfHref: string; locale?: Locale }) {
+/** `sample` renders the public sample report: no private-data notes. `pdfHref` is omitted when there is no PDF. */
+export default function ReportView({ r, pdfHref, locale = normalizeLocale(r.locale), sample = false }: { r: ReportModel; pdfHref?: string; locale?: Locale; sample?: boolean }) {
   const { ROADMAP_COLUMNS, formatReportDate, freeTextLabel, reportIntro } = getScorecardCopy(locale);
+  const bookingUrl = known(site.bookingUrl);
+  // Until a booking link exists, the review button goes to the home page contact form.
+  const booking = bookingUrl ?? localizePath(locale, "/#contact");
   const { AREA_NAMES } = getQuestionContent(locale);
   const t = labels[locale];
   const date = formatReportDate(r);
@@ -123,7 +129,7 @@ export default function ReportView({ r, pdfHref, locale = normalizeLocale(r.loca
         <div className="gm-label">{t.report} · {date}</div>
         <h1>{r.intake.firstName}, {t.greeting}</h1>
         <p className="gm-lead">{reportIntro(r)} {t.intro}</p>
-        <div className="gm-actions"><a className="gm-cta" href={pdfHref}>{t.download} <span aria-hidden="true">↓</span></a><a className="gm-text-link" href="#next-step">{t.jump}</a></div>
+        <div className="gm-actions">{pdfHref ? <a className="gm-cta" href={pdfHref}>{t.download} <span aria-hidden="true">↓</span></a> : null}<a className="gm-text-link" href="#next-step">{t.jump}</a></div>
       </section>
 
       <section className="gm-shell sc-block sc-two">
@@ -187,9 +193,12 @@ export default function ReportView({ r, pdfHref, locale = normalizeLocale(r.loca
             <p>{r.nextStep.text.observed} {r.nextStep.text.why}</p>
             <p style={{ marginTop: 12 }}>{r.nextStep.text.action}</p>
           </div>
-          <div className="gm-actions">
-            <a className="gm-cta light" href={`mailto:${business.email}?subject=${encodeURIComponent(t.subject)}`}>{t.review} <span aria-hidden="true">↗</span></a>
-            <span className="sc-final-note">{t.final}</span>
+          <div className="gm-actions sc-help">
+            <h3>{t.helpTitle}</h3>
+            <p>{t.helpText}</p>
+            <a className="gm-cta light" href={booking} {...(bookingUrl ? { target: "_blank", rel: "noopener" } : {})}>{t.book} <span aria-hidden="true">↗</span></a>
+            <a className="sc-deeper" href={localizePath(locale, "/advanced-audit")}>{t.deeper} <span aria-hidden="true">→</span></a>
+            {sample ? null : <span className="sc-final-note">{t.final}</span>}
           </div>
         </div>
       </section>

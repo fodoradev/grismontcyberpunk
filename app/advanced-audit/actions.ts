@@ -14,7 +14,7 @@ import { sendAdvancedAuditResumeEmail } from "../../lib/advanced-audit/delivery"
 
 const validToken = (token: unknown): token is string => typeof token === "string" && /^[A-Za-z0-9_-]{22}$/.test(token);
 export type AuditActionResult = { ok: true; resumeEmailPending?: boolean } | { ok: false; message: string };
-export type AdvancedAuditStartState = { email?: string; errors?: { email?: string; consent?: string }; message?: string };
+export type AdvancedAuditStartState = { email?: string; resumeEmail?: boolean; errors?: { email?: string; consent?: string }; message?: string };
 
 function logAdvancedAuditFailure(action: string, error: unknown) {
   const name = error instanceof Error ? error.name : "UnknownError";
@@ -29,19 +29,21 @@ export async function startAdvancedAuditAction(_previous: AdvancedAuditStartStat
   const locale = await getLocale();
   const hu = locale === "hu";
   const rawEmail = String(formData.get("email") ?? "");
+  // Two separate checkboxes (04 §4): the privacy notice is required; the resume-link email is optional.
+  const resumeEmail = formData.get("resumeEmail") === "on";
   const email = z.string().trim().toLowerCase().max(254).pipe(z.email()).safeParse(rawEmail);
   const errors: NonNullable<AdvancedAuditStartState["errors"]> = {};
-  if (!email.success) errors.email = hu ? "Kérlek, adj meg egy érvényes e-mail-címet." : "Please enter a valid email address.";
-  if (formData.get("consent") !== "on") errors.consent = hu ? "Erősítsd meg, hogy e-mailben kéred a privát hivatkozást." : "Please confirm that you want the private link by email.";
+  if (resumeEmail && !email.success) errors.email = hu ? "A hivatkozás elküldéséhez adj meg egy érvényes e-mail-címet." : "Please enter a valid email address for the link.";
+  if (formData.get("consent") !== "on") errors.consent = hu ? "Kérlek, erősítsd meg, hogy elolvastad az adatkezelési tájékoztatót." : "Please confirm you've read the privacy notice.";
   if (String(formData.get("website") ?? "")) return { message: hu ? "Valami nem sikerült. Próbáld újra." : "Something went wrong. Please try again." };
-  if (!email.success || Object.keys(errors).length) return { email: rawEmail, errors };
+  if (Object.keys(errors).length) return { email: rawEmail, resumeEmail, errors };
 
   let token: string;
   try {
-    token = await createAdvancedAudit(AUDIT_CONTENT_VERSION, email.data, locale);
+    token = await createAdvancedAudit(AUDIT_CONTENT_VERSION, resumeEmail && email.success ? email.data : null, locale);
   } catch (error) {
     logAdvancedAuditFailure("start", error);
-    return { email: rawEmail, message: hu ? "Most nem sikerült elindítani az auditot. Kérlek, próbáld újra később." : "We couldn't start the audit just now. Please try again in a moment." };
+    return { email: rawEmail, resumeEmail, message: hu ? "Most nem sikerült elindítani az auditot. Kérlek, próbáld újra később." : "We couldn't start the audit just now. Please try again in a moment." };
   }
   redirect(localizePath(locale, `/advanced-audit/s/${token}`));
 }

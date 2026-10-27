@@ -9,6 +9,7 @@ export type Email = {
   html: string;
   text: string;
   replyTo?: string;
+  headers?: Record<string, string>;
   attachments?: { filename: string; content: Buffer }[];
 };
 
@@ -34,6 +35,7 @@ export async function deliverEmail(email: Email, idempotencyKey: string): Promis
       html: email.html,
       text: email.text,
       ...(email.replyTo ? { reply_to: email.replyTo } : {}),
+      ...(email.headers ? { headers: email.headers } : {}),
       attachments: email.attachments?.map(a => ({ filename: a.filename, content: a.content.toString("base64") })),
     }),
   });

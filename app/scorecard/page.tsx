@@ -1,29 +1,53 @@
+import { site } from "../../data/site";
 import type { Metadata } from "next";
 import IntakeForm from "../../components/scorecard/IntakeForm";
 import { getQuestionContent } from "../../content/scorecard/questions";
 import { getLocale } from "../../lib/i18n-server";
+import { localizePath } from "../../lib/i18n";
 import { AREAS } from "../../lib/scorecard/types";
 
+// Copy: docs/content-plan/04-copy-scorecard-en-hu.md §1.
+const copy = {
+  en: {
+    metaTitle: "Free Discovery Scorecard: score one process in 8 minutes | Grismont",
+    metaDescription: "Answer 30 questions about one process. Get six scores, three quick wins, the main risk and a 90-day roadmap. Free, on screen and as PDF.",
+    label: "Discovery Scorecard", title: "One process. A clearer next step.",
+    intro: "Pick a process you know well, for example the weekly report, order handling or month-end closing. Answer 30 short questions. A best estimate is fine.",
+    youGet: "You get:", items: ["six scores with short explanations", "three quick wins", "the main risk to fix before automation or AI", "a 90-day roadmap"],
+    reassurance: "Free · about 8 minutes · answers save after each question · no obligation to book",
+    privacy: "Please leave out confidential or personal details.", sample: "See a sample report first",
+  },
+  hu: {
+    metaTitle: "Ingyenes Folyamat-pontozó: értékelj egy folyamatot 8 perc alatt | Grismont",
+    metaDescription: "Válaszolj 30 kérdésre egy folyamatról. Hat pontszámot, három gyors javítást, a fő kockázatot és 90 napos ütemtervet kapsz. Ingyenes, azonnal és PDF-ben.",
+    label: "Folyamat-pontozó", title: "Egy folyamat. Egy tisztább következő lépés.",
+    intro: "Válassz egy folyamatot, amit jól ismersz, például a heti riportot, a rendeléskezelést vagy a havi zárást. Válaszolj 30 rövid kérdésre. A legjobb becslésed is elég.",
+    youGet: "Ezt kapod:", items: ["hat pontszám rövid magyarázattal", "három gyors javítás", "a fő kockázat, amit az automatizálás vagy az AI előtt rendezni kell", "90 napos ütemterv"],
+    reassurance: "Ingyenes · kb. 8 perc · minden válasz után mentünk · semmire nem kötelez",
+    privacy: "Bizalmas vagy személyes adatokat kérlek, ne adj meg.", sample: "Előbb megnézem a mintajelentést",
+  },
+};
+
 export async function generateMetadata(): Promise<Metadata> {
-  const hu = await getLocale() === "hu";
-  return {
-    title: hu ? "Folyamatfelmérő" : "Discovery Scorecard",
-    description: hu ? "Harminc konkrét kérdés a folyamatodról, az adatokról, az automatizálásról és az AI-felkészültségről, utána pedig egy riport, amely alapján el tudsz indulni." : "Thirty concrete questions about your processes, data, automation and AI readiness, and a report you can act on.",
-  };
+  const c = copy[await getLocale()];
+  return { title: { absolute: c.metaTitle }, description: c.metaDescription };
 }
 
 export default async function ScorecardIntake() {
   const locale = await getLocale();
-  const hu = locale === "hu";
+  const c = copy[locale];
   const { AREA_NAMES } = getQuestionContent(locale);
   return (
     <main id="main-content" className="gm-shell sc-page">
       <div className="sc-intro">
-        <div className="gm-label">{hu ? "Folyamatfelmérő" : "Discovery Scorecard"}</div>
-        <h1>{hu ? "Egy folyamat. Világosabb következő lépés." : "One process. A clearer next step."}</h1>
-        <p className="gm-lead">{hu ? "Válassz egy folyamatot, amelyet jól ismersz, és válaszolj harminc kérdésre arról, hogyan működik. Mindig azt jelöld, amelyik a legközelebb áll a helyzetetekhez. Hat pontszámot, három gyorsan megvalósítható javaslatot és egy 90 napos ütemtervet kapsz, a képernyőn és PDF-ben e-mailben is." : "Choose a process you know well, then answer thirty questions about how it works. Pick the situation closest to yours. You’ll get six scores, three suggested quick wins and a 90-day roadmap, on screen and as a PDF by email."}</p>
+        <div className="gm-label">{c.label}</div>
+        <h1>{c.title}</h1>
+        <p className="gm-lead">{c.intro}</p>
+        <p className="gm-lead"><strong>{c.youGet}</strong></p>
+        <ul className="sc-get">{c.items.map(item => <li key={item}>{item}</li>)}</ul>
         <ol className="sc-areas">{AREAS.map((a, i) => <li key={a}><span>{String(i + 1).padStart(2, "0")} /</span>{AREA_NAMES[a]}</li>)}</ol>
-        <p className="sc-hint">{hu ? "Ingyenes · Körülbelül 7–8 perc · Semmire nem kötelez." : "Free · About 7–8 minutes · No obligation to book anything."}<br />{hu ? "Elég, ha megbecsülöd. Bizalmas vagy személyes adatokat kérlek, ne adj meg." : "Your best estimate is fine. Please leave out confidential or personal details."}</p>
+        <p className="sc-hint">{c.reassurance}<br />{c.privacy}</p>
+        {site.sampleReportPublished ? <p className="sc-hint"><a className="gm-text-link" href={localizePath(locale, "/scorecard/sample")}>{c.sample} <span aria-hidden="true">↗</span></a></p> : null}
       </div>
       <IntakeForm locale={locale} />
     </main>

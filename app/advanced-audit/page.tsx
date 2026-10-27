@@ -5,7 +5,7 @@ import AdvancedAuditIntake from "../../components/advanced-audit/AdvancedAuditIn
 
 export async function generateMetadata(): Promise<Metadata> {
   const hu = await getLocale() === "hu";
-  return { title:hu?"Részletes folyamat-audit":"Advanced audit", description:hu?"Részletes, szabályalapú folyamatfelmérés és 90 napos fejlesztési terv.":"A detailed, rule-based process assessment with a prioritised 90-day improvement plan.", robots:{index:false,follow:false} };
+  return { title:hu?"Részletes folyamat-audit":"Advanced audit", description:hu?"Részletes, szabályalapú folyamat-audit és 90 napos fejlesztési terv.":"A detailed, rule-based process assessment with a prioritised 90-day improvement plan.", robots:{index:false,follow:false} };
 }
 
 export default async function AdvancedAuditPage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
@@ -14,6 +14,7 @@ export default async function AdvancedAuditPage({ searchParams }: { searchParams
   return <main id="main-content" className="gm-shell sc-page sc-audit-intro">
     {error === "start" && <p className="sc-alert" role="alert">{hu?"Most nem sikerült elindítani az auditot. Kérlek, próbáld újra később.":"We couldn't start the audit just now. Please try again in a moment."}</p>}
     <div className="sc-intro">
+      <p className="sc-audit-already">{hu?"Már kitöltötted a Folyamat-pontozót? Ez a részletesebb változat.":"Already did the scorecard? This is the deeper version."}</p>
       <div className="gm-label">{hu?"Részletes folyamat-audit":"Advanced audit"}</div>
       <h1>{hu?"A folyamat teljesebb képe.":"A deeper look at how work gets done."}</h1>
       <p className="gm-lead">{hu?"Válassz ki egy folyamatot, és válaszolj arról, hogyan működött az elmúlt három hónapban. A „nem tudom” is hasznos válasz. A kitöltés után részletes eredményt és 90 napos fejlesztési tervet kapsz.":"Choose one process and answer based on how it has really run over the last three months. “Don't know” is useful information. At the end, you'll get a detailed assessment and a prioritised 90-day improvement plan."}</p>

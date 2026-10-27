@@ -11,7 +11,7 @@ const config: NextConfig = {
     { key: "X-Content-Type-Options", value: "nosniff" },
     { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
     { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" }
-  ] }, ...["/scorecard/:kind(s|r|delete)/:path*", "/hu/scorecard/:kind(s|r|delete)/:path*", "/advanced-audit/s/:token", "/advanced-audit/r/:token/:path*", "/hu/advanced-audit/s/:token", "/hu/advanced-audit/r/:token/:path*"].map(source => ({ source, headers: [
+  ] }, ...["/scorecard/:kind(s|r|delete|unsubscribe)/:path*", "/hu/scorecard/:kind(s|r|delete|unsubscribe)/:path*", "/advanced-audit/s/:token", "/advanced-audit/r/:token/:path*", "/hu/advanced-audit/s/:token", "/hu/advanced-audit/r/:token/:path*"].map(source => ({ source, headers: [
     { key: "Referrer-Policy", value: "no-referrer" },
     { key: "X-Robots-Tag", value: "noindex, nofollow" },
     { key: "Cache-Control", value: "private, no-store" }

@@ -7,7 +7,7 @@ import { getLocale } from "../../../../lib/i18n-server";
 import { localizePath } from "../../../../lib/i18n";
 
 export async function generateMetadata(): Promise<Metadata> {
-  return { title: await getLocale() === "hu" ? "A folyamatfelmérőd riportja" : "Your scorecard report", referrer: "no-referrer" };
+  return { title: await getLocale() === "hu" ? "A Folyamat-pontozód riportja" : "Your scorecard report", referrer: "no-referrer" };
 }
 
 export default async function ReportPage({ params }: { params: Promise<{ token: string }> }) {

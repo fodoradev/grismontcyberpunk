@@ -43,6 +43,20 @@
       "when": 1792585871174,
       "tag": "0005_advanced_audit_email",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1793094670336,
+      "tag": "0006_contact_messages",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1793095097506,
+      "tag": "0007_scorecard_consents",
+      "breakpoints": true
     }
   ]
 }

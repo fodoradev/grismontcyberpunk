@@ -5,7 +5,7 @@ import type { AdvancedAuditAnswers, AdvancedAuditReport } from "../lib/advanced-
 import type { Locale } from "../lib/i18n";
 
 export const submissionStatus = pgEnum("submission_status", ["in_progress", "superseded", "completed"]);
-export const emailKind = pgEnum("email_kind", ["report", "reminder", "reminder_1", "reminder_3", "reminder_5", "owner_notify"]);
+export const emailKind = pgEnum("email_kind", ["report", "reminder", "reminder_1", "reminder_3", "reminder_5", "owner_notify", "followup_2", "followup_5", "followup_9"]);
 export const emailStatus = pgEnum("email_status", ["pending", "sent", "failed"]);
 
 export const submissions = pgTable("submissions", {
@@ -15,11 +15,17 @@ export const submissions = pgTable("submissions", {
   firstName: text("first_name").notNull(),
   email: text("email").notNull(),
   locale: text("locale").$type<Locale>().notNull().default("en"),
-  companySize: text("company_size").notNull(),
-  industry: text("industry").notNull(),
+  /** Asked (optionally) after the last question, so null until then or when skipped. */
+  companySize: text("company_size"),
+  industry: text("industry"),
   companyName: text("company_name"),
   role: text("role"),
   consentAt: timestamp("consent_at", { withTimezone: true }).notNull(),
+  /** Separate, optional consent to up to three reminders if unfinished. */
+  reminderConsentAt: timestamp("reminder_consent_at", { withTimezone: true }),
+  /** Separate, optional marketing consent to the follow-up email series; cleared by unsubscribing. */
+  followUpConsentAt: timestamp("follow_up_consent_at", { withTimezone: true }),
+  unsubscribedAt: timestamp("unsubscribed_at", { withTimezone: true }),
   ipHash: text("ip_hash"),
   answers: jsonb("answers").$type<Answers>().notNull().default({}),
   reminderSentAt: timestamp("reminder_sent_at", { withTimezone: true }),
@@ -90,5 +96,25 @@ export const advancedAuditEmailLog = pgTable("advanced_audit_email_log", {
   lastError: text("last_error"),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 }, t => [unique("advanced_audit_email_log_once").on(t.submissionId)]);
+
+export const CONTACT_INTERESTS = ["training", "workshop", "programme", "sprint", "unsure"] as const;
+export type ContactInterest = (typeof CONTACT_INTERESTS)[number];
+
+/** Home page contact form. The owner notification is retried by the daily job; rows are deleted after 12 months. */
+export const contactMessages = pgTable("contact_messages", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: text("name").notNull(),
+  email: text("email").notNull(),
+  message: text("message").notNull(),
+  interest: text("interest").$type<ContactInterest>(),
+  locale: text("locale").$type<Locale>().notNull().default("en"),
+  consentAt: timestamp("consent_at", { withTimezone: true }).notNull(),
+  ipHash: text("ip_hash"),
+  notifyStatus: emailStatus("notify_status").notNull().default("pending"),
+  notifyAttempts: integer("notify_attempts").notNull().default(0),
+  notifyError: text("notify_error"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
 
 export type Submission = typeof submissions.$inferSelect;

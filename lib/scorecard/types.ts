@@ -56,8 +56,8 @@ export type FindingCtx = {
   /** True if the answer to a question is one of the given option ids. */
   is: (questionId: string, ...optionIds: string[]) => boolean;
   s: Scores;
-  size: SizeBand;
-  industry: Industry;
+  size?: SizeBand;
+  industry?: Industry;
   lowestArea: AreaId;
 };
 
@@ -84,7 +84,8 @@ export type Finding =
   | (FindingBase & { kind: "roadmap"; window: 30 | 60 | 90 })
   | (FindingBase & { kind: "nextStep"; step: NextStepKind });
 
-export type Intake ={ firstName: string; companySize: SizeBand; industry: Industry; companyName?: string };
+/** Size and type of work are optional: they are asked after the last question and may be skipped. */
+export type Intake ={ firstName: string; companySize?: SizeBand; industry?: Industry; companyName?: string };
 
 export type ReportModel = {
   locale?: Locale;

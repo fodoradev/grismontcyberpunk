@@ -10,11 +10,6 @@ html{scroll-behavior:smooth}body{margin:0;background:#F5F4EE}*{box-sizing:border
 @media(max-width:600px){#grismont-board .gm-header-tools{gap:8px}#grismont-board .gm-language{padding:2px;font-size:10px}#grismont-board .gm-language>a,#grismont-board .gm-language>span{min-width:28px;min-height:36px;padding:0 4px}#grismont-board .gm-header-cta .gm-cta-full{display:none}#grismont-board .gm-header-cta .gm-cta-short{display:inline}}
 
 /* Future content stays secondary to the services and scorecard. */
-#grismont-board .gm-footer-upcoming{display:flex;align-items:baseline;gap:18px 28px;border-top:1px solid var(--gm-line);padding-top:20px;margin-top:24px;color:var(--gm-muted)}
-#grismont-board .gm-footer-upcoming>.gm-label{font-size:10px;white-space:nowrap}
-#grismont-board .gm-footer-upcoming>div{display:flex;flex-wrap:wrap;gap:4px 24px}
-#grismont-board .gm-footer-upcoming a{display:inline-flex;align-items:center;min-height:44px;font-size:12px;text-underline-offset:4px}
-@media(max-width:600px){#grismont-board .gm-footer-upcoming{flex-direction:column;gap:6px}#grismont-board .gm-footer-upcoming>div{gap:2px 22px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
 @font-face {
   font-family: 'DM Sans';
@@ -170,6 +165,11 @@ html{scroll-behavior:smooth}body{margin:0;background:#F5F4EE}*{box-sizing:border
 #grismont-board .gm-footer-links{justify-self:end;font-size:13px;gap:8px 22px;align-content:start}
 #grismont-board .gm-footer-links>a,#grismont-board .gm-footer-links>span{min-height:36px;display:flex;align-items:center}
 #grismont-board .gm-footer p,#grismont-board .gm-footer-bottom{font-size:13px;line-height:1.7}
+#grismont-board .gm-footer-cols{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px;justify-self:end;width:min(100%,560px)}
+#grismont-board .gm-footer-cols nav{display:flex;flex-direction:column;align-items:start;font-size:13px}
+#grismont-board .gm-footer-cols .gm-label{font-size:10px;margin-bottom:6px;color:var(--gm-muted)}
+#grismont-board .gm-footer-cols a{min-height:36px;display:flex;align-items:center;text-underline-offset:4px}
+@media(max-width:620px){#grismont-board .gm-footer-cols{grid-template-columns:1fr 1fr;justify-self:start}}
 @media(max-width:1000px){
  #grismont-board .gm-top{grid-template-columns:1fr auto;gap:10px 24px}
  #grismont-board .gm-top>.gm-nav{display:none}
@@ -310,6 +310,14 @@ html{scroll-behavior:smooth}body{margin:0;background:#F5F4EE}*{box-sizing:border
 #grismont-board .sc-hp{position:absolute;left:-10000px;width:1px;height:1px;overflow:hidden}
 #grismont-board .sc-consent{display:flex;gap:12px;align-items:start;margin-top:22px;font-size:13px;line-height:1.55;color:var(--gm-muted)}
 #grismont-board .sc-consent input{width:20px;height:20px;margin:1px 0 0;flex-shrink:0;accent-color:#202B26}
+#grismont-board .sc-consent-optional{margin-top:12px}
+#grismont-board .sc-sample-banner{display:flex;flex-wrap:wrap;align-items:center;gap:8px 20px;background:var(--gm-lilac);border-radius:4px;padding:16px 20px;margin-top:20px;font-size:14px;line-height:1.6}#grismont-board .sc-sample-banner .gm-cta{margin-left:auto}#grismont-board .sc-sample-foot{margin:32px auto 8px}
+#grismont-board .sc-audit-already{display:inline-block;background:var(--gm-lime);border-radius:2px;padding:4px 10px;font-size:13px;margin-bottom:18px}
+#grismont-board .sc-profile-form{margin-top:22px;text-align:left}
+#grismont-board .sc-profile-form .sc-ok{margin-top:24px;display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+#grismont-board .sc-help{flex-direction:column;align-items:start;gap:14px}#grismont-board .sc-help h3{font:500 22px/1.3 'Manrope',sans-serif;letter-spacing:-.4px}#grismont-board .sc-help p{font-size:15px;line-height:1.7}#grismont-board .sc-deeper{font-size:14px;line-height:1.6;color:inherit;text-underline-offset:4px}
+#grismont-board .sc-skip{background:none;border:0;padding:12px 4px;font:inherit;font-size:14px;color:var(--gm-muted);text-decoration:underline;text-underline-offset:4px;cursor:pointer;min-height:44px}
+#grismont-board .sc-get{margin:18px 0 0;padding-left:20px;font-size:15px;line-height:1.8}
 #grismont-board .sc-actions{display:flex;align-items:center;flex-wrap:wrap;gap:16px 22px;margin-top:26px}
 #grismont-board button.gm-cta{border:0;cursor:pointer}
 #grismont-board button.gm-cta:disabled{opacity:.7;cursor:progress}

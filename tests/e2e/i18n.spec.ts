@@ -1,15 +1,11 @@
 import { expect, test, type APIResponse, type Page } from "@playwright/test";
 
 const publicPages = [
-  { path: "", title: "Folytonos munka.Kevesebb fennakadás." },
+  { path: "", title: "Szerezd vissza az órákat, amelyeket a csapatod adminisztrációval tölt." },
   { path: "/privacy", title: "Adatkezelés." },
   { path: "/cookies", title: "Sütik." },
   { path: "/impressum", title: "Impresszum." },
-  { path: "/courses", title: "Online képzések.", upcoming: true },
-  { path: "/downloads", title: "Letölthető anyagok.", upcoming: true },
-  { path: "/work/case-studies", title: "Esettanulmányok.", upcoming: true },
-  { path: "/work/apps", title: "Alkalmazások, amelyeket készítettem.", upcoming: true },
-  { path: "/scorecard", title: "Egy folyamat. Világosabb következő lépés." },
+  { path: "/scorecard", title: "Egy folyamat. Egy tisztább következő lépés." },
 ];
 
 const language = (page: Page) => page.locator("header .gm-language");
@@ -35,10 +31,8 @@ async function startHungarianScorecard(page: Page) {
   await page.goto("/hu/scorecard");
   await expect(page.locator("html")).toHaveAttribute("lang", "hu");
   await page.getByLabel("Keresztnév", { exact: true }).fill("Ágnes");
-  await page.getByLabel("Munkahelyi e-mail-cím", { exact: true }).fill(`e2e-hu-${Date.now()}-${Math.random().toString(36).slice(2)}@example.test`);
-  await page.getByLabel(/^Cégméret/).selectOption("11-50");
-  await page.getByLabel(/^Tevékenységi terület/).selectOption("services");
-  await page.getByRole("checkbox").check();
+  await page.getByLabel("Munkahelyi e-mail", { exact: true }).fill(`e2e-hu-${Date.now()}-${Math.random().toString(36).slice(2)}@example.test`);
+  await page.getByRole("checkbox", { name: /adatkezelési tájékoztatót/ }).check();
   await page.getByRole("button", { name: "Kezdjük a kérdéseket" }).click();
   await expect(page).toHaveURL(/\/hu\/scorecard\/s\//);
   await expect(page.getByRole("textbox")).toBeFocused();
@@ -114,12 +108,6 @@ for (const item of publicPages) {
       .map(link => link.getAttribute("href") ?? "")
       .filter(href => href.startsWith("/") && !/^\/hu(?:\/|#|\?|$)/.test(href)));
     expect(englishLinks).toEqual([]);
-    if (item.upcoming) {
-      await expect(page).toHaveTitle(/hamarosan.*Grismont/i);
-      await expect(page.locator("main").getByText("Hamarosan", { exact: true })).toBeVisible();
-      await expect(page.getByRole("link", { name: "Nézd meg az elérhető szolgáltatásokat" })).toHaveAttribute("href", "/hu#services");
-      await expect(page.getByRole("link", { name: "Vagy kezdd az ingyenes folyamatfelmérővel" })).toHaveAttribute("href", "/hu/scorecard");
-    }
     await noOverflow(page);
     await language(page).getByRole("link", { name: "English", exact: true }).click();
     await expect(page).toHaveURL(new RegExp(`${item.path || "/"}$`));
@@ -148,31 +136,29 @@ for (const path of ["/?source=i18n#services", "/privacy?source=i18n#scorecard"])
   });
 }
 
-test("HU mobile navigation and upcoming footer keep the locale", async ({ page }) => {
+test("HU mobile navigation and footer keep the locale", async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 900 });
   await page.goto("/hu");
   await expect(page.locator("html")).toHaveAttribute("lang", "hu");
   const menu = page.locator(".gm-mobile-menu");
   await menu.getByText("Menü", { exact: true }).click();
-  await menu.getByRole("link", { name: "Szolgáltatások", exact: true }).click();
+  await menu.getByRole("link", { name: "Tréningek és szolgáltatások", exact: true }).click();
   await expect(menu).not.toHaveAttribute("open");
   await expect(page).toHaveURL(/\/hu#services$/);
-  const upcoming = page.getByRole("navigation", { name: "Hamarosan", exact: true });
-  await expect(upcoming.getByRole("link")).toHaveCount(4);
-  await upcoming.getByRole("link", { name: "Online képzések", exact: true }).click();
-  await expect(page).toHaveURL(/\/hu\/courses$/);
-  await page.getByRole("link", { name: "Nézd meg az elérhető szolgáltatásokat" }).click();
-  await expect(page).toHaveURL(/\/hu#services$/);
+  await expect(page.locator("footer")).not.toContainText("Hamarosan");
+  await page.locator("footer").getByRole("link", { name: "Csapattréning", exact: true }).click();
+  await expect(page).toHaveURL(/\/hu#training$/);
+  expect((await page.request.get("/hu/courses")).status()).toBe(404);
 });
 
 test("header switch href follows dynamic section navigation and HU respects reduced motion", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/");
   const englishNav = page.getByRole("navigation", { name: "Main navigation", exact: true });
-  await englishNav.getByRole("link", { name: "The work", exact: true }).click();
+  await englishNav.getByRole("link", { name: "Training & services", exact: true }).click();
   await expect(page).toHaveURL(/\/#services$/);
   await expect(language(page).getByRole("link", { name: "Magyar", exact: true })).toHaveAttribute("href", "/hu#services");
-  await englishNav.getByRole("link", { name: "The approach", exact: true }).click();
+  await englishNav.getByRole("link", { name: "How I work", exact: true }).click();
   await expect(language(page).getByRole("link", { name: "Magyar", exact: true })).toHaveAttribute("href", "/hu#method");
   await page.goBack();
   await expect(page).toHaveURL(/\/#services$/);
@@ -193,23 +179,20 @@ test("HU intake shows localized field errors and retains entered details", async
   for (const message of [
     "Kérlek, add meg a keresztneved.",
     "Kérlek, adj meg egy érvényes e-mail-címet.",
-    "Válaszd ki a vállalkozás létszámát.",
-    "Válaszd ki a munkátokhoz legközelebb álló tevékenységet.",
     "Kérlek, erősítsd meg, hogy elolvastad az adatkezelési tájékoztatót.",
   ]) await expect(page.getByText(message, { exact: true })).toBeVisible();
   await expect(page.locator('[name="firstName"]')).toBeFocused();
   // Inline errors become part of each wrapping label after validation.
   await page.getByLabel(/^Keresztnév/).fill("Ágnes");
-  await page.getByLabel(/^Munkahelyi e-mail-cím/).fill("invalid-email");
-  await page.getByLabel(/^Cégméret/).selectOption("11-50");
-  await page.getByLabel(/^Tevékenységi terület/).selectOption("services");
+  await page.getByLabel(/^Munkahelyi e-mail/).fill("invalid-email");
+  await page.getByRole("checkbox", { name: /emlékeztetőt/ }).check();
   await page.getByRole("button", { name: "Kezdjük a kérdéseket" }).click();
   await expect(page.locator('[name="email"]')).toHaveAttribute("aria-invalid", "true");
   await expect(page.locator('[name="email"]')).toBeFocused();
   await expect(page.locator('[name="firstName"]')).toHaveValue("Ágnes");
   await expect(page.locator('[name="email"]')).toHaveValue("invalid-email");
-  await expect(page.locator('[name="companySize"]')).toHaveValue("11-50");
-  await expect(page.locator('[name="industry"]')).toHaveValue("services");
+  await expect(page.locator('[name="reminders"]')).toBeChecked();
+  await expect(page.locator('[name="reminders"]')).not.toHaveAttribute("required");
   await noOverflow(page);
 });
 
@@ -223,7 +206,7 @@ for (const item of [
     await page.goto(`/hu/scorecard${item.path}`);
     await expect(page.locator("html")).toHaveAttribute("lang", "hu");
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(item.title);
-    await expect(page.getByRole("link", { name: "Felmérő indítása" })).toHaveAttribute("href", "/hu/scorecard");
+    await expect(page.getByRole("link", { name: "Folyamat-pontozó indítása" })).toHaveAttribute("href", "/hu/scorecard");
     await noOverflow(page);
   });
 }
@@ -279,7 +262,8 @@ test("HU scorecard journey saves drafts across language switches, resumes, repor
   await expect(page).toHaveURL(resumeURL);
   await page.waitForLoadState("load");
   await expect(page.getByRole("heading", { name: "Minden kérdésre válaszoltál, Ágnes." })).toBeVisible();
-  await page.getByRole("button", { name: "Megnézem a riportot" }).click();
+  await page.getByLabel("Munka jellege").selectOption("manufacturing");
+  await page.getByRole("button", { name: /Mutasd az eredményt/ }).click();
   await expect(page).toHaveURL(/\/hu\/scorecard\/r\//, { timeout: 30_000 });
   const reportURL = page.url();
   await expect(page.locator("html")).toHaveAttribute("lang", "hu");
@@ -327,7 +311,7 @@ test("HU scorecard journey saves drafts across language switches, resumes, repor
   expect(pdf.headers()["content-type"]).toBe("application/pdf");
   expect((await pdf.body()).subarray(0, 5).toString()).toBe("%PDF-");
   await page.goto(`/hu/scorecard/delete/${token}`);
-  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Törlöd a folyamatfelmérődet?");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Törlöd a Folyamat-pontozódat?");
   await noOverflow(page);
   await page.getByRole("button", { name: "Végleges törlés" }).click();
   await expect(page).toHaveURL(/\/hu\/scorecard\/delete\/done$/);

@@ -20,7 +20,7 @@ export default async function CookiesPage() {
           <h2>A weboldal sütihasználata</h2>
           <p>A Grismont jelenlegi alkalmazása nem helyez el sütiket, és nem használja a böngésző helyi vagy munkamenet-tárolóját. Nincs benne analitika, hirdetés, beágyazott időpontfoglaló vagy látogatói fiók.</p>
           <p>Az oldal animációi, a szakaszok megjelenése, a lenyíló tartalmak és a gombok fényhatása csak addig működnek a memóriában, amíg az oldal nyitva van. Nem mentenek látogatói profilt vagy beállítást a böngészőbe.</p>
-          <p>A folyamatfelmérő és a részletes audit sem használ sütiket vagy böngészőtárhelyet. A kitöltés állapotát a szerveren tároljuk, és a böngésző címsorában látható privát linkhez kötjük, így ugyanazzal a linkkel folytathatod. A tárolt adatokat az <a href={localizePath(locale, '/privacy#scorecard')}>adatkezelési tájékoztató</a> ismerteti.</p>
+          <p>A Folyamat-pontozó és a részletes audit sem használ sütiket vagy böngészőtárhelyet. A kitöltés állapotát a szerveren tároljuk, és a böngésző címsorában látható privát linkhez kötjük, így ugyanazzal a linkkel folytathatod. A tárolt adatokat az <a href={localizePath(locale, '/privacy#scorecard')}>adatkezelési tájékoztató</a> ismerteti.</p>
         </section>
         <section>
           <h2>A tárhely infrastruktúrája</h2>

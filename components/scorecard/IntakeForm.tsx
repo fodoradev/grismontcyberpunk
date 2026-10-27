@@ -2,9 +2,7 @@
 
 import { useActionState, useEffect, useRef } from "react";
 import { startScorecard, type IntakeState } from "../../app/scorecard/actions";
-import { getQuestionContent } from "../../content/scorecard/questions";
 import { localizePath, type Locale } from "../../lib/i18n";
-import { INDUSTRIES, SIZE_BANDS } from "../../lib/scorecard/types";
 
 function FieldError({ id, message }: { id: string; message?: string }) {
   return message ? <span className="sc-error" id={`${id}-error`}>{message}</span> : null;
@@ -12,7 +10,6 @@ function FieldError({ id, message }: { id: string; message?: string }) {
 
 export default function IntakeForm({ locale = "en" }: { locale?: Locale }) {
   const hu = locale === "hu";
-  const { INDUSTRY_LABELS, SIZE_LABELS } = getQuestionContent(locale);
   const [state, action, pending] = useActionState<IntakeState, FormData>(async (previous, data) => {
     // Keep the entered details available if the action cannot reach the server.
     try { return await startScorecard(previous, data); }
@@ -43,43 +40,22 @@ export default function IntakeForm({ locale = "en" }: { locale?: Locale }) {
           <FieldError id="firstName" message={err("firstName")} />
         </label>
         <label className="sc-field">
-          <span>{hu ? "Munkahelyi e-mail-cím" : "Work email"}</span>
+          <span>{hu ? "Munkahelyi e-mail" : "Work email"}</span>
           <input name="email" type="email" autoComplete="email" required maxLength={254} defaultValue={v.email} {...describe("email")} />
           <FieldError id="email" message={err("email")} />
-        </label>
-        <label className="sc-field">
-          <span>{hu ? "Cégméret" : "Company size"}</span>
-          <select key={v.companySize ?? ""} name="companySize" required defaultValue={v.companySize ?? ""} {...describe("companySize")}>
-            <option value="" disabled>{hu ? "Válassz…" : "Choose…"}</option>
-            {SIZE_BANDS.map(s => <option key={s} value={s}>{SIZE_LABELS[s]}</option>)}
-          </select>
-          <FieldError id="companySize" message={err("companySize")} />
-        </label>
-        <label className="sc-field">
-          <span>{hu ? "Tevékenységi terület" : "Type of work"}</span>
-          <select key={v.industry ?? ""} name="industry" required defaultValue={v.industry ?? ""} {...describe("industry")}>
-            <option value="" disabled>{hu ? "Válaszd a leginkább illőt…" : "Choose the closest…"}</option>
-            {INDUSTRIES.map(i => <option key={i} value={i}>{INDUSTRY_LABELS[i]}</option>)}
-          </select>
-          <FieldError id="industry" message={err("industry")} />
-        </label>
-        <label className="sc-field">
-          <span>{hu ? "Cégnév" : "Company"} <em>{hu ? "nem kötelező" : "optional"}</em></span>
-          <input name="companyName" autoComplete="organization" maxLength={120} defaultValue={v.companyName} {...describe("companyName")} />
-          <FieldError id="companyName" message={err("companyName")} />
-        </label>
-        <label className="sc-field">
-          <span>{hu ? "Munkakör" : "Your role"} <em>{hu ? "nem kötelező" : "optional"}</em></span>
-          <input name="role" autoComplete="organization-title" maxLength={80} defaultValue={v.role} {...describe("role")} />
-          <FieldError id="role" message={err("role")} />
         </label>
       </div>
       <label className="sc-hp" aria-hidden="true">{hu ? "Weboldal" : "Website"}<input name="website" tabIndex={-1} autoComplete="off" /></label>
       <label className="sc-consent">
         <input type="checkbox" name="consent" required defaultChecked={v.consent === "on"} {...describe("consent")} />
-        <span>{hu ? "Elolvastam az " : "I've read the "}<a href={localizePath(locale, "/privacy")} target="_blank">{hu ? "adatkezelési tájékoztatót" : "privacy notice"}<span className="sc-sr">{hu ? " (új lapon nyílik meg)" : " (opens in a new tab)"}</span></a>{hu ? ". Hozzájárulok, hogy e-mailt kapjak erről a felmérésről, és legfeljebb három emlékeztetőt, ha nem fejezem be." : ". You may email me about this scorecard, including up to three reminders if I don't finish."}</span>
+        <span>{hu ? "Elolvastam az " : "I have read the "}<a href={localizePath(locale, "/privacy")} target="_blank">{hu ? "adatkezelési tájékoztatót" : "privacy notice"}<span className="sc-sr">{hu ? " (új lapon nyílik meg)" : " (opens in a new tab)"}</span></a>.</span>
       </label>
       <FieldError id="consent" message={err("consent")} />
+      {/* Separate and optional, never pre-ticked (04 §2, 07 B). */}
+      <label className="sc-consent sc-consent-optional">
+        <input type="checkbox" name="reminders" defaultChecked={v.reminders === "on"} />
+        <span>{hu ? "Küldj legfeljebb 3 emlékeztetőt, ha nem fejezem be." : "Send me up to 3 reminders if I do not finish."}</span>
+      </label>
       <div className="sc-actions">
         <button className="gm-cta" type="submit" disabled={pending}>{pending ? (hu ? "Mentés…" : "Saving…") : (hu ? "Kezdjük a kérdéseket" : "Start the questions")} <span aria-hidden="true">→</span></button>
         <span className="sc-hint">{hu ? "A válaszaidat minden kérdés után mentjük." : "Your answers are saved after every question."}</span>

@@ -1,25 +1,15 @@
 "use server";
 
-import { createHash } from "node:crypto";
-import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { after } from "next/server";
 import { sendReportEmails } from "../../lib/scorecard/delivery";
-import { RateLimitedError, deleteByResumeToken, saveAnswer, startSubmission, submit, setSubmissionLocale } from "../../lib/scorecard/store";
-import { getIntakeSchema, validateAnswer } from "../../lib/scorecard/validation";
+import { RateLimitedError, deleteByResumeToken, unsubscribeByResumeToken, saveAnswer, startSubmission, submit, setSubmissionLocale } from "../../lib/scorecard/store";
+import { getIntakeSchema, profileSchema, validateAnswer } from "../../lib/scorecard/validation";
 import { getLocale } from "../../lib/i18n-server";
 import { localizePath } from "../../lib/i18n";
+import { ipHash } from "../../lib/request";
 
 export type IntakeState = { errors?: Record<string, string>; message?: string; values?: Record<string, string> };
-
-async function ipHash() {
-  // Without a secret salt the hash could be reversed, so don't store anything (rate limiting is then skipped).
-  const salt = process.env.IP_HASH_SALT;
-  if (!salt) { console.warn("[scorecard] IP_HASH_SALT is not set; rate limiting disabled"); return null; }
-  const h = await headers();
-  const ip = h.get("x-forwarded-for")?.split(",")[0]?.trim() || h.get("x-real-ip");
-  return ip ? createHash("sha256").update(ip + salt).digest("hex") : null;
-}
 
 export async function startScorecard(_: IntakeState, formData: FormData): Promise<IntakeState> {
   const locale = await getLocale();
@@ -61,16 +51,18 @@ export async function saveAnswerAction(token: string, questionId: string, value:
     console.error("[scorecard] save failed", err);
     return { ok: false, message: hu ? "Most nem sikerült elmenteni a választ. A korábbi válaszaid megvannak; kérlek, próbáld újra." : SAVE_FAILED };
   }
-  return saved ? { ok: true } : { ok: false, message: hu ? "Ez a felmérő már nem szerkeszthető. Kérlek, töltsd újra az oldalt." : "This scorecard can no longer be edited. Please reload the page." };
+  return saved ? { ok: true } : { ok: false, message: hu ? "Ez a Folyamat-pontozó már nem szerkeszthető. Kérlek, töltsd újra az oldalt." : "This scorecard can no longer be edited. Please reload the page." };
 }
 
-export async function submitAction(token: string): Promise<StepResult> {
+export async function submitAction(token: string, profile?: unknown): Promise<StepResult> {
   const locale = await getLocale();
   const hu = locale === "hu";
   if (typeof token !== "string") return { ok: false, message: hu ? "Érvénytelen kérés." : "Invalid request." };
+  // The step-3 profile is optional: a malformed value is dropped, never a reason to withhold the report.
+  const parsedProfile = profileSchema.safeParse(profile && typeof profile === "object" ? profile : {});
   let result: Awaited<ReturnType<typeof submit>>;
   try {
-    result = await submit(token, locale);
+    result = await submit(token, locale, parsedProfile.success ? parsedProfile.data : {});
   } catch (err) {
     console.error("[scorecard] submit failed", err);
     return { ok: false, message: hu ? "Most nem sikerült elmenteni a választ. A korábbi válaszaid megvannak; kérlek, próbáld újra." : SAVE_FAILED };
@@ -86,7 +78,7 @@ export async function changeScorecardLocaleAction(token: string, locale: unknown
   if (typeof token !== "string" || (locale !== "en" && locale !== "hu")) return { ok: false, message: "Invalid request." };
   try {
     const saved = await setSubmissionLocale(token, locale);
-    return saved ? { ok: true } : { ok: false, message: locale === "hu" ? "Ez a felmérő már nem szerkeszthető. Kérlek, töltsd újra az oldalt." : "This scorecard can no longer be edited. Please reload the page." };
+    return saved ? { ok: true } : { ok: false, message: locale === "hu" ? "Ez a Folyamat-pontozó már nem szerkeszthető. Kérlek, töltsd újra az oldalt." : "This scorecard can no longer be edited. Please reload the page." };
   } catch {
     return { ok: false, message: locale === "hu" ? "Nyelvváltás előtt nem sikerült menteni. Kérlek, próbáld újra." : "We couldn't save before switching languages. Please try again." };
   }
@@ -97,4 +89,11 @@ export async function deleteAction(formData: FormData) {
   const token = String(formData.get("token") ?? "");
   await deleteByResumeToken(token);
   redirect(localizePath(locale, "/scorecard/delete/done"));
+}
+
+export async function unsubscribeAction(formData: FormData) {
+  const locale = await getLocale();
+  const token = String(formData.get("token") ?? "");
+  await unsubscribeByResumeToken(token);
+  redirect(localizePath(locale, `/scorecard/unsubscribe/${encodeURIComponent(token)}?done=1`));
 }

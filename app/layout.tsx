@@ -9,7 +9,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale();
   return {
   title: { default: locale === "hu" ? "Folyamatfejlesztés, automatizálás és AI | Grismont" : "Lean Six Sigma, AI & Automation | Grismont", template: "%s | Grismont" },
-  description: locale === "hu" ? "Átláthatóbb folyamatok, kevesebb felesleges kör. Attila Lean Six Sigma szemlélettel, automatizálással és AI-megoldásokkal segít. Kezdd az ingyenes folyamatfelmérővel." : "Make work easier to follow. Attila combines Lean Six Sigma, process improvement, automation and AI. Start with a free Discovery Scorecard.",
+  description: locale === "hu" ? "Átláthatóbb folyamatok, kevesebb felesleges kör. Attila Lean Six Sigma szemlélettel, automatizálással és AI-megoldásokkal segít. Kezdd az ingyenes Folyamat-pontozóval." : "Make work easier to follow. Attila combines Lean Six Sigma, process improvement, automation and AI. Start with a free Discovery Scorecard.",
   robots: { index: false, follow: false },
   };
 }

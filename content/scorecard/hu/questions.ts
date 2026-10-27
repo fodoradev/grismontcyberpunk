@@ -125,4 +125,4 @@ export const QUESTIONS: Question[] = [
 
 export const QUESTION_BY_ID = new Map(QUESTIONS.map(q => [q.id, q]));
 
-export const promptFor = (q: Question, industry: Industry) => q.promptByIndustry?.[industry] ?? q.prompt;
+export const promptFor = (q: Question, industry?: Industry) => (industry && q.promptByIndustry?.[industry]) || q.prompt;

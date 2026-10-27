@@ -1,15 +1,22 @@
 import { expect, test } from "@playwright/test";
 
-test("Advanced Audit landing is linked from the shared footer in both locales", async ({page}) => {
-  for (const [path, label, heading] of [["/advanced-audit","Advanced audit","A deeper look at how work gets done."],["/hu/advanced-audit","Részletes audit","A folyamat teljesebb képe."]] as const) {
+test("Advanced Audit is not in the footer, explains itself, and starts without an email", async ({page}) => {
+  for (const [path, line, heading] of [["/advanced-audit","Already did the scorecard? This is the deeper version.","A deeper look at how work gets done."],["/hu/advanced-audit","Már kitöltötted a Folyamat-pontozót? Ez a részletesebb változat.","A folyamat teljesebb képe."]] as const) {
     await page.setViewportSize({width:390,height:844});
     await page.goto(path);
     await expect(page.getByRole("heading",{name:heading,exact:true})).toBeVisible();
+    await expect(page.getByText(line)).toBeVisible();
     const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth);
     expect(overflow,`${path} should not overflow horizontally on mobile`).toBe(false);
-    await page.locator("footer").getByRole("link",{name:label,exact:true}).click();
-    await expect(page).toHaveURL(new RegExp(path.replaceAll("/","\\/")));
+    await expect(page.locator("footer a[href*='advanced-audit']")).toHaveCount(0);
   }
+  await page.goto("/advanced-audit");
+  await expect(page.getByRole("checkbox",{name:/resume link/})).not.toBeChecked();
+  await page.getByRole("button",{name:"Start the audit"}).click();
+  await expect(page.getByText("Please confirm you've read the privacy notice.")).toBeVisible();
+  await page.getByRole("checkbox",{name:/privacy notice/}).check();
+  await page.getByRole("button",{name:"Start the audit"}).click();
+  await expect(page).toHaveURL(/\/advanced-audit\/s\/[A-Za-z0-9_-]{22}$/);
 });
 
 test("Advanced Audit start failures show a localized retry message", async ({page}) => {
@@ -22,9 +29,10 @@ test("Advanced Audit start failures show a localized retry message", async ({pag
 
 test("Advanced Audit saves, resumes, completes, and downloads report formats", async ({page}) => {
   await page.goto("/advanced-audit");
-  await expect(page.getByLabel("Email address")).toBeVisible();
-  await page.getByLabel("Email address").fill("audit-test@example.com");
-  await page.getByLabel(/I've read the privacy notice/).check();
+  await expect(page.getByLabel(/Email address/)).toBeVisible();
+  await page.getByLabel(/Email address/).fill("audit-test@example.com");
+  await page.getByRole("checkbox",{name:/privacy notice/}).check();
+  await page.getByRole("checkbox",{name:/resume link/}).check();
   await page.getByRole("button",{name:"Start the audit"}).click();
   await expect(page).toHaveURL(/\/advanced-audit\/s\/[A-Za-z0-9_-]{22}$/);
 

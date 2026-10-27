@@ -32,10 +32,11 @@ function requireContentVersion(version: string): void {
 }
 
 /** Create a resumable audit. Keep the returned resume token private. */
-export async function createAdvancedAudit(contentVersion: string, email: string, locale: Locale): Promise<string> {
+/** `email` is null when the respondent did not ask for the resume-link email (it is then never stored). */
+export async function createAdvancedAudit(contentVersion: string, email: string | null, locale: Locale): Promise<string> {
   requireContentVersion(contentVersion);
   const resumeToken = newAdvancedAuditToken();
-  await getDb().insert(submissions).values({ resumeToken, contentVersion, email, locale, emailConsentAt: new Date() });
+  await getDb().insert(submissions).values({ resumeToken, contentVersion, email, locale, emailConsentAt: email ? new Date() : null });
   return resumeToken;
 }
 

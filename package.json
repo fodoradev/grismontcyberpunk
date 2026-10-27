@@ -10,7 +10,8 @@
     "test": "vitest run",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "node --env-file-if-exists=.env.local db/migrate.mjs",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "check:launch": "node scripts/check-launch.mjs"
   },
   "engines": {
     "node": ">=20.9.0"

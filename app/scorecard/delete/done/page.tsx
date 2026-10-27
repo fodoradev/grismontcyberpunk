@@ -3,7 +3,7 @@ import ScorecardMessage from "../../../../components/scorecard/ScorecardMessage"
 import { getLocale } from "../../../../lib/i18n-server";
 
 export async function generateMetadata(): Promise<Metadata> {
-  return { title: await getLocale() === "hu" ? "Folyamatfelmérő törölve" : "Scorecard deleted" };
+  return { title: await getLocale() === "hu" ? "Folyamat-pontozó törölve" : "Scorecard deleted" };
 }
 
 export default async function DeletedPage() {

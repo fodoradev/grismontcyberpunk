@@ -3,7 +3,9 @@
 import { Fragment, startTransition, useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { changeScorecardLocaleAction, saveAnswerAction, submitAction } from "../../app/scorecard/actions";
 import { getScorecardCopy } from "../../content/scorecard/copy";
-import type { Locale } from "../../lib/i18n";
+import { localizePath, type Locale } from "../../lib/i18n";
+import { INDUSTRIES, SIZE_BANDS } from "../../lib/scorecard/types";
+import { getQuestionContent } from "../../content/scorecard/questions";
 
 export type FlowQuestion = {
   id: string;
@@ -19,6 +21,12 @@ export type FlowQuestion = {
 };
 export type FlowSection = { name: string; count: number };
 
+// Step 3 work-type labels (04 §2) are shorter than the report's INDUSTRY_LABELS.
+const WORK_TYPES = {
+  en: { manufacturing: "Manufacturing or logistics", services: "Customer service", office: "Office and admin", other: "Other" },
+  hu: { manufacturing: "Gyártás vagy logisztika", services: "Ügyfélszolgálat", office: "Iroda és adminisztráció", other: "Egyéb" },
+} as const;
+
 const ADVANCE_DELAY = 380; // long enough to see the choice register, short enough to feel instant
 const SAVE_RETRIES = 3;
 
@@ -29,8 +37,8 @@ function Prompt({ text, process, locale }: { text: string; process: string; loca
   return <>{parts.map((p, i) => <Fragment key={i}>{p}{i < parts.length - 1 ? <span className="sc-pipe">{name}</span> : null}</Fragment>)}</>;
 }
 
-function Progress({ questions, sections, answers, current, position, editingId, locale }: {
-  questions: FlowQuestion[]; sections: FlowSection[]; answers: Record<string, string>; current: number; position?: string; editingId?: string; locale: Locale;
+function Progress({ questions, sections, answers, current, position, editingId, index, locale }: {
+  questions: FlowQuestion[]; sections: FlowSection[]; answers: Record<string, string>; current: number; position?: string; editingId?: string; index: number; locale: Locale;
 }) {
   // A text answer counts once it has been confirmed, not while it is still being typed.
   const answered = questions.filter(q => q.id in answers && !(q.kind === "text" && q.id === editingId) && (q.kind !== "text" || !q.required || answers[q.id].trim()));
@@ -39,7 +47,7 @@ function Progress({ questions, sections, answers, current, position, editingId, 
   doneAtMount.current ??= new Set(perSection.flatMap((f, i) => (f === 1 ? [i] : [])));
   return (
     <div className="sc-progress-wrap">
-      <div className="sc-progress" role="progressbar" aria-label={locale === "hu" ? "A folyamatfelmérő előrehaladása" : "Scorecard progress"} aria-valuemin={0} aria-valuemax={questions.length} aria-valuenow={answered.length}>
+      <div className="sc-progress" role="progressbar" aria-label={locale === "hu" ? "A Folyamat-pontozó előrehaladása" : "Scorecard progress"} aria-valuemin={0} aria-valuemax={questions.length} aria-valuenow={answered.length}>
         {sections.map((s, i) => {
           const done = perSection[i] === 1;
           const cls = ["sc-seg", done ? "sc-seg-done" : "", done && !doneAtMount.current!.has(i) ? "sc-seg-sweep" : "", i === current ? "sc-seg-current" : ""].join(" ");
@@ -48,7 +56,9 @@ function Progress({ questions, sections, answers, current, position, editingId, 
       </div>
       <div className="sc-progress-meta" aria-hidden="true">
         <span>{sections[current]?.name ?? (locale === "hu" ? "Minden kész" : "All done")}{position ? <span className="sc-progress-pos">{locale === "hu" ? `, ${position}. kérdés` : `, question ${position}`}</span> : null}</span>
-        <span>{locale === "hu" ? `${answered.length}/${questions.length} megválaszolva` : `${answered.length} of ${questions.length} answered`}</span>
+        <span>{index < questions.length
+          ? (locale === "hu" ? `${index + 1}. kérdés / ${questions.length}` : `Question ${index + 1} of ${questions.length}`)
+          : (locale === "hu" ? `${answered.length}/${questions.length} megválaszolva` : `${answered.length} of ${questions.length} answered`)}</span>
       </div>
     </div>
   );
@@ -78,8 +88,10 @@ export default function CardFlow({ token, firstName, questions, sections, initia
   const heading = useRef<HTMLHeadingElement>(null);
   const card = useRef<HTMLDivElement>(null);
   const textField = useRef<HTMLInputElement & HTMLTextAreaElement>(null);
+  const profileForm = useRef<HTMLFormElement>(null);
 
   const total = questions.length;
+  const { SIZE_LABELS } = getQuestionContent(locale);
   const q = questions[index] as FlowQuestion | undefined; // undefined on the final "submit" card
   const process = answers.P1?.trim() ?? "";
 
@@ -125,14 +137,18 @@ export default function CardFlow({ token, firstName, questions, sections, initia
   const answeredHere = (question: FlowQuestion) =>
     question.kind === "text" ? !question.required || Boolean(answers[question.id]?.trim()) : Boolean(answers[question.id]);
 
-  const submit = useCallback(() => {
+  /** Submits with the optional step-3 profile, or without it when the visitor skips. */
+  const submit = useCallback((skipProfile = false) => {
     if (switchingLocale.current || submittingReport.current) return;
     submittingReport.current = true;
+    const profile = !skipProfile && profileForm.current
+      ? Object.fromEntries([...new FormData(profileForm.current)].filter(([, v]) => typeof v === "string" && v.trim()))
+      : {};
     startSubmit(async () => {
       try {
         await flush();
         if (unsaved.current.size) { setMessage(unsavedMessage); return; }
-        const r = await submitAction(token); // redirects to the report on success
+        const r = await submitAction(token, profile); // redirects to the report on success
         if (!r.ok) setMessage(r.message);
       } catch {
         setMessage(networkMessage);
@@ -295,9 +311,9 @@ export default function CardFlow({ token, firstName, questions, sections, initia
   const posInSection = q ? inSection.indexOf(q) + 1 : 0;
 
   return (
-    <section ref={flow} className="sc-flow" aria-label={hu ? "A folyamatfelmérő kérdései" : "Discovery Scorecard questions"} aria-busy={switching || submitting}>
+    <section ref={flow} className="sc-flow" aria-label={hu ? "A Folyamat-pontozó kérdései" : "Discovery Scorecard questions"} aria-busy={switching || submitting}>
       <Progress questions={questions} sections={sections} answers={answers} current={section}
-        position={q && inSection.length > 1 ? (hu ? `${posInSection}/${inSection.length}` : `${posInSection} of ${inSection.length}`) : undefined} editingId={q?.kind === "text" ? q.id : undefined} locale={locale} />
+        position={q && inSection.length > 1 ? (hu ? `${posInSection}/${inSection.length}` : `${posInSection} of ${inSection.length}`) : undefined} editingId={q?.kind === "text" ? q.id : undefined} index={index} locale={locale} />
 
       <div ref={stage} className="sc-stage" inert={switching}>
         <div key={index} ref={card} className={`sc-card ${dir === 1 ? "sc-in-fwd" : "sc-in-back"}`}>
@@ -338,11 +354,23 @@ export default function CardFlow({ token, firstName, questions, sections, initia
           ) : (
             <>
               <h1 ref={heading} tabIndex={-1} className="sc-card-q">{hu ? `Minden kérdésre válaszoltál, ${firstName}.` : `That's everything, ${firstName}.`}</h1>
-              <p className="sc-card-help">{hu ? "Beküldés után azonnal elkészül a riportod: a céged profilja, a legnagyobb kockázat, három gyorsan megvalósítható javítás és egy 90 napos ütemterv. PDF-ben e-mailben is elküldjük." : "Your report is built the moment you submit: your profile, biggest risk, three quick wins and a 90-day roadmap. A PDF copy goes to your inbox."}</p>
-              <div className="sc-ok">
-                <button type="button" className="gm-cta" onClick={submit} disabled={submitting || switching}>{submitting ? (hu ? "A riport készül…" : "Building your report…") : (hu ? "Megnézem a riportot" : "See my report")} <span aria-hidden="true">↗</span></button>
-                <span className="sc-keyhint">{hu ? "folytatás: " : "press "}<kbd>Enter ↵</kbd></span>
-              </div>
+              <p className="sc-card-help">{hu ? "Három opcionális kérdés, hogy a jelentésed hasznosabb legyen." : "Three optional questions help me make your report more useful."}</p>
+              <form ref={profileForm} className="sc-profile-form" onSubmit={event => { event.preventDefault(); submit(); }}>
+                <div className="sc-fields">
+                  <label className="sc-field"><span>{hu ? "Cégméret" : "Company size"}</span>
+                    <select name="companySize" defaultValue=""><option value="">{hu ? "Válassz…" : "Choose…"}</option>{SIZE_BANDS.map(size => <option key={size} value={size}>{SIZE_LABELS[size]}</option>)}</select></label>
+                  <label className="sc-field"><span>{hu ? "Munka jellege" : "Type of work"}</span>
+                    <select name="industry" defaultValue=""><option value="">{hu ? "Válassz…" : "Choose…"}</option>{INDUSTRIES.map(i => <option key={i} value={i}>{WORK_TYPES[locale][i]}</option>)}</select></label>
+                  <label className="sc-field"><span>{hu ? "Beosztásod" : "Your role"}</span><input name="role" autoComplete="organization-title" maxLength={80} /></label>
+                  <label className="sc-field"><span>{hu ? "Cég" : "Company"} <em>{hu ? "(opcionális)" : "(optional)"}</em></span><input name="companyName" autoComplete="organization" maxLength={120} /></label>
+                </div>
+                {/* Marketing consent: separate, optional and never pre-ticked (04 §3). */}
+                <label className="sc-consent"><input type="checkbox" name="followUp" /><span>{hu ? "Küldj néhány hasznos e-mailt az eredményeimmel kapcsolatban." : "Send me a few useful follow-up emails about my results."} <a href={localizePath(locale, "/privacy#scorecard")} target="_blank">{hu ? "Részletek" : "Details"}<span className="sc-sr">{hu ? " (új lapon nyílik meg)" : " (opens in a new tab)"}</span></a></span></label>
+                <div className="sc-ok">
+                  <button type="submit" className="gm-cta" disabled={submitting || switching}>{submitting ? (hu ? "A riport készül…" : "Building your report…") : (hu ? "Mutasd az eredményt" : "Show my report")} <span aria-hidden="true">↗</span></button>
+                  <button type="button" className="sc-skip" onClick={() => submit(true)} disabled={submitting || switching}>{hu ? "Kihagyom" : "Skip"}</button>
+                </div>
+              </form>
             </>
           )}
         </div>

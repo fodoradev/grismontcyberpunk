@@ -10,7 +10,7 @@ import { firstOpenIndex } from "../../../../lib/scorecard/validation";
 import { AREAS, type Industry } from "../../../../lib/scorecard/types";
 
 export async function generateMetadata(): Promise<Metadata> {
-  return { title: await getLocale() === "hu" ? "Folyamatfelmérő" : "Discovery Scorecard", referrer: "no-referrer" };
+  return { title: await getLocale() === "hu" ? "Folyamat-pontozó" : "Discovery Scorecard", referrer: "no-referrer" };
 }
 
 // Section 0 is the opening process question; sections 1–6 are the areas, in method order.
@@ -24,13 +24,13 @@ export default async function Questionnaire({ params }: { params: Promise<{ toke
   const { token } = await params;
   const s = await getByResumeToken(token);
   if (!s || s.status === "superseded") {
-    return <ScorecardMessage locale={locale} title={hu ? "Ez a hivatkozás már nem érvényes." : "This link has expired."} text={hu ? "Lehet, hogy azóta újrakezdted a felmérőt, vagy a válaszokat törölték. Bármikor kezdhetsz újat." : "It may have been replaced by a newer start, or the answers were deleted. You can start a fresh scorecard any time."} />;
+    return <ScorecardMessage locale={locale} title={hu ? "Ez a hivatkozás már nem érvényes." : "This link has expired."} text={hu ? "Lehet, hogy azóta újrakezdted a Folyamat-pontozót, vagy a válaszokat törölték. Bármikor kezdhetsz újat." : "It may have been replaced by a newer start, or the answers were deleted. You can start a fresh scorecard any time."} />;
   }
   if (s.status === "completed") {
     const reportToken = await getReportTokenFor(s.id);
     if (reportToken) redirect(localizePath(locale, `/scorecard/r/${reportToken}`));
   }
-  const industry = s.industry as Industry;
+  const industry = (s.industry ?? undefined) as Industry | undefined;
   const questions: FlowQuestion[] = QUESTIONS.map(q => ({
     id: q.id, kind: q.kind, prompt: promptFor(q, industry), section: sectionOf(q.area),
     options: q.kind === "text" ? [] : q.options.map(({ id, label }) => ({ id, label })),

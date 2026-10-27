@@ -64,7 +64,7 @@ function interpolate(text: string, f: Finding, answers: Answers, ctx: FindingCtx
 
 function render(f: Finding, answers: Answers, ctx: FindingCtx, locale: Locale = "en"): FindingText {
   if (locale === "hu") f = HU_FINDINGS.find(candidate => candidate.id === f.id) ?? f;
-  const merged = { ...f.text, ...f.byIndustry?.[ctx.industry], ...f.bySize?.[ctx.size] };
+  const merged = { ...f.text, ...(ctx.industry && f.byIndustry?.[ctx.industry]), ...(ctx.size && f.bySize?.[ctx.size]) };
   const out = { id: f.id, area: f.area } as FindingText;
   for (const k of ["title", "observed", "why", "action", "done"] as const) out[k] = interpolate(merged[k], f, answers, ctx, locale);
   return out;

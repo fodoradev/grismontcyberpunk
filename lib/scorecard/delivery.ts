@@ -2,13 +2,15 @@ import { and, eq, lt, ne } from "drizzle-orm";
 import { getDb, schema } from "../../db";
 import { QUESTIONS } from "../../content/scorecard/en/questions";
 import { MAX_ATTEMPTS, sendOnce } from "../email/send";
-import { ownerNotifyEmail, reminderEmail, reportEmail } from "../email/templates";
+import { followUpEmail, ownerNotifyEmail, reminderEmail, reportEmail } from "../email/templates";
+import { nextFollowUp } from "./followups";
 import { renderReportPdf } from "../pdf/ReportDocument";
 import { profileString } from "./scoring";
-import { dueForReminders, purgeExpired } from "./store";
+import { dueForReminders, followUpCandidates, purgeExpired } from "./store";
 import { answeredCount } from "./validation";
 import type { Submission } from "../../db/schema";
 import { business } from "../../data/business";
+import { known, site } from "../../data/site";
 import { localizePath, normalizeLocale, type Locale } from "../i18n";
 
 const { submissions, reports, emailLog } = schema;
@@ -22,6 +24,8 @@ export const urls = {
   resume: (token: string, locale: Locale = "en") => `${appUrl()}${localizePath(locale, `/scorecard/s/${token}`)}`,
   report: (token: string, locale: Locale = "en") => `${appUrl()}${localizePath(locale, `/scorecard/r/${token}`)}`,
   delete: (token: string, locale: Locale = "en") => `${appUrl()}${localizePath(locale, `/scorecard/delete/${token}`)}`,
+  audit: (locale: Locale = "en") => `${appUrl()}${localizePath(locale, "/advanced-audit")}`,
+  unsubscribe: (token: string, locale: Locale = "en") => `${appUrl()}${localizePath(locale, `/scorecard/unsubscribe/${token}`)}`,
 };
 
 /** Emails the PDF report to the submitter and notifies the owner. Safe to call repeatedly. */
@@ -36,7 +40,7 @@ export async function sendReportEmails(submissionId: string) {
   await sendOnce(s.id, "report", async () => ({
     to: s.email,
     replyTo: process.env.OWNER_NOTIFY_EMAIL || business.email,
-    ...reportEmail(r, { report: reportUrl, delete: urls.delete(s.resumeToken, locale) }),
+    ...reportEmail(r, { report: reportUrl, delete: urls.delete(s.resumeToken, locale), audit: urls.audit(locale), booking: known(site.bookingUrl) }),
     attachments: [{ filename: "Grismont-Discovery-Scorecard.pdf", content: await renderReportPdf(r, reportUrl) }],
   }));
 
@@ -58,7 +62,28 @@ async function sendReminder(s: Submission, reminderNumber: number, reminderKind:
   }));
 }
 
-/** Daily job: schedule three inactivity reminders, retry report emails, enforce retention. */
+/** Sends the next due follow-up (04 §3) to everyone who opted in; at most one per person per run. */
+async function sendFollowUps() {
+  const counts = { sent: 0, failed: 0 };
+  for (const { submission: s, report, sent } of await followUpCandidates()) {
+    const locale = normalizeLocale(report.result.locale);
+    const caseStudy = site.caseStudies[locale][0];
+    const stage = nextFollowUp(s.completedAt!, sent, Boolean(caseStudy));
+    if (!stage) continue;
+    const result = await sendOnce(s.id, stage.kind, async () => ({
+      to: s.email,
+      replyTo: process.env.OWNER_NOTIFY_EMAIL || business.email,
+      ...followUpEmail(stage.kind, report.result,
+        { report: urls.report(report.reportToken, locale), unsubscribe: urls.unsubscribe(s.resumeToken, locale), booking: known(site.bookingUrl) },
+        caseStudy && { ...caseStudy, url: caseStudy.slug ? `${appUrl()}${localizePath(locale, `/work/case-studies/${caseStudy.slug}`)}` : undefined }),
+    }));
+    if (result === "sent") counts.sent++;
+    if (result === "failed") counts.failed++;
+  }
+  return counts;
+}
+
+/** Daily job: schedule three inactivity reminders, send opted-in follow-ups, retry report emails, enforce retention. */
 export async function runDaily() {
   const reminders = { sent: 0, failed: 0 };
   for (const { submission, reminderNumber, reminderKind } of await dueForReminders()) {
@@ -72,6 +97,7 @@ export async function runDaily() {
     .where(and(ne(emailLog.kind, "reminder"), ne(emailLog.status, "sent"), lt(emailLog.attempts, MAX_ATTEMPTS)));
   for (const { id } of unsent) await sendReportEmails(id);
 
+  const followUps = await sendFollowUps();
   const purged = await purgeExpired();
-  return { reminders, retried: unsent.length, purged };
+  return { reminders, followUps, retried: unsent.length, purged };
 }

@@ -8,9 +8,8 @@ async function intake(page: Page, email: string) {
   await page.goto("/scorecard");
   await page.getByLabel("First name").fill("Anna");
   await page.getByLabel("Work email").fill(email);
-  await page.getByLabel("Company size").selectOption("11-50");
-  await page.getByLabel("Type of work").selectOption("services");
-  await page.getByRole("checkbox").check();
+  await page.getByRole("checkbox", { name: /privacy notice/ }).check();
+  await page.getByRole("checkbox", { name: /reminders/ }).check();
   await shot(page, "1-intake");
   await page.getByRole("button", { name: /Start the questions/ }).click();
   await expect(page).toHaveURL(/\/scorecard\/s\//);
@@ -72,13 +71,20 @@ test("keyboard flow: process, numbers, back, resume, submit, report, PDF, email"
   await page.keyboard.type("Three people re-check the same numbers and it still slips.");
   await page.keyboard.press("Enter"); // the closing card has no question number
   await expect(page.getByRole("heading", { name: /That's everything, Anna/ })).toBeVisible();
+  // Step 3: optional profile and a separate, unticked marketing consent.
+  await expect(page.getByRole("checkbox", { name: /follow-up emails/ })).not.toBeChecked();
+  await page.getByLabel("Company size").selectOption("51-250");
+  await page.getByLabel("Type of work").selectOption("manufacturing");
+  await page.getByRole("checkbox", { name: /follow-up emails/ }).check();
   await shot(page, "4-done");
-  await page.keyboard.press("Enter");
+  await page.getByRole("button", { name: /Show my report/ }).click();
 
   await expect(page).toHaveURL(/\/scorecard\/r\//, { timeout: 30_000 });
   await expect(page.getByRole("heading", { name: "Anna, here's where you stand." })).toBeVisible();
   await expect(page.getByText("Based on your answers about “Customer quotes”.", { exact: false })).toBeVisible();
   await expect(page.getByText("Three people re-check", { exact: false })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Want help with the first quick win?" })).toBeVisible();
+  await expect(page.getByRole("link", { name: /Take the Advanced audit/ })).toHaveAttribute("href", "/advanced-audit");
   await shot(page, "5-report");
 
   const pdf = await page.request.get(page.url() + "/pdf");
@@ -157,4 +163,15 @@ test("delete flow requires confirmation", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "Deleted." })).toBeVisible();
   await page.goto(`/scorecard/s/${token}`);
   await expect(page.getByRole("heading", { name: "This link has expired." })).toBeVisible();
+});
+
+test("the sample report is labelled fictional and linked from the scorecard page", async ({ page }) => {
+  await page.goto("/scorecard");
+  await page.getByRole("link", { name: /See a sample report first/ }).click();
+  await expect(page).toHaveURL(/\/scorecard\/sample$/);
+  await expect(page.getByRole("note")).toContainText("Sample report — fictional company");
+  await expect(page.getByRole("heading", { name: "Three quick wins" })).toBeVisible();
+  await expect(page.getByRole("link", { name: /Download PDF/ })).toHaveCount(0);
+  await page.goto("/hu/scorecard/sample");
+  await expect(page.getByRole("note")).toContainText("Mintajelentés — kitalált cég");
 });

@@ -106,10 +106,10 @@ export function ReportDocument({ r, reportUrl }: { r: ReportModel; reportUrl: st
   const hu = locale === "hu";
   const { ROADMAP_COLUMNS, formatReportDate, freeTextLabel, reportIntro } = getScorecardCopy(locale);
   const { AREA_NAMES } = getQuestionContent(locale);
-  const title = hu ? "Grismont folyamatfelmérő" : "Grismont Discovery Scorecard";
+  const title = hu ? "Grismont Folyamat-pontozó" : "Grismont Discovery Scorecard";
   const date = formatReportDate(r);
   return (
-    <Document title={`${hu ? "Folyamatfelmérő" : "Discovery Scorecard"} – ${r.intake.firstName}`} author="Grismont" language={locale}>
+    <Document title={`${hu ? "Folyamat-pontozó" : "Discovery Scorecard"} – ${r.intake.firstName}`} author="Grismont" language={locale}>
       <Page size="A4" style={s.page}>
         <View style={s.footer} fixed>
           <Text style={{ flex: 1, paddingRight: 10 }}>grismont · {reportUrl}</Text>
@@ -176,7 +176,7 @@ export function ReportDocument({ r, reportUrl }: { r: ReportModel; reportUrl: st
           <Text style={[s.h3, { color: C.paper }]}>{r.nextStep.text.title}</Text>
           <Text style={{ color: "#CDD2C7" }}>{r.nextStep.text.why}</Text>
           <Text style={{ color: C.paper, marginTop: 4 }}>{r.nextStep.text.action}</Text>
-          <Text style={{ color: "#CDD2C7", marginTop: 6 }}>{hu ? "Ez a kiindulópont a 30 perces beszélgetésünkhöz, ahol a saját javaslatommal is kiegészítem." : "This is a starting point for our 30-minute call, where I'll add my own recommendation."}</Text>
+          <Text style={{ color: "#CDD2C7", marginTop: 6 }}>{hu ? "Segítsek az első gyors javításban? Egy ingyenes, 20 perces beszélgetésben átnézzük a pontszámaidat, és megbeszéljük az első lépést." : "Want help with the first quick win? In a free 20-minute call we go through your scores and agree the first step."}</Text>
         </View>
       </Page>
     </Document>

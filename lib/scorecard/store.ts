@@ -1,9 +1,9 @@
 import { randomBytes } from "node:crypto";
-import { and, eq, gt, inArray, lt, or, sql } from "drizzle-orm";
+import { and, eq, gt, inArray, isNotNull, isNull, lt, or, sql } from "drizzle-orm";
 import { getDb, schema } from "../../db";
 import { buildReport, translateReport } from "./report";
 import { normalizeLocale, type Locale } from "../i18n";
-import { isComplete, type IntakeInput } from "./validation";
+import { isComplete, type IntakeInput, type ProfileInput } from "./validation";
 import { nextReminderStage } from "./reminders";
 import type { Answers, Intake, SizeBand, Industry } from "./types";
 
@@ -26,8 +26,8 @@ export async function startSubmission(input: IntakeInput, ipHash: string | null,
     await tx.update(submissions).set({ status: "superseded", updatedAt: new Date() })
       .where(and(eq(submissions.email, input.email), eq(submissions.status, "in_progress")));
     await tx.insert(submissions).values({
-      resumeToken, firstName: input.firstName, email: input.email, companySize: input.companySize, industry: input.industry,
-      companyName: input.companyName, role: input.role, consentAt: new Date(), ipHash, locale,
+      resumeToken, firstName: input.firstName, email: input.email, consentAt: new Date(),
+      reminderConsentAt: input.reminders === "on" ? new Date() : null, ipHash, locale,
     });
   });
   return resumeToken;
@@ -62,15 +62,18 @@ export async function saveAnswer(token: string, questionId: string, value: strin
   return updated.length > 0;
 }
 
-export const intakeOf = (s: { firstName: string; companySize: string; industry: string; companyName: string | null }): Intake => ({
-  firstName: s.firstName, companySize: s.companySize as SizeBand, industry: s.industry as Industry, ...(s.companyName ? { companyName: s.companyName } : {}),
+export const intakeOf = (s: { firstName: string; companySize: string | null; industry: string | null; companyName: string | null }): Intake => ({
+  firstName: s.firstName,
+  ...(s.companySize ? { companySize: s.companySize as SizeBand } : {}),
+  ...(s.industry ? { industry: s.industry as Industry } : {}),
+  ...(s.companyName ? { companyName: s.companyName } : {}),
 });
 
 type Done = { submissionId: string; reportToken: string };
 export type SubmitResult = (Done & { kind: "created" }) | (Done & { kind: "existing" }) | { kind: "incomplete" } | { kind: "not-found" };
 
 /** Scores, snapshots and completes a submission exactly once; repeated calls return the existing report. */
-export async function submit(token: string, locale?: Locale): Promise<SubmitResult> {
+export async function submit(token: string, locale?: Locale, profile: ProfileInput = {}): Promise<SubmitResult> {
   return getDb().transaction(async tx => {
     const [s] = await tx.select().from(submissions).where(eq(submissions.resumeToken, token)).for("update");
     if (!s || s.status === "superseded") return { kind: "not-found" };
@@ -79,13 +82,23 @@ export async function submit(token: string, locale?: Locale): Promise<SubmitResu
       return { kind: "existing", submissionId: s.id, reportToken: r.reportToken };
     }
     if (!isComplete(s.answers)) return { kind: "incomplete" };
-    const en = buildReport(s.answers, intakeOf(s));
+    // The optional step-3 profile is saved with the completion, so the report can use it.
+    const withProfile = {
+      ...s,
+      companySize: profile.companySize ?? s.companySize, industry: profile.industry ?? s.industry,
+      role: profile.role ?? s.role, companyName: profile.companyName ?? s.companyName,
+    };
+    const en = buildReport(s.answers, intakeOf(withProfile));
     const hu = translateReport(en, s.answers, "hu");
     const reportLocale = locale ?? normalizeLocale(s.locale);
     const result = { ...(reportLocale === "hu" ? hu : en), translations: { en, hu } };
     const reportToken = newToken();
     await tx.insert(reports).values({ submissionId: s.id, reportToken, contentVersion: result.contentVersion, result });
-    await tx.update(submissions).set({ status: "completed", completedAt: new Date(), updatedAt: new Date(), locale: reportLocale }).where(eq(submissions.id, s.id));
+    await tx.update(submissions).set({
+      status: "completed", completedAt: new Date(), updatedAt: new Date(), locale: reportLocale,
+      companySize: withProfile.companySize, industry: withProfile.industry, role: withProfile.role, companyName: withProfile.companyName,
+      ...(profile.followUp === "on" ? { followUpConsentAt: new Date() } : {}),
+    }).where(eq(submissions.id, s.id));
     // Recorded in the same transaction, so the daily job retries the email even if the post-response send never runs.
     await tx.insert(schema.emailLog).values({ submissionId: s.id, kind: "report" });
     return { kind: "created", submissionId: s.id, reportToken };
@@ -102,6 +115,7 @@ export async function dueForReminders() {
   const db = getDb();
   const candidates = await db.select().from(submissions).where(and(
     eq(submissions.status, "in_progress"),
+    isNotNull(submissions.reminderConsentAt),
     lt(submissions.updatedAt, sql`now() - interval '1 day'`),
     gt(submissions.createdAt, sql`now() - interval '30 days'`),
   ));
@@ -129,6 +143,28 @@ export async function dueForReminders() {
     const stage = nextReminderStage(submission.updatedAt, sentBySubmission.get(submission.id) ?? new Set());
     return stage ? [{ submission, reminderNumber: stage.afterDays, reminderKind: stage.kind }] : [];
   });
+}
+
+/** Completed submissions with follow-up consent, still inside the follow-up period, with the email kinds already sent. */
+export async function followUpCandidates() {
+  const db = getDb();
+  const rows = await db.select().from(submissions).innerJoin(reports, eq(reports.submissionId, submissions.id)).where(and(
+    eq(submissions.status, "completed"),
+    isNotNull(submissions.followUpConsentAt),
+    isNull(submissions.unsubscribedAt),
+    gt(submissions.completedAt, sql`now() - interval '14 days'`),
+  ));
+  if (rows.length === 0) return [];
+  const logs = await db.select({ submissionId: schema.emailLog.submissionId, kind: schema.emailLog.kind }).from(schema.emailLog)
+    .where(and(inArray(schema.emailLog.submissionId, rows.map(r => r.submissions.id)), eq(schema.emailLog.status, "sent")));
+  return rows.map(row => ({ submission: row.submissions, report: row.reports, sent: new Set(logs.filter(l => l.submissionId === row.submissions.id).map(l => l.kind as string)) }));
+}
+
+/** Stops the follow-up series. Returns false for an unknown token. */
+export async function unsubscribeByResumeToken(token: string): Promise<boolean> {
+  const rows = await getDb().update(submissions).set({ unsubscribedAt: new Date() })
+    .where(eq(submissions.resumeToken, token)).returning({ id: submissions.id });
+  return rows.length > 0;
 }
 
 /** Retention: unfinished after 30 days, completed after 12 months. Returns the number of deleted submissions. */
