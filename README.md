@@ -1,6 +1,6 @@
 # Grismont — Next.js website
 
-Native Next.js 16.4.0 / React 19.3.0 / TypeScript application. The homepage pairs a custom process illustration with concrete service descriptions, interactive process examples, a free Discovery Scorecard and direct email contact. Fonts are bundled locally.
+Native Next.js 16.4.3 / React 19.3.0 / TypeScript application. The homepage pairs a custom process illustration with concrete service descriptions, interactive process examples, a free Discovery Scorecard and direct email contact. Fonts are bundled locally.
 
 ## Run locally
 
