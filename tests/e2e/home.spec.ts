@@ -20,7 +20,7 @@ test("visitors can explore the problems by keyboard and reach the free scorecard
 
 test("section numbers, prices and links resolve; no placeholders leak", async ({ page }) => {
   await page.goto("/");
-  await expect(page.locator("main .gm-label").filter({ hasText: /^\d\d \/ / })).toHaveText(["01 / The problems", "02 / Training & services", "03 / How I work", "04 / The free scorecard", "05 / About"]);
+  await expect(page.locator("main .gm-label").filter({ hasText: /^\d\d \/ / })).toHaveText(["01 / The problems", "02 / How I work", "03 / The free scorecard", "04 / Training & services", "05 / About"]);
   await expect(page.locator("#training .home-price strong")).toHaveText("320 000 Ft");
   const unresolved = await page.locator("a[href*='#']").evaluateAll(links => links.map(link => link.getAttribute("href")!).filter(href => href.startsWith("#") || href.startsWith("/#")).filter(href => !document.getElementById(href.split("#")[1])));
   expect(unresolved).toEqual([]);
@@ -63,3 +63,40 @@ for (const width of [320, 390, 768, 1440]) {
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   });
 }
+
+test("the hours calculator answers from the visitor's own numbers", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/");
+  const calc = page.locator(".home-calc");
+  await expect(calc.locator(".home-calc-figure")).toHaveText("552");
+  await calc.locator("input[name=people]").fill("10");
+  await calc.locator("input[name=hours]").fill("5");
+  await expect(calc.locator(".home-calc-figure")).toHaveText("2,300");
+  await expect(calc).toContainText("about 58 full working weeks");
+  await expect(calc.locator(".home-calc-blocks i.on")).toHaveCount(52);
+});
+
+test("visuals without a file show labelled frames, not broken images", async ({ page }) => {
+  await page.goto("/");
+  await expect(page.locator('[data-visual="samurai"]')).toContainText("Flow Samurai");
+  await expect(page.locator('[data-visual="offerTraining"]')).toBeVisible();
+  expect(await page.locator("main img").count()).toBe(0);
+});
+
+test("opening a scorecard area lights up its score in the sample", async ({ page }) => {
+  await page.goto("/");
+  await page.locator("#scorecard summary").nth(2).click();
+  await expect(page.locator(".home-report-bars li").nth(2)).toHaveAttribute("data-active", "true");
+  await expect(page.locator(".home-report")).toContainText("Sample report");
+});
+
+test("phones get a primary action between sections, hidden where one is already shown", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 800 });
+  await page.goto("/");
+  const bar = page.locator(".home-sticky-cta");
+  await expect(bar).toBeHidden();
+  await page.locator("#method").scrollIntoViewIfNeeded();
+  await expect(bar).toBeVisible();
+  await page.locator("#contact").scrollIntoViewIfNeeded();
+  await expect(bar).toBeHidden();
+});

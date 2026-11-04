@@ -33,7 +33,7 @@ export default function SiteFooter({ locale = "en" }: { locale?: Locale }) {
           <nav key={col.title} aria-label={col.title}><span className="gm-label">{col.title}</span>{col.links.map(link => <a key={link.href} href={link.href}>{link.text}</a>)}</nav>
         ))}</div>
       </div>
-      <div className="gm-footer-bottom"><span>© 2026 {legalName ? `${legalName} egyéni vállalkozó · ` : ""}Grismont · <a href={`mailto:${business.email}`}>{business.email}</a></span><a href={href("/#home")}>{hu ? "Vissza az elejére ↑" : "Back to the top ↑"}</a></div>
+      <div className="gm-footer-bottom"><span>© 2026 {legalName ? `${legalName} egyéni vállalkozó · ` : ""}Grismont · <a href={`mailto:${business.email}`}>{business.email}</a></span><a href={href("/#home")}>{hu ? "Vissza az elejére" : "Back to the top"} <span aria-hidden="true">↑</span></a></div>
     </footer>
   );
 }

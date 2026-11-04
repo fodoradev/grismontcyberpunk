@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useRef } from "react";
+import { startTransition, useActionState, useEffect, useRef } from "react";
 import { startScorecard, type IntakeState } from "../../app/scorecard/actions";
 import { localizePath, type Locale } from "../../lib/i18n";
 
@@ -30,7 +30,12 @@ export default function IntakeForm({ locale = "en" }: { locale?: Locale }) {
   useEffect(() => { form.current?.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus(); }, [state]);
 
   return (
-    <form ref={form} action={action} className="sc-intake" noValidate>
+    <form ref={form} action={action} className="sc-intake" noValidate onSubmit={event => {
+      // React resets the fields when an `action` prop returns, which would drop a tick made meanwhile; dispatching keeps them as typed.
+      event.preventDefault();
+      const data = new FormData(event.currentTarget);
+      startTransition(() => action(data));
+    }}>
       <input type="hidden" name="locale" value={locale} />
       {state.message ? <p className="sc-alert" role="alert">{state.message}</p> : null}
       <div className="sc-fields">
@@ -41,7 +46,7 @@ export default function IntakeForm({ locale = "en" }: { locale?: Locale }) {
         </label>
         <label className="sc-field">
           <span>{hu ? "Munkahelyi e-mail" : "Work email"}</span>
-          <input name="email" type="email" autoComplete="email" required maxLength={254} defaultValue={v.email} {...describe("email")} />
+          <input name="email" type="email" autoComplete="email" spellCheck={false} required maxLength={254} defaultValue={v.email} {...describe("email")} />
           <FieldError id="email" message={err("email")} />
         </label>
       </div>

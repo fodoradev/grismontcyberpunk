@@ -6,6 +6,7 @@ import { ADVANCED_AUDIT_QUESTIONS, AUDIT_SECTIONS, type AuditQuestion } from "..
 import { firstOpenAdvancedAuditIndex } from "../../lib/advanced-audit/validation";
 import type { AdvancedAuditAnswers } from "../../lib/advanced-audit/types";
 import type { Locale } from "../../lib/i18n";
+import { minutesLeft, resetCardScroll, useSectionMomentum } from "../scorecard/momentum";
 
 export default function AdvancedAuditFlow({ token, initialAnswers, locale }: { token:string; initialAnswers:AdvancedAuditAnswers; locale:Locale }) {
   const hu=locale==="hu";
@@ -18,8 +19,6 @@ export default function AdvancedAuditFlow({ token, initialAnswers, locale }: { t
   const [copied,setCopied]=useState(false);
   const [resumeEmailQueued,setResumeEmailQueued]=useState(false);
   const [dir,setDir]=useState<1|-1>(1);
-  const flow=useRef<HTMLElement>(null);
-  const stage=useRef<HTMLDivElement>(null);
   const heading=useRef<HTMLHeadingElement>(null);
   const textField=useRef<HTMLTextAreaElement>(null);
   const firstRender=useRef(true);
@@ -117,36 +116,35 @@ export default function AdvancedAuditFlow({ token, initialAnswers, locale }: { t
   const position=q&&sectionQuestions.length>1?(hu?`${posInSection}/${sectionQuestions.length}`:`${posInSection} of ${sectionQuestions.length}`):undefined;
   const copyLink=async()=>{try{await navigator.clipboard.writeText(location.href);setCopied(true);setTimeout(()=>setCopied(false),1800);}catch{setMessage(hu?"Másold ki a hivatkozást a böngésző címsorából.":"Copy the link from your browser address bar.");}};
 
+  const total=ADVANCED_AUDIT_QUESTIONS.length;
+  const momentum=useSectionMomentum(index,AUDIT_SECTIONS.map(section=>{const list=ADVANCED_AUDIT_QUESTIONS.filter(item=>item.section===section.id);return list.length>0&&list.every(item=>answered.includes(item));}),(done,left)=>{
+    const name=hu?AUDIT_SECTIONS[done].nameHu:AUDIT_SECTIONS[done].name;
+    if(!left)return hu?`${name}: kész. Minden szakasz megvan.`:`${name} done. All sections finished.`;
+    return hu?`${name}: kész. Még ${left} szakasz van hátra.`:`${name} done, ${left} ${left===1?"section":"sections"} left.`;
+  });
+
   useEffect(()=>{
     const shouldFocus=!firstRender.current||q?.kind==="text"; firstRender.current=false;
     if(shouldFocus)(q?.kind==="text"?textField.current:heading.current)?.focus({preventScroll:true});
-    const frame=requestAnimationFrame(()=>{
-      const mobile=window.matchMedia("(max-width: 1000px)").matches;
-      const viewportHeight=window.visualViewport?.height??window.innerHeight;
-      const rect=(mobile?flow.current:stage.current)?.getBoundingClientRect(); if(!rect)return;
-      const target=mobile?window.scrollY+rect.top:window.scrollY+rect.top+rect.height/2-viewportHeight/2;
-      const top=Math.min(Math.max(0,target),Math.max(0,document.documentElement.scrollHeight-viewportHeight));
-      window.scrollTo({top,behavior:window.matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"});
-    });
-    return()=>cancelAnimationFrame(frame);
+    resetCardScroll();
   },[index,q?.kind]);
 
-  return <section ref={flow} className="sc-flow sc-audit-flow" aria-label={hu?"Részletes audit kérdőív":"Advanced audit questionnaire"} aria-busy={completing}>
-    <div className="sc-resume-bar"><span>{hu?"A válaszaid mentése":"Your answers are saved as you go"}{saving?` · ${hu?"Mentés…":"Saving…"}`:""}{resumeEmailQueued?<span role="status"> · {hu?"Hamarosan e-mailben elküldjük a folytatáshoz szükséges hivatkozást.":"We’ll email your personal resume link shortly."}</span>:null}</span><button type="button" className="gm-text-link" onClick={copyLink}>{copied?(hu?"Hivatkozás másolva":"Link copied"):hu?"Privát hivatkozás másolása":"Copy private link"}</button></div>
+  return <section className="sc-flow sc-audit-flow" aria-label={hu?"Részletes audit kérdőív":"Advanced audit questionnaire"} aria-busy={completing}>
+    <div className="sc-resume-bar"><span>{saving?(hu?"Mentés…":"Saving…"):answered.length?(hu?"Mentve. A válaszaidat folyamatosan mentjük.":"Saved. Your answers are saved as you go."):(hu?"A válaszaidat folyamatosan mentjük.":"Your answers are saved as you go.")}{resumeEmailQueued?<span role="status"> · {hu?"Hamarosan e-mailben elküldjük a folytatáshoz szükséges hivatkozást.":"We’ll email your personal resume link shortly."}</span>:null}</span><button type="button" className="gm-text-link" onClick={copyLink}>{copied?(hu?"Hivatkozás másolva":"Link copied"):hu?"Privát hivatkozás másolása":"Copy private link"}</button></div>
     <div className="sc-progress-wrap">
-      <div className="sc-progress" role="progressbar" aria-label={hu?"A folyamatfelmérő előrehaladása":"Scorecard progress"} aria-valuemin={0} aria-valuemax={ADVANCED_AUDIT_QUESTIONS.length} aria-valuenow={answered.length}>
+      <div className="sc-progress" role="progressbar" aria-label={hu?"A Részletes folyamat-audit előrehaladása":"Advanced audit progress"} aria-valuemin={0} aria-valuemax={total} aria-valuenow={answered.length} aria-valuetext={hu?`${answered.length}/${total} kérdés megválaszolva`:`${answered.length} of ${total} questions answered`}>
         {AUDIT_SECTIONS.map((section,i)=>{const questions=ADVANCED_AUDIT_QUESTIONS.filter(item=>item.section===section.id);const fraction=answered.filter(item=>item.section===section.id).length/Math.max(1,questions.length);const done=fraction===1;const cls=["sc-seg",done?"sc-seg-done":"",done&&!doneAtMount.current?.has(section.id)?"sc-seg-sweep":"",i===sectionIndex?"sc-seg-current":""].join(" ");return <div key={section.id} className={cls} style={{flexGrow:questions.length}} title={hu?section.nameHu:section.name}><span style={{transform:`scaleX(${fraction})`}}/></div>;})}
       </div>
-      <div className="sc-progress-meta" aria-hidden="true"><span>{currentSection?(hu?currentSection.nameHu:currentSection.name):hu?"Minden kész":"All done"}{position?<span className="sc-progress-pos">{hu?`, ${position}. kérdés`:`, question ${position}`}</span>:null}</span><span>{hu?`${answered.length}/${ADVANCED_AUDIT_QUESTIONS.length} megválaszolva`:`${answered.length} of ${ADVANCED_AUDIT_QUESTIONS.length} answered`}</span></div>
+      <div className="sc-progress-meta" aria-hidden="true"><span>{currentSection?(hu?currentSection.nameHu:currentSection.name):hu?"Minden kész":"All done"}{position?<span className="sc-progress-pos">{hu?`, ${position}. kérdés`:`, question ${position}`}</span>:null}</span><span className="sc-progress-count">{q?(hu?`${index+1}. kérdés / ${total} · kb. ${minutesLeft(total-index,total)} perc van hátra`:`Question ${index+1} of ${total} · about ${minutesLeft(total-index,total)} min left`):(hu?`${answered.length}/${total} megválaszolva`:`${answered.length} of ${total} answered`)}</span></div>
     </div>
-    <div ref={stage} className="sc-stage"><div className={`sc-card ${dir===1?"sc-in-fwd":"sc-in-back"}`} key={index}>
+    <div className="sc-stage"><div className={`sc-card ${dir===1?"sc-in-fwd":"sc-in-back"}`} key={index}>
       {currentSection?.intro?<p className="sc-card-help">{hu?currentSection.introHu:currentSection.intro}</p>:null}
       {q?<>
-        <h1 ref={heading} tabIndex={-1} className="sc-card-q" id="audit-question">{String(index+1).padStart(2,"0")}<span className="sc-card-n">/{ADVANCED_AUDIT_QUESTIONS.length}</span> {localPrompt(q)}{q.kind==="text"&&!q.required?<em className="sc-optional">{hu?"nem kötelező":"optional"}</em>:null}</h1>
+        <h1 ref={heading} tabIndex={-1} className="sc-card-q" id="audit-question"><span className="sc-card-n" aria-hidden="true">{index+1}</span>{localPrompt(q)}{q.kind==="text"&&!q.required?<em className="sc-optional">{hu?"nem kötelező":"optional"}</em>:null}</h1>
         {q.help?<p className="sc-card-help">{hu&&q.helpHu?q.helpHu:q.help}</p>:null}
-        {q.kind==="text"?<div className="sc-text"><textarea ref={textField} id="audit-answer" maxLength={q.maxLength} rows={q.id==="P1_process"?2:3} value={typeof answers[q.id]==="string"?answers[q.id] as string:""} onChange={event=>setAnswer(q.id,event.target.value,true)} placeholder={hu?q.placeholderHu:q.placeholder} aria-labelledby="audit-question"/><div className="sc-ok"><span className="sc-keyhint">{(typeof answers[q.id]==="string"?answers[q.id] as string:"").length}/{q.maxLength}</span><button type="button" className="gm-cta" onClick={()=>void next()}>{hu?"Rendben":"OK"} <span aria-hidden="true">→</span></button></div></div>:<div className="sc-choices" role="radiogroup" aria-labelledby="audit-question">{q.options.map((option,i)=><button type="button" role="radio" aria-checked={answers[q.id]===option.code} className="sc-choice" key={option.code} onClick={()=>{setAnswer(q.id,option.code);window.setTimeout(()=>void go(index+1),260);}}><kbd>{i+1}</kbd><span>{hu?option.labelHu:option.label}</span>{answers[q.id]===option.code?<span aria-hidden="true">✓</span>:null}</button>)}</div>}
+        {q.kind==="text"?<div className="sc-text"><textarea ref={textField} id="audit-answer" name={q.id} maxLength={q.maxLength} rows={q.id==="P1_process"?2:3} value={typeof answers[q.id]==="string"?answers[q.id] as string:""} onChange={event=>setAnswer(q.id,event.target.value,true)} placeholder={hu?q.placeholderHu:q.placeholder} aria-labelledby="audit-question"/><div className="sc-ok"><span className="sc-keyhint">{(typeof answers[q.id]==="string"?answers[q.id] as string:"").length}/{q.maxLength}</span><button type="button" className="gm-cta" onClick={()=>void next()}>{hu?"Rendben":"OK"} <span aria-hidden="true">→</span></button></div></div>:<div className="sc-choices" role="radiogroup" aria-labelledby="audit-question">{q.options.map((option,i)=><button type="button" role="radio" aria-checked={answers[q.id]===option.code} tabIndex={answers[q.id]===option.code||(answers[q.id]===undefined&&i===0)?0:-1} className="sc-choice" key={option.code} onClick={()=>{setAnswer(q.id,option.code);window.setTimeout(()=>void go(index+1),260);}}><kbd aria-hidden="true">{i+1}</kbd><span>{hu?option.labelHu:option.label}</span>{answers[q.id]===option.code?<svg className="sc-check" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3 3 7-7" /></svg>:null}</button>)}</div>}
       </>:<div className="sc-audit-finish"><h1 className="sc-card-q">{hu?"Minden kötelező kérdésre válaszoltál.":"You’ve answered every required question."}</h1><p className="sc-card-help">{hu?"Készítsd el a jelentést. Bármikor visszaléphetsz és módosíthatsz egy választ.":"Generate your report now. You can go back and change any answer first."}</p><button type="button" className="gm-cta" onClick={()=>void finish()} disabled={completing}>{completing?(hu?"Jelentés készül…":"Generating report…"):hu?"Jelentés készítése":"Generate report"} <span aria-hidden="true">→</span></button></div>}
     </div></div>
-    <div className="sc-flow-foot"><p className="sc-flow-msg" role="status" aria-live="polite">{message|| (saving?(hu?"Válasz mentése…":"Saving answer…"):"")}</p><span className="sc-keyhint sc-keyhint-nav">{q?.kind==="choice"?<><kbd>1</kbd>–<kbd>{q.options.length}</kbd>{hu?" választás · ":" choose · "}</>:null}<kbd>Enter</kbd>{hu?" tovább · ":" next · "}<kbd>←</kbd>{hu?" vissza":" back"}</span><nav className="sc-flow-nav" aria-label={hu?"Navigáció a kérdések között":"Question navigation"}><button type="button" onClick={()=>void go(index-1)} disabled={index<=0||completing} aria-label={hu?"Előző kérdés":"Previous question"}>←</button><button type="button" onClick={()=>void next()} disabled={!q||completing} aria-label={hu?"Következő kérdés":"Next question"}>→</button></nav></div>
+    <div className="sc-flow-foot"><p className="sc-flow-msg" role="status" aria-live="polite">{message||(momentum?<span key={momentum} className="sc-momentum">{momentum}</span>:"")}</p><span className="sc-keyhint sc-keyhint-nav">{q?.kind==="choice"?<><kbd>1</kbd>–<kbd>{q.options.length}</kbd>{hu?" választás · ":" choose · "}</>:null}<kbd>Enter</kbd>{hu?" tovább · ":" next · "}<kbd>←</kbd>{hu?" vissza":" back"}</span><nav className="sc-flow-nav" aria-label={hu?"Navigáció a kérdések között":"Question navigation"}><button type="button" onClick={()=>void go(index-1)} disabled={index<=0||completing} aria-label={hu?"Előző kérdés":"Previous question"}>←</button><button type="button" onClick={()=>void next()} disabled={!q||completing} aria-label={hu?"Következő kérdés":"Next question"}>→</button></nav></div>
   </section>;
 }

@@ -40,6 +40,11 @@ Status: ✅ done · 🟡 done, waiting on a value from Attila · ⏳ in progress
 | D18 | Sample report: fictional "Példa Kft." answers generated through the real scoring engine, so it always matches the live report. No PDF download on the sample. | `lib/scorecard/sample.ts` |
 | D19 | Impressum: required rows show "[To be provided]" until filled; optional rows (postal address, phone, EU VAT, adult training, VAT) are hidden. The "Terms" link is left out until terms exist. NAIH details from 07 B are filled in, marked CHECK. | `data/business.ts`, `app/impressum/page.tsx` |
 | D20 | HU naming: every "folyamatfelmérő / felmérő / felmérés" in the scorecard UI, emails, PDF and legal pages is now "Folyamat-pontozó" (suffixes adjusted: -ját, -ból, -val …). | — |
+| D-design | Hero eyebrow now names "Lean Six Sigma and AI automation" (HU: "Lean Six Sigma és AI-automatizálás") so the visual redesign keeps the offer explicit. | `content/site/home.ts` |
+| D-order | Homepage order changed for the funnel: problems, calculator, method, scorecard, services, about, next, FAQ, contact. See `docs/design-assessment.md`. | `app/page.tsx` |
+| D-copy | New copy, EN and HU: hours calculator, hero person line, sample preview labels, "score a process like this". Calculator assumes 46 working weeks and a 40-hour week, stated on the page. Please review the Hungarian wording. | `content/site/home.ts` |
+| D-visuals | All image slots are placeholders until supplied: samurai, portrait, training photo and four offer images. Backdrops are optional. Each has a prompt in `docs/asset-prompts.md`; the portrait and training photo must be real photographs. The training photo is not on the homepage now but `check:launch` still lists it. | `data/visuals.ts` |
+| D-night | Site redesigned to the cyberpunk "night shift" system. Copy, offers and facts are unchanged. PDFs and emails stay on the light palette. | `docs/design-guideline.md` |
 
 ## Workstreams
 

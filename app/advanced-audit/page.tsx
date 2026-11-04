@@ -11,16 +11,18 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function AdvancedAuditPage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
   const hu = await getLocale() === "hu";
   const { error } = await searchParams;
-  return <main id="main-content" className="gm-shell sc-page sc-audit-intro">
-    {error === "start" && <p className="sc-alert" role="alert">{hu?"Most nem sikerült elindítani az auditot. Kérlek, próbáld újra később.":"We couldn't start the audit just now. Please try again in a moment."}</p>}
-    <div className="sc-intro">
-      <p className="sc-audit-already">{hu?"Már kitöltötted a Folyamat-pontozót? Ez a részletesebb változat.":"Already did the scorecard? This is the deeper version."}</p>
+  return <main id="main-content" className="gm-shell sc-intake-page sc-audit-intro">
+    <div className="sc-intake-head">
+      {error === "start" && <p className="sc-alert" role="alert">{hu?"Most nem sikerült elindítani az auditot. Kérlek, próbáld újra később.":"We couldn't start the audit just now. Please try again in a moment."}</p>}
       <div className="gm-label">{hu?"Részletes folyamat-audit":"Advanced audit"}</div>
       <h1>{hu?"A folyamat teljesebb képe.":"A deeper look at how work gets done."}</h1>
       <p className="gm-lead">{hu?"Válassz ki egy folyamatot, és válaszolj arról, hogyan működött az elmúlt három hónapban. A „nem tudom” is hasznos válasz. A kitöltés után részletes eredményt és 90 napos fejlesztési tervet kapsz.":"Choose one process and answer based on how it has really run over the last three months. “Don't know” is useful information. At the end, you'll get a detailed assessment and a prioritised 90-day improvement plan."}</p>
-      <ol className="sc-areas">{AUDIT_SECTIONS.map((section,index)=><li key={section.id}><span>{String(index+1).padStart(2,"0")} /</span>{hu?section.nameHu:section.name}</li>)}</ol>
-      <p className="sc-hint">{hu?"44 kérdés · Kb. 8 perc · A válaszokat mentjük, így a privát hivatkozással később folytathatod.":"44 questions · About 8 minutes · Answers are saved, so you can resume later with your private link."}<br/>{hu?"Személyes adatot ne írj a szabad szöveges válaszokba. A becslésed is megfelelő; bizalmas információt ne adj meg.":"Avoid personal or confidential details in free-text answers. Your best estimate is fine."}</p>
     </div>
     <AdvancedAuditIntake locale={hu?"hu":"en"} />
+    <div className="sc-intake-rest">
+      <p className="sc-audit-already">{hu?"Már kitöltötted a Folyamat-pontozót? Ez a részletesebb változat.":"Already did the scorecard? This is the deeper version."}</p>
+      <ul className="sc-section-list">{AUDIT_SECTIONS.map(section=><li key={section.id}>{hu?section.nameHu:section.name}</li>)}</ul>
+      <p className="sc-reassure">{hu?"44 kérdés · Kb. 8 perc · A válaszokat mentjük, így a privát hivatkozással később folytathatod.":"44 questions · About 8 minutes · Answers are saved, so you can resume later with your private link."}<br/>{hu?"Személyes adatot ne írj a szabad szöveges válaszokba. A becslésed is megfelelő; bizalmas információt ne adj meg.":"Avoid personal or confidential details in free-text answers. Your best estimate is fine."}</p>
+    </div>
   </main>;
 }

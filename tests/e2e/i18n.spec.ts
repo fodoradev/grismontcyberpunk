@@ -232,7 +232,7 @@ test("HU scorecard journey saves drafts across language switches, resumes, repor
   await expect(page).toHaveURL(resumeURL);
   await page.waitForLoadState("load");
   await expect(page.locator("html")).toHaveAttribute("lang", "hu");
-  await expect(page.locator(".sc-card-n")).toHaveText("2");
+  await expect(page.locator(".sc-card-n")).toHaveText("1");
   await expect(page.locator(".sc-pipe").first()).toHaveText(process);
   await page.getByRole("button", { name: "Következő kérdés", exact: true }).click();
   await expect(page.getByRole("status")).toContainText("A folytatáshoz válassz:");
@@ -241,7 +241,7 @@ test("HU scorecard journey saves drafts across language switches, resumes, repor
   await advance(page, "2");
   await savedAnswer;
   await page.reload();
-  await expect(page.locator(".sc-card-n")).toHaveText("3");
+  await expect(page.locator(".sc-card-n")).toHaveText("2");
   await page.getByRole("button", { name: "Előző kérdés", exact: true }).click();
   await expect(page.getByRole("radio", { checked: true })).toContainText("1–2 héten belül");
   await advance(page, "Enter");

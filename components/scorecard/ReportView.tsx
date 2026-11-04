@@ -2,16 +2,18 @@ import { getScorecardCopy } from "../../content/scorecard/copy";
 import { getQuestionContent } from "../../content/scorecard/questions";
 import { known, site } from "../../data/site";
 import { formatNumber, levelLabel, localizePath, normalizeLocale, type Locale } from "../../lib/i18n";
-import { profileBars, quadrantCells, quadrantPoint, type Cell } from "../../lib/scorecard/chart-geometry";
+import { levelTone, profileBars, quadrantCells, quadrantPoint, WEB_COLORS, type Cell } from "../../lib/scorecard/chart-geometry";
 import { AREAS, type FindingText, type Quadrant as QuadrantId, type ReportModel } from "../../lib/scorecard/types";
 
 const TRACK = 240;
+const TONE_FILL = { weak: WEB_COLORS.crimson, mid: WEB_COLORS.onDark, strong: WEB_COLORS.flow };
 
 const labels = {
   en: {
     report: "Discovery Scorecard", greeting: "here's where you stand.",
     intro: "Every point below comes from something you told us.",
-    download: "Download PDF", jump: "Jump to the next step ↓",
+    download: "Download PDF", jump: "Jump to the next step",
+    summary: "Your result in short", weakest: "Weakest area", firstAction: "Your first action", score: "of 4", why: "Why this matters",
     profile: "Your profile", profileTitle: "Six areas, one picture", scores: "Scores by area, 0 to 4",
     cap: "Why AI readiness is capped:", automation: "Automation", automationTitle: "Opportunity vs. readiness",
     opportunity: "Opportunity", readiness: "Readiness", ofFour: "of 4", scale: "(of 4)",
@@ -26,7 +28,8 @@ const labels = {
   hu: {
     report: "Folyamat-pontozó – eredmény", greeting: "itt tartasz most.",
     intro: "Minden, amit itt olvasol, a válaszaidon alapul.",
-    download: "PDF letöltése", jump: "Ugrás a következő lépéshez ↓",
+    download: "PDF letöltése", jump: "Ugrás a következő lépéshez",
+    summary: "Az eredményed röviden", weakest: "A leggyengébb terület", firstAction: "Az első teendőd", score: "a 4-ből", why: "Miért fontos?",
     profile: "Az eredményeid", profileTitle: "Hat terület, egy átfogó kép", scores: "Pontszámok területenként, 0–4 pontos skálán",
     cap: "Miért alacsonyabb az AI-felkészültségi pontszámod?", automation: "Automatizálás", automationTitle: "Lehetőségek és felkészültség",
     opportunity: "Automatizálási lehetőség", readiness: "Felkészültség", ofFour: "a 4-ből", scale: "(4 pontos skálán)",
@@ -48,9 +51,9 @@ function Profile({ r, locale }: { r: ReportModel; locale: Locale }) {
         <div className="sc-profile-row" role="row" key={row.area}>
           <span role="rowheader">{AREA_NAMES[row.area]}</span>
           <svg viewBox={`0 0 ${TRACK} 12`} preserveAspectRatio="none" aria-hidden="true">
-            <rect width={TRACK} height="12" rx="3" className="sc-track" />
-            {row.ghostWidth > 0 ? <rect width={row.ghostWidth} height="12" rx="3" className="sc-ghost" /> : null}
-            <rect width={row.width} height="12" rx="3" className="sc-bar" />
+            <rect width={TRACK} height="12" rx="2" fill={WEB_COLORS.line} className="sc-track" />
+            {row.ghostWidth > 0 ? <rect width={row.ghostWidth} height="12" rx="2" fill={WEB_COLORS.steel} className="sc-ghost" /> : null}
+            <rect width={row.width} height="12" rx="2" fill={TONE_FILL[levelTone(r.areas[row.area].level)]} className="sc-bar" />
           </svg>
           <span role="cell"><b>{formatNumber(r.areas[row.area].score, locale)}</b> {levelLabel(r.areas[row.area].level, locale)}</span>
         </div>
@@ -83,11 +86,11 @@ function Quadrant({ r, locale }: { r: ReportModel; locale: Locale }) {
                 : QUADRANT_TEXT[key].title}</text>
           ))}
           <g transform={`translate(0 ${band})`}>
-            {cells.map(([key, c]) => <rect key={key} x={c.x} y={c.y} width={c.w} height={c.h} className={key === quadrant ? "sc-q-cell sc-q-current" : "sc-q-cell"} />)}
-            <circle cx={p.x} cy={p.y} r={radius} className="sc-q-dot" />
+            {cells.map(([key, c]) => <rect key={key} x={c.x} y={c.y} width={c.w} height={c.h} fill={key === quadrant ? WEB_COLORS.mist : WEB_COLORS.panel} stroke={WEB_COLORS.line} className={key === quadrant ? "sc-q-cell sc-q-current" : "sc-q-cell"} />)}
+            <circle cx={p.x} cy={p.y} r={radius} fill={WEB_COLORS.crimson} stroke={WEB_COLORS.ink} strokeWidth="3" className="sc-q-dot" />
           </g>
         </svg>
-        <figcaption>↑ {QUADRANT_AXES.up}<br />→ {QUADRANT_AXES.right}</figcaption>
+        <figcaption><span aria-hidden="true">↑ </span>{QUADRANT_AXES.up}<br /><span aria-hidden="true">→ </span>{QUADRANT_AXES.right}</figcaption>
       </figure>
       <div>
         <h3>{q.title}</h3>
@@ -96,6 +99,36 @@ function Quadrant({ r, locale }: { r: ReportModel; locale: Locale }) {
         {capped ? <p className="sc-cap-note">{automationCapNote(r)}</p> : null}
       </div>
     </div>
+  );
+}
+
+/** The verdict first: weakest area, biggest risk and the first thing to do, all from the report model. */
+function Summary({ r, locale }: { r: ReportModel; locale: Locale }) {
+  const { AREA_NAMES } = getQuestionContent(locale);
+  const t = labels[locale];
+  const weakest = AREAS.reduce((low, a) => (r.areas[a].score < r.areas[low].score ? a : low), AREAS[0]);
+  const first = r.quickWins[0];
+  return (
+    <dl className="sc-summary" aria-label={t.summary}>
+      <div><dt>{t.weakest}</dt><dd>{AREA_NAMES[weakest]}<small><b>{formatNumber(r.areas[weakest].score, locale)}</b> {t.score}</small></dd></div>
+      <div><dt>{t.risk}</dt><dd>{r.biggestRisk.title}</dd></div>
+      {first ? <div><dt>{t.firstAction}</dt><dd>{first.title}</dd></div> : null}
+    </dl>
+  );
+}
+
+/** A quick win leads with the action; the reasoning stays one click away. */
+function QuickWin({ f, locale }: { f: FindingText; locale: Locale }) {
+  const { AREA_NAMES } = getQuestionContent(locale);
+  const t = labels[locale];
+  return (
+    <article className="sc-finding">
+      {f.area !== "ALL" ? <div className="gm-label">{AREA_NAMES[f.area]}</div> : null}
+      <h3>{f.title}</h3>
+      <p className="sc-do"><b>{t.action}</b> {f.action}</p>
+      <p className="sc-done"><b>{t.done}</b> {f.done}</p>
+      <details className="sc-why"><summary>{t.why}</summary><p className="sc-observed">{f.observed}</p><p>{f.why}</p></details>
+    </article>
   );
 }
 
@@ -129,7 +162,8 @@ export default function ReportView({ r, pdfHref, locale = normalizeLocale(r.loca
         <div className="gm-label">{t.report} · {date}</div>
         <h1>{r.intake.firstName}, {t.greeting}</h1>
         <p className="gm-lead">{reportIntro(r)} {t.intro}</p>
-        <div className="gm-actions">{pdfHref ? <a className="gm-cta" href={pdfHref}>{t.download} <span aria-hidden="true">↓</span></a> : null}<a className="gm-text-link" href="#next-step">{t.jump}</a></div>
+        <Summary r={r} locale={locale} />
+        <div className="gm-actions"><a className="gm-cta" href={booking} {...(bookingUrl ? { target: "_blank", rel: "noopener" } : {})}>{t.book} <span aria-hidden="true">↗</span></a>{pdfHref ? <a className="gm-text-link" href={pdfHref}>{t.download} <span aria-hidden="true">↓</span></a> : null}<a className="gm-text-link" href="#next-step">{t.jump} <span aria-hidden="true">↓</span></a></div>
       </section>
 
       <section className="gm-shell sc-block sc-two">
@@ -145,7 +179,7 @@ export default function ReportView({ r, pdfHref, locale = normalizeLocale(r.loca
       <section className="gm-shell sc-block">
         <div className="gm-label">{t.start}</div>
         <h2>{t.wins}</h2>
-        <div className="sc-wins">{r.quickWins.map(f => <Finding key={f.id} f={f} locale={locale} />)}</div>
+        <div className="sc-wins">{r.quickWins.map(f => <QuickWin key={f.id} f={f} locale={locale} />)}</div>
       </section>
 
       <section className="sc-roadmap-band">

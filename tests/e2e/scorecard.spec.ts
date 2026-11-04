@@ -31,6 +31,19 @@ test("intake validates required fields", async ({ page }) => {
   await expect(page.getByText("Please confirm you've read the privacy notice.")).toBeVisible();
 });
 
+test("a consent tick made while a failed submit is returning survives", async ({ page }) => {
+  await page.route("**/scorecard", async route => {
+    if (route.request().method() === "POST") await new Promise(resolve => setTimeout(resolve, 800));
+    await route.continue();
+  });
+  await page.goto("/scorecard");
+  const consent = page.getByRole("checkbox", { name: /privacy notice/ });
+  await page.getByRole("button", { name: /Start the questions/ }).click();
+  await consent.check();
+  await expect(page.getByText("Please tell us your first name.")).toBeVisible();
+  await expect(consent).toBeChecked();
+});
+
 test("keyboard flow: process, numbers, back, resume, submit, report, PDF, email", async ({ page }) => {
   await intake(page, `e2e-${Date.now()}@example.test`);
 
@@ -49,7 +62,9 @@ test("keyboard flow: process, numbers, back, resume, submit, report, PDF, email"
 
   // A number key picks the option and moves on.
   await pressAndAdvance(page, "2");
-  await expect(page.locator(".sc-card-n")).toHaveText("3");
+  await expect(page.locator(".sc-card-n")).toHaveText("2");
+  await expect(page.locator(".sc-progress-count")).toContainText("Question 2 of 30");
+  await expect(page.locator(".sc-save-state")).toHaveText("Saved");
   await shot(page, "3-choice");
 
   // Backspace and ← go back with the earlier answer still selected; → moves on again.
@@ -97,61 +112,60 @@ test("mouse flow works too", async ({ page }) => {
   await page.getByRole("textbox").fill("Order to delivery");
   await page.getByRole("button", { name: "OK" }).click();
   await page.getByRole("radio", { name: /Within a few days/ }).click();
-  await expect(page.locator(".sc-card-n")).toHaveText("3");
+  await expect(page.locator(".sc-card-n")).toHaveText("2");
   await page.getByRole("button", { name: "Previous question" }).click();
   await expect(page.getByRole("radio", { checked: true })).toContainText("Within a few days");
   await page.getByRole("button", { name: "Next question" }).click();
-  await expect(page.locator(".sc-card-n")).toHaveText("3");
+  await expect(page.locator(".sc-card-n")).toHaveText("2");
 });
 
-test("question layout matches the progress width and repositions for each viewport", async ({ page }) => {
+test("the focused shell keeps one question in view at every viewport, without site navigation", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   await intake(page, `e2e-layout-${Date.now()}@example.test`);
   await expect(page.getByRole("textbox")).toBeFocused();
+  await expect(page.locator(".gm-nav")).toBeHidden();
+  await expect(page.locator(".gm-header-cta")).toBeHidden();
+  await expect(page.locator(".gm-footer")).toBeHidden();
+  await expect(page.locator("header .gm-wordmark")).toBeVisible();
+  await expect(page.locator("header .gm-language")).toBeVisible();
   await page.getByRole("textbox").fill("Order to delivery");
   await pressAndAdvance(page, "Enter");
 
   const layout = () => page.evaluate(() => {
     const rect = (selector: string) => document.querySelector(selector)!.getBoundingClientRect();
-    const progress = rect(".sc-progress-wrap");
-    const card = rect(".sc-card");
-    const choices = rect(".sc-choices");
-    const heading = rect(".sc-card-q");
-    return { progress, card, choices, heading, viewportHeight: innerHeight };
+    return { progress: rect(".sc-progress-wrap"), choices: rect(".sc-choices"), heading: rect(".sc-card-q"), header: rect("header"), scrollY };
   });
-
-  await expect.poll(async () => {
-    const { card, viewportHeight } = await layout();
-    return Math.abs(card.top + card.height / 2 - viewportHeight / 2);
-  }).toBeLessThan(8);
-  let geometry = await layout();
-  expect(Math.abs(geometry.choices.left - geometry.progress.left)).toBeLessThan(2);
-  expect(Math.abs(geometry.choices.right - geometry.progress.right)).toBeLessThan(2);
-  expect(Math.abs(geometry.heading.width - geometry.progress.width)).toBeLessThan(2);
-  await expect(page.locator("#sc-q")).toBeFocused();
+  const check = async () => {
+    await expect(page.locator("#sc-q")).toBeFocused();
+    await expect.poll(() => page.evaluate(() => scrollY)).toBe(0);
+    const g = await layout();
+    expect(g.header.top).toBe(0);
+    expect(g.heading.top).toBeGreaterThanOrEqual(g.progress.bottom);
+    expect(Math.abs(g.choices.left - g.progress.left)).toBeLessThan(2);
+    expect(Math.abs(g.choices.right - g.progress.right)).toBeLessThan(2);
+  };
+  await check();
   await shot(page, "6-question-layout-desktop");
 
-  await page.setViewportSize({ width: 820, height: 1180 });
-  await page.evaluate(() => scrollTo(0, document.documentElement.scrollHeight));
-  await pressAndAdvance(page, "2");
-  await expect.poll(() => page.locator(".sc-progress-wrap").evaluate(element => Math.abs(element.getBoundingClientRect().top))).toBeLessThan(2);
-  geometry = await layout();
-  expect(geometry.heading.top).toBeGreaterThanOrEqual(geometry.progress.bottom);
-  expect(Math.abs(geometry.choices.left - geometry.progress.left)).toBeLessThan(2);
-  expect(Math.abs(geometry.choices.right - geometry.progress.right)).toBeLessThan(2);
-  await expect(page.locator("#sc-q")).toBeFocused();
-  await shot(page, "7-question-layout-tablet");
+  for (const [width, height, name] of [[820, 1180, "7-question-layout-tablet"], [390, 844, "8-question-layout-mobile"]] as const) {
+    await page.setViewportSize({ width, height });
+    await page.evaluate(() => scrollTo(0, document.documentElement.scrollHeight));
+    await pressAndAdvance(page, "2");
+    await check();
+    await shot(page, name);
+  }
+});
 
-  await page.setViewportSize({ width: 390, height: 844 });
-  await page.evaluate(() => scrollTo(0, document.documentElement.scrollHeight));
+test("one tab stop per question, and the section line appears once an area is finished", async ({ page }) => {
+  await intake(page, `e2e-momentum-${Date.now()}@example.test`);
+  await page.getByRole("textbox").fill("Order to delivery");
+  await pressAndAdvance(page, "Enter");
+  await expect(page.locator('.sc-choice[tabindex="0"]')).toHaveCount(1);
+  await expect(page.getByRole("progressbar")).toHaveAttribute("aria-valuetext", "0 of 30 questions answered");
+  for (let i = 0; i < 5; i++) await pressAndAdvance(page, "2");
+  await expect(page.locator(".sc-momentum")).toHaveText("Flow and waste done, 5 areas left.");
   await pressAndAdvance(page, "2");
-  await expect.poll(() => page.locator(".sc-progress-wrap").evaluate(element => Math.abs(element.getBoundingClientRect().top))).toBeLessThan(2);
-  geometry = await layout();
-  expect(geometry.heading.top).toBeGreaterThanOrEqual(geometry.progress.bottom);
-  expect(Math.abs(geometry.choices.left - geometry.progress.left)).toBeLessThan(2);
-  expect(Math.abs(geometry.choices.right - geometry.progress.right)).toBeLessThan(2);
-  await expect(page.locator("#sc-q")).toBeFocused();
-  await shot(page, "8-question-layout-mobile");
+  await expect(page.locator(".sc-momentum")).toHaveCount(0);
 });
 
 test("delete flow requires confirmation", async ({ page }) => {

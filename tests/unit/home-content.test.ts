@@ -3,6 +3,7 @@ import { getHomeContent } from "../../content/site/home";
 import { known } from "../../data/site";
 import { formatFt } from "../../data/offers";
 import { getContactSchema } from "../../lib/contact/validation";
+import { getVisual, visuals, type VisualId } from "../../data/visuals";
 
 describe("known()", () => {
   it("treats content-pack placeholders and blanks as missing", () => {
@@ -65,5 +66,15 @@ describe("sample report", () => {
     expect(r.locale ?? "en").toBe(locale);
     expect(r.quickWins).toHaveLength(3);
     expect(JSON.stringify(r)).not.toMatch(/\{[A-Za-z.]+\}/);
+  });
+});
+
+describe("visuals", () => {
+  it.each(Object.keys(visuals) as VisualId[])("%s never exposes its marker as a path", id => {
+    for (const locale of ["en", "hu"] as const) {
+      const v = getVisual(id, locale);
+      expect(v.src ?? "").not.toMatch(/\{\{/);
+      expect(v.name && v.brief && v.alt).toBeTruthy();
+    }
   });
 });

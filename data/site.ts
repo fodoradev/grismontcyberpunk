@@ -35,7 +35,7 @@ export const site = {
   /** Adult training registration number (07 §C), e.g. "B/2026/000123". */
   adultTrainingRegistration: "{{FILL: adult training registration number}}",
   /** Photo in public/, e.g. "/attila.jpg". */
-  photo: "{{FILL: real photo, friendly, work setting}}",
+  photo: "{{FILL: real portrait photo, 4:5, friendly, work setting}}",
 
   // ── [PROOF] blocks: empty until real, measured content exists (05-proof-plan.md). ──
   /** One measured result for the hero proof strip, e.g. "Month-end report: 3 days → 4 hours". */

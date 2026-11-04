@@ -6,6 +6,7 @@ import { getScorecardCopy } from "../../content/scorecard/copy";
 import { localizePath, type Locale } from "../../lib/i18n";
 import { INDUSTRIES, SIZE_BANDS } from "../../lib/scorecard/types";
 import { getQuestionContent } from "../../content/scorecard/questions";
+import { minutesLeft, resetCardScroll, useSectionMomentum } from "./momentum";
 
 export type FlowQuestion = {
   id: string;
@@ -37,17 +38,34 @@ function Prompt({ text, process, locale }: { text: string; process: string; loca
   return <>{parts.map((p, i) => <Fragment key={i}>{p}{i < parts.length - 1 ? <span className="sc-pipe">{name}</span> : null}</Fragment>)}</>;
 }
 
+/** The promised count: only the choice questions are numbered, the process name and free text aren't. */
+const numbered = (questions: FlowQuestion[]) => questions.filter(q => q.kind !== "text");
+
+function answeredList(questions: FlowQuestion[], answers: Record<string, string>, editingId?: string) {
+  // A text answer counts once it has been confirmed, not while it is still being typed.
+  return questions.filter(q => q.id in answers && !(q.kind === "text" && q.id === editingId) && (q.kind !== "text" || !q.required || answers[q.id].trim()));
+}
+
 function Progress({ questions, sections, answers, current, position, editingId, index, locale }: {
   questions: FlowQuestion[]; sections: FlowSection[]; answers: Record<string, string>; current: number; position?: string; editingId?: string; index: number; locale: Locale;
 }) {
-  // A text answer counts once it has been confirmed, not while it is still being typed.
-  const answered = questions.filter(q => q.id in answers && !(q.kind === "text" && q.id === editingId) && (q.kind !== "text" || !q.required || answers[q.id].trim()));
+  const hu = locale === "hu";
+  const answered = answeredList(questions, answers, editingId);
+  const scored = numbered(questions);
+  const answeredScored = answered.filter(q => q.kind !== "text").length;
+  const here = questions[index] as FlowQuestion | undefined;
+  const number = here && here.kind !== "text" ? scored.indexOf(here) + 1 : 0;
+  const left = number ? scored.length - number + 1 : here && index === 0 ? scored.length : 0;
+  const timeLeft = left ? (hu ? `kb. ${minutesLeft(left, scored.length)} perc van hátra` : `about ${minutesLeft(left, scored.length)} min left`) : "";
+  const count = !here ? (hu ? `${answeredScored}/${scored.length} megválaszolva` : `${answeredScored} of ${scored.length} answered`)
+    : number ? (hu ? `${number}. kérdés / ${scored.length}` : `Question ${number} of ${scored.length}`)
+    : index === 0 ? (hu ? "Mielőtt elkezdjük" : "Before the questions") : (hu ? "Utolsó kérdés" : "One last question");
   const doneAtMount = useRef<Set<number> | null>(null);
   const perSection = sections.map((s, i) => answered.filter(q => q.section === i).length / s.count);
   doneAtMount.current ??= new Set(perSection.flatMap((f, i) => (f === 1 ? [i] : [])));
   return (
     <div className="sc-progress-wrap">
-      <div className="sc-progress" role="progressbar" aria-label={locale === "hu" ? "A Folyamat-pontozó előrehaladása" : "Scorecard progress"} aria-valuemin={0} aria-valuemax={questions.length} aria-valuenow={answered.length}>
+      <div className="sc-progress" role="progressbar" aria-label={locale === "hu" ? "A Folyamat-pontozó előrehaladása" : "Scorecard progress"} aria-valuemin={0} aria-valuemax={questions.length} aria-valuenow={answered.length} aria-valuetext={hu ? `${answeredScored}/${scored.length} kérdés megválaszolva` : `${answeredScored} of ${scored.length} questions answered`}>
         {sections.map((s, i) => {
           const done = perSection[i] === 1;
           const cls = ["sc-seg", done ? "sc-seg-done" : "", done && !doneAtMount.current!.has(i) ? "sc-seg-sweep" : "", i === current ? "sc-seg-current" : ""].join(" ");
@@ -56,9 +74,7 @@ function Progress({ questions, sections, answers, current, position, editingId, 
       </div>
       <div className="sc-progress-meta" aria-hidden="true">
         <span>{sections[current]?.name ?? (locale === "hu" ? "Minden kész" : "All done")}{position ? <span className="sc-progress-pos">{locale === "hu" ? `, ${position}. kérdés` : `, question ${position}`}</span> : null}</span>
-        <span>{index < questions.length
-          ? (locale === "hu" ? `${index + 1}. kérdés / ${questions.length}` : `Question ${index + 1} of ${questions.length}`)
-          : (locale === "hu" ? `${answered.length}/${questions.length} megválaszolva` : `${answered.length} of ${questions.length} answered`)}</span>
+        <span className="sc-progress-count">{count}{timeLeft ? ` · ${timeLeft}` : ""}</span>
       </div>
     </div>
   );
@@ -75,6 +91,7 @@ export default function CardFlow({ token, firstName, questions, sections, initia
   const [answers, setAnswers] = useState(initialAnswers);
   const [message, setMessage] = useState<string>();
   const [saveFailed, setSaveFailed] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [submitting, startSubmit] = useTransition();
   const [switching, setSwitching] = useState(false);
   const switchingLocale = useRef(false);
@@ -83,8 +100,6 @@ export default function CardFlow({ token, firstName, questions, sections, initia
   const unsaved = useRef(new Map<string, string>());
   const persistedAnswers = useRef(new Set(Object.keys(initialAnswers)));
   const flushing = useRef<Promise<void>>(Promise.resolve());
-  const flow = useRef<HTMLElement>(null);
-  const stage = useRef<HTMLDivElement>(null);
   const heading = useRef<HTMLHeadingElement>(null);
   const card = useRef<HTMLDivElement>(null);
   const textField = useRef<HTMLInputElement & HTMLTextAreaElement>(null);
@@ -98,6 +113,7 @@ export default function CardFlow({ token, firstName, questions, sections, initia
   // ── Saving: optimistic, in order, retried; the final submit waits for everything to land. ──
   const flush = useCallback(() => {
     flushing.current = flushing.current.then(async () => {
+      setSaving(true);
       for (const [id, value] of [...unsaved.current]) {
         if (unsaved.current.get(id) !== value) continue;
         for (let attempt = 1; attempt <= SAVE_RETRIES; attempt++) {
@@ -115,6 +131,7 @@ export default function CardFlow({ token, firstName, questions, sections, initia
         }
       }
       setSaveFailed(unsaved.current.size > 0);
+      setSaving(false);
     });
     return flushing.current;
   }, [token]);
@@ -279,56 +296,40 @@ export default function CardFlow({ token, firstName, questions, sections, initia
     firstRender.current = false;
     if (shouldFocus) (q?.kind === "text" ? textField.current : heading.current)?.focus({ preventScroll: true });
 
-    const frame = requestAnimationFrame(() => {
-      const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      const tabletOrMobile = window.matchMedia("(max-width: 1000px)").matches;
-      const viewportHeight = window.visualViewport?.height ?? window.innerHeight;
-      let target: number;
-
-      if (tabletOrMobile) {
-        const flowRect = flow.current?.getBoundingClientRect();
-        if (!flowRect) return;
-        target = window.scrollY + flowRect.top;
-      } else {
-        const stageRect = stage.current?.getBoundingClientRect();
-        if (!stageRect) return;
-        target = window.scrollY + stageRect.top + stageRect.height / 2 - viewportHeight / 2;
-      }
-
-      const maxScroll = Math.max(0, document.documentElement.scrollHeight - viewportHeight);
-      const top = Math.min(Math.max(0, target), maxScroll);
-      if (reducedMotion) window.scrollTo(0, top);
-      else window.scrollTo({ top, behavior: "smooth" });
-    });
-
-    return () => cancelAnimationFrame(frame);
+    resetCardScroll();
   }, [index, q?.kind]);
 
   useEffect(() => () => clearTimeout(advanceTimer.current), []);
 
   const section = q ? q.section : sections.length;
+  const answeredNow = answeredList(questions, answers, q?.kind === "text" ? q.id : undefined);
+  const momentum = useSectionMomentum(index, sections.map((s, i) => answeredNow.filter(x => x.section === i).length === s.count), (done, left) => {
+    const name = sections[done].name;
+    if (!left) return hu ? `${name}: kész. Mind a hat terület megvan.` : `${name} done. All six areas finished.`;
+    return hu ? `${name}: kész. Még ${left} terület van hátra.` : `${name} done, ${left} ${left === 1 ? "area" : "areas"} left.`;
+  }, 0);
   const inSection = q ? questions.filter(x => x.section === q.section) : [];
   const posInSection = q ? inSection.indexOf(q) + 1 : 0;
 
   return (
-    <section ref={flow} className="sc-flow" aria-label={hu ? "A Folyamat-pontozó kérdései" : "Discovery Scorecard questions"} aria-busy={switching || submitting}>
+    <section className="sc-flow" aria-label={hu ? "A Folyamat-pontozó kérdései" : "Discovery Scorecard questions"} aria-busy={switching || submitting}>
       <Progress questions={questions} sections={sections} answers={answers} current={section}
         position={q && inSection.length > 1 ? (hu ? `${posInSection}/${inSection.length}` : `${posInSection} of ${inSection.length}`) : undefined} editingId={q?.kind === "text" ? q.id : undefined} index={index} locale={locale} />
 
-      <div ref={stage} className="sc-stage" inert={switching}>
+      <div className="sc-stage" inert={switching}>
         <div key={index} ref={card} className={`sc-card ${dir === 1 ? "sc-in-fwd" : "sc-in-back"}`}>
           {q ? (
             <>
-              <h1 ref={heading} tabIndex={-1} id="sc-q" className="sc-card-q"><span className="sc-card-n">{index + 1}</span><Prompt text={q.prompt} process={process} locale={locale} /></h1>
+              <h1 ref={heading} tabIndex={-1} id="sc-q" className="sc-card-q"><span className="sc-card-n" aria-hidden="true">{q.kind === "text" ? "" : numbered(questions).indexOf(q) + 1}</span><Prompt text={q.prompt} process={process} locale={locale} /></h1>
               {q.help ? <p className="sc-card-help" id="sc-q-help">{q.help}</p> : null}
 
               {q.kind === "text" ? (
                 <div className="sc-text">
                   {q.maxLength && q.maxLength > 120 ? (
-                    <textarea ref={textField} rows={3} maxLength={q.maxLength} placeholder={q.placeholder} value={answers[q.id] ?? ""} aria-required={q.required} aria-labelledby="sc-q" aria-describedby={q.help ? "sc-q-help" : undefined}
+                    <textarea ref={textField} name={q.id} rows={3} maxLength={q.maxLength} placeholder={q.placeholder} value={answers[q.id] ?? ""} aria-required={q.required} aria-labelledby="sc-q" aria-describedby={q.help ? "sc-q-help" : undefined}
                       onChange={e => { setAnswers(a => ({ ...a, [q.id]: e.target.value })); setMessage(undefined); }} />
                   ) : (
-                    <input ref={textField} maxLength={q.maxLength} placeholder={q.placeholder} value={answers[q.id] ?? ""} aria-labelledby="sc-q" aria-describedby={q.help ? "sc-q-help" : undefined}
+                    <input ref={textField} name={q.id} maxLength={q.maxLength} placeholder={q.placeholder} value={answers[q.id] ?? ""} aria-labelledby="sc-q" aria-describedby={q.help ? "sc-q-help" : undefined}
                       aria-required={q.required} autoComplete="off" onChange={e => { setAnswers(a => ({ ...a, [q.id]: e.target.value })); setMessage(undefined); }} />
                   )}
                   <div className="sc-ok">
@@ -340,8 +341,10 @@ export default function CardFlow({ token, firstName, questions, sections, initia
                 <div className="sc-choices" role="radiogroup" aria-labelledby="sc-q">
                   {q.options.map((o, i) => {
                     const checked = answers[q.id] === o.id;
+                    // One tab stop for the group; ↑/↓ moves between the options.
+                    const tabStop = checked || (!answers[q.id] && i === 0);
                     return (
-                      <button key={o.id} type="button" role="radio" aria-checked={checked} className="sc-choice" onClick={() => select(o.id)}>
+                      <button key={o.id} type="button" role="radio" aria-checked={checked} tabIndex={tabStop ? 0 : -1} className="sc-choice" onClick={() => select(o.id)}>
                         <kbd aria-hidden="true">{i + 1}</kbd>
                         <span>{o.label}</span>
                         {checked ? <svg className="sc-check" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3 3 7-7" /></svg> : null}
@@ -377,7 +380,8 @@ export default function CardFlow({ token, firstName, questions, sections, initia
       </div>
 
       <div className="sc-flow-foot">
-        <p className="sc-flow-msg" role="status" aria-live="polite">{message ?? (switching ? (hu ? "Válaszok mentése és nyelvváltás…" : "Saving answers and changing language…") : saveFailed ? (hu ? "Néhány választ még nem sikerült elmenteni; újrapróbáljuk." : "Some answers aren't saved yet; we'll keep trying.") : "")}</p>
+        <p className="sc-flow-msg" role="status" aria-live="polite">{message ?? (switching ? (hu ? "Válaszok mentése és nyelvváltás…" : "Saving answers and changing language…") : saveFailed ? (hu ? "Néhány választ még nem sikerült elmenteni; újrapróbáljuk." : "Some answers aren't saved yet; we'll keep trying.") : momentum ? <span key={momentum} className="sc-momentum">{momentum}</span> : "")}</p>
+        {answeredNow.length && !saveFailed ? <span className="sc-save-state" aria-hidden="true">{saving ? (hu ? "Mentés…" : "Saving…") : (hu ? "Mentve" : "Saved")}</span> : null}
         <span className="sc-keyhint sc-keyhint-nav">{q && q.kind !== "text" ? <><kbd>1</kbd>–<kbd>{q.options.length}</kbd>{hu ? " választás · " : " choose · "}</> : null}<kbd>Enter</kbd>{hu ? " tovább · " : " next · "}<kbd>←</kbd>{hu ? " vissza" : " back"}</span>
         <nav className="sc-flow-nav" aria-label={hu ? "Navigáció a kérdések között" : "Question navigation"}>
           <button type="button" onClick={() => go(index - 1)} disabled={index === 0 || switching} aria-label={hu ? "Előző kérdés" : "Previous question"}>←</button>

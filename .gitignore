@@ -8,4 +8,7 @@ test-results/
 playwright-report/
 .DS_Store
 .claude/
+.AGENTS.md
+.CLAUDE.md
 tmp/
+.vercel

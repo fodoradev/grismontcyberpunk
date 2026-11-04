@@ -1,9 +1,15 @@
 import { QUADRANT_SPLIT } from "./scoring";
-import { AREAS, type AreaId, type Quadrant, type ReportModel } from "./types";
+import { AREAS, type AreaId, type Level, type Quadrant, type ReportModel } from "./types";
 
 /** Pure layout math shared by the web (DOM SVG) and PDF (@react-pdf Svg) charts. */
 
-export const COLORS = { paper: "#F5F4EE", ink: "#202B26", lime: "#D5F36B", lilac: "#DCD4F4", line: "#D8DBD1", muted: "#536057", green: "#61782D", ghost: "#C9CEC0" };
+export const COLORS = { paper: "#F7F5F0", ink: "#20232B", crimson: "#D9273D", mist: "#EEF0F1", line: "#D9DEE2", muted: "#59616B", ghost: "#C5CBD0" };
+
+/** The night palette for the web report. PDFs and print keep COLORS above. */
+export const WEB_COLORS = { paper: "#07060F", panel: "#100F20", mist: "#191731", ink: "#F3F0FF", line: "#34314F", steel: "#807CA6", onDark: "#CFCBE6", crimson: "#FF2E54", flow: "#35F0D8" };
+
+/** Colour role of a score on the web: crimson is friction, mint is resolved. The number and level label always carry it too. */
+export function levelTone(level: Level) { return level === "Ad hoc" || level === "Person-dependent" ? "weak" : level === "Documented" ? "mid" : "strong"; }
 
 export type BarGeometry = { area: AreaId; width: number; ghostWidth: number };
 

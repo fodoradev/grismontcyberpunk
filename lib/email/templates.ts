@@ -6,21 +6,21 @@ const esc = (s: string) => s.replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt
 
 /** Minimal, client-safe HTML layout using the site's palette. */
 function layout(body: string, footer: string, locale: Locale = "en") {
-  return `<!doctype html><html lang="${locale}"><head><meta charset="utf-8"></head><body style="margin:0;background:#F5F4EE;font-family:Arial,Helvetica,sans-serif;color:#202B26">
+  return `<!doctype html><html lang="${locale}"><head><meta charset="utf-8"></head><body style="margin:0;background:#F7F5F0;font-family:Arial,Helvetica,sans-serif;color:#20232B">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:32px 16px">
 <table role="presentation" width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%">
-<tr><td style="font:800 24px Arial,sans-serif;letter-spacing:-1px;padding-bottom:24px">grismont<span style="color:#61782D">.</span></td></tr>
+<tr><td style="font:800 24px Arial,sans-serif;letter-spacing:-1px;padding-bottom:24px">grismont<span style="color:#D9273D">.</span></td></tr>
 <tr><td style="font-size:15px;line-height:1.6">${body}</td></tr>
-<tr><td style="font-size:12px;line-height:1.5;color:#536057;padding-top:28px;border-top:1px solid #D8DBD1">${footer}</td></tr>
+<tr><td style="font-size:12px;line-height:1.5;color:#59616B;padding-top:28px;border-top:1px solid #D9DEE2">${footer}</td></tr>
 </table></td></tr></table></body></html>`;
 }
 
 const button = (href: string, label: string) =>
-  `<p style="margin:24px 0"><a href="${esc(href)}" style="background:#202B26;color:#F5F4EE;padding:13px 18px;border-radius:8px;text-decoration:none;font-weight:bold;display:inline-block">${esc(label)}</a></p>`;
+  `<p style="margin:24px 0"><a href="${esc(href)}" style="background:#D9273D;color:#FFFDF9;padding:13px 18px;border-radius:6px;text-decoration:none;font-weight:bold;display:inline-block">${esc(label)}</a></p>`;
 
 const deleteFooter = (deleteUrl: string, locale: Locale = "en") => locale === "hu"
-  ? `Azért kapod ezt az e-mailt, mert elkezdted kitölteni a Grismont Folyamat-pontozóját. <a href="${esc(deleteUrl)}" style="color:#536057">Válaszaim és riportom törlése</a>.`
-  : `You're receiving this because you started the Grismont Discovery Scorecard. <a href="${esc(deleteUrl)}" style="color:#536057">Delete my answers and report</a>.`;
+  ? `Azért kapod ezt az e-mailt, mert elkezdted kitölteni a Grismont Folyamat-pontozóját. <a href="${esc(deleteUrl)}" style="color:#59616B">Válaszaim és riportom törlése</a>.`
+  : `You're receiving this because you started the Grismont Discovery Scorecard. <a href="${esc(deleteUrl)}" style="color:#59616B">Delete my answers and report</a>.`;
 
 export function advancedAuditResumeEmail(resumeUrl: string, privacyUrl: string, locale: Locale = "en") {
   locale = normalizeLocale(locale);
@@ -31,12 +31,12 @@ export function advancedAuditResumeEmail(resumeUrl: string, privacyUrl: string, 
 <p>Elmentettük az első válaszodat a Grismont részletes auditjában. Ezzel a privát hivatkozással később, akár másik eszközön is folytathatod.</p>
 ${button(resumeUrl, "Audit folytatása")}
 <p>Őrizd biztonságban ezt a hivatkozást: bárki megnyithatja, aki hozzáfér. Nem küldünk emlékeztetőket, és nem teszünk marketinglistára. Az audit az adatkezelési tájékoztatóban leírt idő után automatikusan törlődik.</p>
-<p>Attila<br><span style="color:#536057">Grismont</span></p>` : `
+<p>Attila<br><span style="color:#59616B">Grismont</span></p>` : `
 <p>Hello,</p>
 <p>We've saved your first answer in the Grismont Advanced Audit. Use this private link to continue later, including on another device.</p>
 ${button(resumeUrl, "Continue your audit")}
 <p>Keep this link private: anyone with access to it can open your saved audit. We won't send reminders or add you to a marketing list. Your audit is deleted automatically after the period described in the privacy notice.</p>
-<p>Attila<br><span style="color:#536057">Grismont</span></p>`, `<a href="${esc(privacyUrl)}" style="color:#536057">${hu ? "Adatkezelési tájékoztató" : "Privacy notice"}</a>`, locale);
+<p>Attila<br><span style="color:#59616B">Grismont</span></p>`, `<a href="${esc(privacyUrl)}" style="color:#59616B">${hu ? "Adatkezelési tájékoztató" : "Privacy notice"}</a>`, locale);
   const text = hu
     ? `Szia!\n\nElmentettük az első válaszodat a Grismont részletes auditjában. Ezzel a privát hivatkozással később, akár másik eszközön is folytathatod:\n${resumeUrl}\n\nŐrizd biztonságban ezt a hivatkozást: bárki megnyithatja, aki hozzáfér. Nem küldünk emlékeztetőket, és nem teszünk marketinglistára. Az audit az adatkezelési tájékoztatóban leírt idő után automatikusan törlődik.`
     : `Hello,\n\nWe've saved your first answer in the Grismont Advanced Audit. Use this private link to continue later, including on another device:\n${resumeUrl}\n\nKeep this link private: anyone with access to it can open your saved audit. We won't send reminders or add you to a marketing list. Your audit is deleted automatically after the period described in the privacy notice.`;
@@ -56,14 +56,14 @@ export function reportEmail(r: ReportModel, links: { report: string; delete: str
     const html = layout(`
 <p>Kedves ${esc(r.intake.firstName)}!</p>
 <p>Elkészült a Folyamat-pontozód eredménye. A riportot PDF-ben csatoltam, de online is bármikor megnézheted.</p>
-<p style="background:#DCD4F4;border-radius:12px;padding:16px 18px;margin:20px 0"><strong>A legnagyobb kockázat:</strong> ${esc(r.biggestRisk.title)}</p>
+<p style="background:#EEF0F1;border-radius:12px;padding:16px 18px;margin:20px 0"><strong>A legnagyobb kockázat:</strong> ${esc(r.biggestRisk.title)}</p>
 <p style="margin-bottom:6px"><strong>Három teendő, amellyel már jövő héten elkezdheted:</strong></p>
 <ol style="padding-left:20px;margin-top:0">${wins}</ol>
 ${button(links.report, "Megnézem a riportot")}
 <p>${esc(help)}</p>
 ${links.booking ? button(links.booking, "Foglalok egy 20 perces átnézést") : ""}
-<p style="font-size:14px">${esc(deeper)} <a href="${esc(links.audit)}" style="color:#202B26">Részletes folyamat-audit</a></p>
-<p>Attila<br><span style="color:#536057">Grismont</span></p>`, deleteFooter(links.delete, locale), locale);
+<p style="font-size:14px">${esc(deeper)} <a href="${esc(links.audit)}" style="color:#20232B">Részletes folyamat-audit</a></p>
+<p>Attila<br><span style="color:#59616B">Grismont</span></p>`, deleteFooter(links.delete, locale), locale);
     const text = `Kedves ${r.intake.firstName}!
 
 Elkészült a Folyamat-pontozód eredménye. A riportot PDF-ben csatoltam, online itt nézheted meg: ${links.report}
@@ -92,14 +92,14 @@ Válaszaim és riportom törlése: ${links.delete}`;
   const html = layout(`
 <p>Hi ${esc(r.intake.firstName)},</p>
 <p>Your Discovery Scorecard report is attached as a PDF, and you can open the full version online any time.</p>
-<p style="background:#DCD4F4;border-radius:12px;padding:16px 18px;margin:20px 0"><strong>Your biggest risk:</strong> ${esc(r.biggestRisk.title)}</p>
+<p style="background:#EEF0F1;border-radius:12px;padding:16px 18px;margin:20px 0"><strong>Your biggest risk:</strong> ${esc(r.biggestRisk.title)}</p>
 <p style="margin-bottom:6px"><strong>Three things you can start next week:</strong></p>
 <ol style="padding-left:20px;margin-top:0">${wins}</ol>
 ${button(links.report, "Open your report")}
 <p>${esc(help)}</p>
 ${links.booking ? button(links.booking, "Book a 20-minute review") : ""}
-<p style="font-size:14px">${esc(deeper)} <a href="${esc(links.audit)}" style="color:#202B26">Advanced audit</a></p>
-<p>Attila<br><span style="color:#536057">Grismont</span></p>`, deleteFooter(links.delete));
+<p style="font-size:14px">${esc(deeper)} <a href="${esc(links.audit)}" style="color:#20232B">Advanced audit</a></p>
+<p>Attila<br><span style="color:#59616B">Grismont</span></p>`, deleteFooter(links.delete));
   const text = `Hi ${r.intake.firstName},
 
 Your Discovery Scorecard report is attached as a PDF. Full version online: ${links.report}
@@ -139,7 +139,7 @@ export function reminderEmail(firstName: string, answered: number, total: number
 <p>Elkezdted kitölteni a Grismont Folyamat-pontozóját, de még nem fejezted be. ${esc(progress)}</p>
 <p>Ha beküldöd, azonnal megkapod a riportot: hat terület értékelését, három gyorsan megvalósítható javaslatot, a legnagyobb kockázatot és egy 90 napos ütemtervet.</p>
 ${button(links.resume, "Folytasd a kitöltést")}
-<p style="color:#536057">${esc(stageNotice)}</p>`, deleteFooter(links.delete, locale), locale);
+<p style="color:#59616B">${esc(stageNotice)}</p>`, deleteFooter(links.delete, locale), locale);
     const text = `Kedves ${firstName}!
 
 Elkezdted kitölteni a Grismont Folyamat-pontozóját, de még nem fejezted be. ${progress}
@@ -163,7 +163,7 @@ Válaszaim és riportom törlése: ${links.delete}`;
 <p>You started the Grismont Discovery Scorecard but didn't finish it. ${esc(progress)}</p>
 <p>When you submit, you'll get your report straight away: your profile across six areas, three quick wins, your biggest risk and a 90-day roadmap.</p>
 ${button(links.resume, "Continue where you left off")}
-<p style="color:#536057">${esc(stageNotice)}</p>`, deleteFooter(links.delete));
+<p style="color:#59616B">${esc(stageNotice)}</p>`, deleteFooter(links.delete));
   const text = `Hi ${firstName},
 
 You started the Grismont Discovery Scorecard but didn't finish it. ${progress}
@@ -195,7 +195,7 @@ export function ownerNotifyEmail(r: ReportModel, details: { email: string; role?
   ];
   const html = layout(`
 <table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;font-size:14px">${rows.map(([k, v]) =>
-    `<tr><td style="padding:8px 12px 8px 0;color:#536057;vertical-align:top">${esc(k)}</td><td style="padding:8px 0;overflow-wrap:anywhere">${esc(v)}</td></tr>`).join("")}</table>
+    `<tr><td style="padding:8px 12px 8px 0;color:#59616B;vertical-align:top">${esc(k)}</td><td style="padding:8px 0;overflow-wrap:anywhere">${esc(v)}</td></tr>`).join("")}</table>
 ${button(details.reportUrl, hu ? "Riport megnyitása" : "Open the report")}`, hu ? "Belső értesítés a Grismont Folyamat-pontozóból." : "Internal notification from the Discovery Scorecard.", locale);
   const text = rows.map(([k, v]) => `${k}: ${v}`).join("\n") + `\n\n${details.reportUrl}`;
   return { subject, html, text: hu ? `${text}\n\nBelső értesítés a Grismont Folyamat-pontozóból.` : text };
@@ -210,8 +210,8 @@ export function contactNotifyEmail(m: { name: string; email: string; message: st
   const rows: [string, string][] = [["Name", m.name], ["Email", m.email], ["Interested in", interest], ["Language", m.locale.toUpperCase()], ["Received", m.createdAt.toISOString()]];
   const html = layout(`
 <p><strong>New message from the contact form.</strong> Reply to this email to answer ${esc(m.name)} directly.</p>
-<table role="presentation" cellpadding="0" cellspacing="0" style="font-size:14px;margin:16px 0">${rows.map(([k, v]) => `<tr><td style="color:#536057;padding:3px 16px 3px 0">${k}</td><td>${esc(v)}</td></tr>`).join("")}</table>
-<p style="background:#EAF0DC;border-radius:12px;padding:16px 18px;white-space:pre-wrap">${esc(m.message)}</p>`, "Sent by the grismont.hu contact form. The message is deleted automatically after 12 months.");
+<table role="presentation" cellpadding="0" cellspacing="0" style="font-size:14px;margin:16px 0">${rows.map(([k, v]) => `<tr><td style="color:#59616B;padding:3px 16px 3px 0">${k}</td><td>${esc(v)}</td></tr>`).join("")}</table>
+<p style="background:#EEF0F1;border-radius:12px;padding:16px 18px;white-space:pre-wrap">${esc(m.message)}</p>`, "Sent by the grismont.hu contact form. The message is deleted automatically after 12 months.");
   const text = `New message from the contact form.\n\n${rows.map(([k, v]) => `${k}: ${v}`).join("\n")}\n\n${m.message}`;
   return { subject, html, text };
 }
@@ -220,15 +220,15 @@ type FollowUpLinks = { report: string; unsubscribe: string; booking?: string };
 type CaseStudyLite = { title: string; problem: string; action: string; result: string; url?: string };
 
 const unsubscribeFooter = (url: string, locale: Locale) => locale === "hu"
-  ? `Azért kapod ezt az e-mailt, mert a Folyamat-pontozó végén kérted az eredményeiddel kapcsolatos e-maileket. <a href="${esc(url)}" style="color:#536057">Leiratkozás</a>.`
-  : `You're receiving this because you asked for follow-up emails about your scorecard results. <a href="${esc(url)}" style="color:#536057">Unsubscribe</a>.`;
+  ? `Azért kapod ezt az e-mailt, mert a Folyamat-pontozó végén kérted az eredményeiddel kapcsolatos e-maileket. <a href="${esc(url)}" style="color:#59616B">Leiratkozás</a>.`
+  : `You're receiving this because you asked for follow-up emails about your scorecard results. <a href="${esc(url)}" style="color:#59616B">Unsubscribe</a>.`;
 
 /** Marketing follow-ups (04 §3), sent only with the separate consent. Every one carries an unsubscribe link. */
 export function followUpEmail(kind: "followup_2" | "followup_5" | "followup_9", r: ReportModel, links: FollowUpLinks, caseStudy?: CaseStudyLite) {
   const locale = normalizeLocale(r.locale ?? "en");
   const hu = locale === "hu";
   const name = r.intake.firstName;
-  const sign = `<p>Attila<br><span style="color:#536057">Grismont</span></p>`;
+  const sign = `<p>Attila<br><span style="color:#59616B">Grismont</span></p>`;
   let subject: string, body: string, text: string;
   if (kind === "followup_2") {
     const w = r.quickWins[0];
@@ -238,7 +238,7 @@ export function followUpEmail(kind: "followup_2" | "followup_5" | "followup_9", 
       : [["What we saw", w.observed], ["Why it matters", w.why], ["What to do", w.action], ["Done when", w.done]];
     body = `<p>${hu ? `Kedves ${esc(name)}!` : `Hi ${esc(name)},`}</p>
 <p>${hu ? "A riportod első gyors javítása ez volt:" : "The first quick win in your report was:"}</p>
-<p style="background:#EAF0DC;border-radius:12px;padding:16px 18px"><strong>${esc(w.title)}</strong></p>
+<p style="background:#EEF0F1;border-radius:12px;padding:16px 18px"><strong>${esc(w.title)}</strong></p>
 ${rows.map(([k, v]) => `<p><strong>${esc(k)}:</strong> ${esc(v)}</p>`).join("\n")}
 <p>${hu ? "Ha elakadsz, válaszolj erre az e-mailre, és segítek." : "If you get stuck, reply to this email and I'll help."}</p>
 ${button(links.report, hu ? "Megnézem a riportot" : "Open your report")}${sign}`;
@@ -249,7 +249,7 @@ ${button(links.report, hu ? "Megnézem a riportot" : "Open your report")}${sign}
     body = `<p>${hu ? `Kedves ${esc(name)}!` : `Hi ${esc(name)},`}</p>
 <p><strong>${esc(caseStudy.title)}</strong></p>
 <p>${esc(caseStudy.problem)}</p><p>${esc(caseStudy.action)}</p>
-<p style="background:#EAF0DC;border-radius:12px;padding:16px 18px"><strong>${hu ? "Eredmény" : "Result"}:</strong> ${esc(caseStudy.result)}</p>
+<p style="background:#EEF0F1;border-radius:12px;padding:16px 18px"><strong>${hu ? "Eredmény" : "Result"}:</strong> ${esc(caseStudy.result)}</p>
 ${caseStudy.url ? button(caseStudy.url, hu ? "Elolvasom az esetet" : "Read the case") : ""}${sign}`;
     text = `${hu ? `Kedves ${name}!` : `Hi ${name},`}\n\n${caseStudy.title}\n\n${caseStudy.problem}\n\n${caseStudy.action}\n\n${hu ? "Eredmény" : "Result"}: ${caseStudy.result}${caseStudy.url ? `\n${caseStudy.url}` : ""}`;
   } else {

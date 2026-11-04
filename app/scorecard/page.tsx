@@ -1,10 +1,9 @@
 import { site } from "../../data/site";
 import type { Metadata } from "next";
 import IntakeForm from "../../components/scorecard/IntakeForm";
-import { getQuestionContent } from "../../content/scorecard/questions";
+import SamplePreview from "../../components/scorecard/SamplePreview";
 import { getLocale } from "../../lib/i18n-server";
 import { localizePath } from "../../lib/i18n";
-import { AREAS } from "../../lib/scorecard/types";
 
 // Copy: docs/content-plan/04-copy-scorecard-en-hu.md §1.
 const copy = {
@@ -36,20 +35,20 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function ScorecardIntake() {
   const locale = await getLocale();
   const c = copy[locale];
-  const { AREA_NAMES } = getQuestionContent(locale);
   return (
-    <main id="main-content" className="gm-shell sc-page">
-      <div className="sc-intro">
+    <main id="main-content" className="gm-shell sc-intake-page">
+      <div className="sc-intake-head">
         <div className="gm-label">{c.label}</div>
         <h1>{c.title}</h1>
         <p className="gm-lead">{c.intro}</p>
-        <p className="gm-lead"><strong>{c.youGet}</strong></p>
-        <ul className="sc-get">{c.items.map(item => <li key={item}>{item}</li>)}</ul>
-        <ol className="sc-areas">{AREAS.map((a, i) => <li key={a}><span>{String(i + 1).padStart(2, "0")} /</span>{AREA_NAMES[a]}</li>)}</ol>
-        <p className="sc-hint">{c.reassurance}<br />{c.privacy}</p>
-        {site.sampleReportPublished ? <p className="sc-hint"><a className="gm-text-link" href={localizePath(locale, "/scorecard/sample")}>{c.sample} <span aria-hidden="true">↗</span></a></p> : null}
       </div>
       <IntakeForm locale={locale} />
+      <div className="sc-intake-rest">
+        <p className="sc-get-title">{c.youGet}</p>
+        <ul className="sc-get">{c.items.map(item => <li key={item}>{item}</li>)}</ul>
+        <SamplePreview locale={locale} sampleLabel={c.sample} sampleHref={site.sampleReportPublished ? localizePath(locale, "/scorecard/sample") : undefined} />
+        <p className="sc-reassure">{c.reassurance}<br />{c.privacy}</p>
+      </div>
     </main>
   );
 }

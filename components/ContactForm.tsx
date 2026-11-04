@@ -1,13 +1,13 @@
 "use client";
 
-import { useActionState, useEffect, useRef, useState } from "react";
+import { startTransition, useActionState, useEffect, useRef, useState, type FormEvent } from "react";
 import { sendContactMessage, type ContactState } from "../lib/contact/actions";
 import { business } from "../data/business";
 import { localizePath, type Locale } from "../lib/i18n";
 
 const copy = {
   en: {
-    name: "Name", email: "Work email", message: "What takes too long?", placeholder: "e.g. Our weekly production report takes a full day to build.",
+    name: "Name", email: "Work email", message: "What takes too long?", placeholder: "e.g. Our weekly production report takes a full day to build…",
     interest: "I'm interested in", optional: "optional",
     interests: { training: "Training", workshop: "Workshop", programme: "Programme", sprint: "Sprint", unsure: "Not sure yet" },
     consent: ["I have read the ", "privacy notice", "."], newTab: " (opens in a new tab)",
@@ -15,7 +15,7 @@ const copy = {
     offline: "We couldn't reach the server. Check your connection and try again.",
   },
   hu: {
-    name: "Név", email: "Munkahelyi e-mail", message: "Mi tart túl sokáig?", placeholder: "Pl. a heti gyártási riport összeállítása egy teljes napot elvisz.",
+    name: "Név", email: "Munkahelyi e-mail", message: "Mi tart túl sokáig?", placeholder: "Pl. a heti gyártási riport összeállítása egy teljes napot elvisz…",
     interest: "Ez érdekel", optional: "nem kötelező",
     interests: { training: "Tréning", workshop: "Workshop", programme: "Program", sprint: "Sprint", unsure: "Még nem tudom" },
     consent: ["Elolvastam az ", "adatkezelési tájékoztatót", "."], newTab: " (új lapon nyílik meg)",
@@ -59,14 +59,21 @@ export default function ContactForm({ locale = "en" }: { locale?: Locale }) {
     return () => cancelAnimationFrame(frame);
   }, [state]);
 
+  // Run the action by hand: a form `action` prop resets the fields when it returns, which would drop a tick made meanwhile. The prop stays for submits before hydration.
+  const submit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const data = new FormData(event.currentTarget);
+    startTransition(() => action(data));
+  };
+
   if (state.ok) return <p className="home-contact-thanks" role="status">{t.thanks}</p>;
 
   return (
-    <form ref={form} action={action} className="home-contact-form" noValidate>
+    <form ref={form} action={action} onSubmit={submit} className="home-contact-form" noValidate>
       {state.message ? <p className="sc-alert" role="alert">{state.message}</p> : null}
       <div className="home-contact-row">
         <label className="sc-field"><span>{t.name}</span><input name="name" autoComplete="name" required maxLength={100} defaultValue={v.name} {...describe("name")} /><FieldError id="name" message={err("name")} /></label>
-        <label className="sc-field"><span>{t.email}</span><input name="email" type="email" autoComplete="email" required maxLength={254} defaultValue={v.email} {...describe("email")} /><FieldError id="email" message={err("email")} /></label>
+        <label className="sc-field"><span>{t.email}</span><input name="email" type="email" autoComplete="email" required maxLength={254} spellCheck={false} defaultValue={v.email} {...describe("email")} /><FieldError id="email" message={err("email")} /></label>
       </div>
       <label className="sc-field"><span>{t.message}</span><textarea name="message" rows={4} required maxLength={3000} placeholder={t.placeholder} defaultValue={v.message} {...describe("message")} /><FieldError id="message" message={err("message")} /></label>
       <fieldset className="home-contact-interest">

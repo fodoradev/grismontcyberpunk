@@ -76,3 +76,15 @@ test("Advanced Audit saves, resumes, completes, and downloads report formats", a
   expect(pdf.headers()["content-disposition"]).toContain("attachment");
   expect((await pdf.body()).subarray(0,5).toString()).toBe("%PDF-");
 });
+
+test("the privacy tick survives a failed audit start", async ({page}) => {
+  await page.goto("/advanced-audit");
+  await page.getByLabel(/Email address/).fill("not-an-email");
+  await page.getByRole("checkbox",{name:/privacy notice/}).check();
+  await page.getByRole("checkbox",{name:/resume link/}).check();
+  await page.getByRole("button",{name:"Start the audit"}).click();
+  await expect(page.locator("#audit-email-error")).toBeVisible();
+  await expect(page.getByRole("checkbox",{name:/privacy notice/})).toBeChecked();
+  await expect(page.getByRole("checkbox",{name:/resume link/})).toBeChecked();
+  await expect(page.getByLabel(/Email address/)).toHaveValue("not-an-email");
+});

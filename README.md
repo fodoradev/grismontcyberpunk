@@ -66,8 +66,8 @@ The scorecard is not a newsletter signup. Reminders and the short follow-up seri
 - `components/ContactForm.tsx`, `lib/contact/`: home page contact form (stored, forwarded to the owner, deleted after 12 months).
 - `app/globals.css`: visual tokens, responsive layout, and motion styles.
 - `app/home.css`: scoped homepage composition, diagrams and responsive layout.
-- `components/FlowArt.tsx`: illustration artwork and accessible description, styled as a digital sticky note with a gently lifted lower edge and a soft shadow concentrated at the bottom right. The figure number, bottom label and “g.” stamp have been removed.
-- `components/FlowDots.tsx` and `lib/animation/flow.ts`: a fixed pool of twelve dots recoils and yields at encounters; occasional paused dots are nudged forward by a follower. Green dots move smoothly and faster after the clarity gate. `MAX_GRAY_DOTS` caps active gray dots at twelve. Returning dots wait hidden off canvas until capacity and space at their entrance are available. The simulation pauses off screen, in background tabs and for reduced-motion preferences.
+- `data/visuals.ts` and `components/VisualSlot.tsx`: every image slot, with placeholders until the files exist. `docs/asset-prompts.md`: a ready-to-paste prompt for each slot. `docs/design-guideline.md`: the night shift design system. `components/FlowArt.tsx`: the tangled-to-clear diagram in the method section, with its accessible description.
+- `components/FlowDots.tsx` and `lib/animation/flow.ts`: a fixed pool of twelve dots recoils and yields at encounters; occasional paused dots are nudged forward by a follower. Dots are crimson before the gate and mint past it. The stream runs for 12 s while in view, then rests on the static picture, which is also what reduced motion shows.
 - `components/ProcessExplorer.tsx`: the three problem cards (#problems), with keyboard-accessible selection buttons.
 - `components/SiteHeader.tsx`, `components/SiteFooter.tsx`: shared navigation.
 - `components/LegalPage.tsx`: legal-page visual structure.

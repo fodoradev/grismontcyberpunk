@@ -1,9 +1,12 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import SiteHeader from "../components/SiteHeader";
 import SiteFooter from "../components/SiteFooter";
 import "./globals.css";
+import "./inner.css";
 import { getLocale, getPublicPath } from "../lib/i18n-server";
+
+export const viewport: Viewport = { themeColor: "#07060F" };
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale();

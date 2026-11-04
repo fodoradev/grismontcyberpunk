@@ -1,0 +1,368 @@
+/* Inner pages: scorecard, audit, report, legal, 404. Loaded after globals.css; same specificity, later wins. */
+
+/* Focused flow shell: wordmark and language only, so every remaining link is deliberate. */
+#grismont-board:has(.sc-flow-page) { min-height: 100svh; display: flex; flex-direction: column; }
+#grismont-board:has(.sc-flow-page) :is(.gm-nav, .gm-header-cta, .gm-mobile-menu, .gm-footer) { display: none; }
+#grismont-board:has(.sc-flow-page) .gm-top { grid-template-columns: 1fr auto; }
+#grismont-board .sc-flow-page { flex: 1; display: flex; width: 100%; padding-top: 8px; padding-bottom: 16px; }
+#grismont-board .sc-flow { flex: 1; width: 100%; min-height: 0; }
+#grismont-board .sc-stage { padding: 24px 0; }
+#grismont-board .sc-progress-wrap { padding: 10px 0; }
+#grismont-board .sc-progress-meta { font-size: 14px; font-variant-numeric: tabular-nums; }
+#grismont-board .sc-progress-meta > span:first-child { font-weight: 600; }
+#grismont-board .sc-progress-count { text-align: right; }
+#grismont-board .sc-seg > span { transition: transform 260ms var(--gm-ease), background-color 200ms ease; }
+
+/* Cards: quick and interruptible; the next key press never waits for them. */
+#grismont-board .sc-in-fwd { animation: sc-in-fwd 180ms var(--gm-ease) both; }
+#grismont-board .sc-in-back { animation: sc-in-back 180ms var(--gm-ease) both; }
+@keyframes sc-in-fwd { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@keyframes sc-in-back { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: none; } }
+#grismont-board .sc-card-q { font-size: clamp(25px, 3.4vw, 36px); line-height: 1.2; }
+#grismont-board .sc-card-n { display: inline-block; min-width: 0; margin-right: 12px; font: 500 14px/1 var(--gm-mono); letter-spacing: 0; vertical-align: .35em; color: var(--gm-muted); font-variant-numeric: tabular-nums; }
+#grismont-board .sc-card-n:empty { display: none; }
+#grismont-board .sc-card-help { font-size: 17px; }
+#grismont-board .sc-optional { font-family: var(--gm-body); font-size: 14px; }
+#grismont-board .sc-choice { font-size: 17px; min-height: 52px; transition: border-color 140ms ease, background-color 140ms ease, transform 100ms var(--gm-ease); }
+#grismont-board .sc-choice:active { transform: scale(.985); }
+#grismont-board .sc-choice:focus-visible { outline: 2px solid var(--gm-flow); outline-offset: 2px; }
+#grismont-board .sc-text input:focus-visible, #grismont-board .sc-text textarea:focus-visible { border-bottom-color: var(--gm-flow); box-shadow: 0 2px 0 var(--gm-flow); }
+
+/* Flow footer: errors, section momentum and save state. */
+#grismont-board .sc-flow-foot { flex-wrap: wrap; }
+#grismont-board .sc-flow-msg { min-width: min(100%, 220px); }
+#grismont-board .sc-momentum { display: inline-block; color: var(--gm-ink); font-weight: 600; animation: sc-momentum 240ms ease-out both; }
+@keyframes sc-momentum { from { opacity: 0; } to { opacity: 1; } }
+#grismont-board .sc-save-state { font: 400 13px var(--gm-mono); color: var(--gm-muted); white-space: nowrap; }
+#grismont-board .sc-resume-bar { font-size: 13px; }
+#grismont-board .sc-flow-nav { margin-left: auto; }
+
+/* Intake: promise and form first, then the proof. The form stays in view on desktop. */
+#grismont-board .sc-intake-page { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); grid-template-areas: "head form" "rest form"; gap: 0 clamp(32px, 6vw, 72px); align-items: start; padding-top: clamp(32px, 5vw, 64px); padding-bottom: clamp(48px, 7vw, 96px); }
+#grismont-board .sc-intake-page > .sc-alert { grid-column: 1 / -1; }
+#grismont-board .sc-intake-head { grid-area: head; }
+#grismont-board .sc-intake-rest { grid-area: rest; margin-top: 32px; }
+#grismont-board .sc-intake-page > .sc-intake { grid-area: form; position: sticky; top: 24px; margin-top: 0; }
+#grismont-board .sc-intake-page h1 { font-size: clamp(36px, 4.6vw, 60px); margin: 14px 0 18px; }
+#grismont-board .sc-intake-page .gm-lead { font-size: 18px; line-height: 1.6; max-width: 52ch; }
+#grismont-board .sc-intake { padding: clamp(22px, 3vw, 32px); }
+#grismont-board .sc-intake .sc-consent { font-size: 14px; }
+#grismont-board .sc-intake .sc-consent a { text-underline-offset: 3px; }
+#grismont-board .sc-get-title { font-size: 18px; font-weight: 600; margin-bottom: 4px; }
+#grismont-board .sc-get { list-style: none; padding: 0; margin: 0 0 28px; font-size: 16px; line-height: 1.5; }
+#grismont-board .sc-get li { padding: 10px 0; border-top: 1px solid var(--gm-line); }
+#grismont-board .sc-get li:last-child { border-bottom: 1px solid var(--gm-line); }
+#grismont-board .sc-section-list { list-style: none; padding: 0; margin: 0 0 24px; display: flex; flex-wrap: wrap; gap: 8px; font-size: 14px; }
+#grismont-board .sc-section-list li { padding: 6px 10px; border: 1px solid var(--gm-line); border-radius:2px; background: var(--gm-white); }
+#grismont-board .sc-reassure { font-size: 14px; line-height: 1.6; color: var(--gm-muted); margin-top: 22px; }
+#grismont-board .sc-audit-already { background: none; padding: 0; margin-bottom: 14px; font-size: 14px; color: var(--gm-muted); }
+
+/* Sample preview */
+#grismont-board .sc-preview { margin: 0; padding: clamp(20px, 2.5vw, 28px); background: var(--gm-mist); border-radius: var(--gm-radius); }
+#grismont-board .sc-preview-bars { list-style: none; padding: 0; margin: 14px 0 18px; }
+#grismont-board .sc-preview-bars li { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr) 30px; gap: 12px; align-items: center; padding: 7px 0; font-size: 14px; line-height: 1.3; }
+#grismont-board .sc-preview-bars i { display: block; height: 8px; border-radius:2px; background: var(--gm-line); overflow: hidden; }
+#grismont-board .sc-preview-bars b { display: block; height: 100%; border-radius:2px; background: var(--gm-flow); }
+#grismont-board .sc-preview-bars em { font-style: normal; font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; }
+#grismont-board .sc-preview-risk { font-size: 15px; line-height: 1.5; padding-top: 14px; border-top: 1px solid var(--gm-line); }
+#grismont-board .sc-preview-link { display: inline-block; margin-top: 14px; font-weight: 600; font-size: 16px; text-decoration-color: var(--gm-crimson); text-decoration-thickness: 2px; }
+
+/* Report */
+#grismont-board .sc-report-head { padding-bottom: 28px; }
+#grismont-board .sc-report-head h1 { font-size: clamp(38px, 5.2vw, 64px); }
+#grismont-board .sc-report-head .gm-lead { font-size: 18px; }
+#grismont-board .sc-summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 28px 0 0; background: var(--gm-mist); color: var(--gm-ink); border: 1px solid var(--gm-line); overflow: hidden; }
+#grismont-board .sc-summary > div { padding: clamp(20px, 2.5vw, 28px); min-width: 0; }
+#grismont-board .sc-summary > div + div { border-left: 1px solid var(--gm-line); }
+#grismont-board .sc-summary dt { font: 500 12px/1.4 var(--gm-mono); letter-spacing: .05em; text-transform: uppercase; color: var(--gm-on-dark); }
+#grismont-board .sc-summary dd { margin: 10px 0 0; font-size: 20px; font-weight: 600; line-height: 1.3; letter-spacing: -.01em; }
+#grismont-board .sc-summary dd small { display: block; margin-top: 8px; font-size: 15px; font-weight: 400; line-height: 1.5; letter-spacing: 0; color: var(--gm-on-dark); }
+#grismont-board .sc-summary dd b { font-variant-numeric: tabular-nums; }
+#grismont-board .sc-profile-row { font-size: 15px; }
+#grismont-board .sc-profile-row [role=cell] { font-variant-numeric: tabular-nums; }
+#grismont-board .sc-quadrant { grid-template-columns: 1fr; gap: 18px; }
+#grismont-board .sc-quadrant figure { width: 100%; max-width: 400px; }
+#grismont-board .sc-q-label { font-size: 8.5px; }
+#grismont-board .sc-quadrant figcaption { font-size: 13px; line-height: 1.5; margin-top: 8px; }
+#grismont-board .sc-quadrant p { font-size: 15px; }
+#grismont-board .sc-finding p { font-size: 15px; line-height: 1.6; }
+#grismont-board .sc-do { font-size: 16px !important; font-weight: 500; padding: 12px 14px; margin-top: 12px; background: var(--gm-mist); border-left: 2px solid var(--gm-crimson); border-radius: 0 6px 6px 0; }
+#grismont-board .sc-why { margin-top: 12px; border: 0 !important; }
+#grismont-board .sc-why summary { padding: 8px 0; font-size: 14px; font-weight: 500; color: var(--gm-muted); }
+#grismont-board .sc-why summary::after { font-size: 18px; }
+#grismont-board .sc-why > p { padding: 0; }
+#grismont-board .sc-audit-metrics strong, #grismont-board .sc-audit-dimension > b, #grismont-board .sc-audit-wastes b { font-variant-numeric: tabular-nums; }
+#grismont-board .sc-notes .gm-number { font-variant-numeric: tabular-nums; }
+
+/* Legal */
+#grismont-board .legal-page { display: grid; grid-template-columns: minmax(0, 760px) 220px; grid-template-areas: "head index" "body index"; justify-content: space-between; gap: 0 clamp(32px, 6vw, 72px); padding-top: clamp(32px, 5vw, 56px); }
+#grismont-board .legal-head { grid-area: head; }
+#grismont-board .legal-main { grid-area: body; min-width: 0; }
+#grismont-board .legal-index { grid-area: index; position: sticky; top: 24px; align-self: start; padding-top: 8px; font-size: 14px; line-height: 1.4; max-height: calc(100svh - 48px); overflow-y: auto; }
+#grismont-board .legal-index ul { list-style: none; padding: 0; margin: 10px 0 0; }
+#grismont-board .legal-index a { display: block; padding: 8px 0; color: var(--gm-muted); text-decoration: none; border-top: 1px solid var(--gm-line); transition: color 140ms ease; }
+#grismont-board .legal-index a:hover { color: var(--gm-ink); }
+#grismont-board .legal-page h1 { font-size: clamp(40px, 5vw, 64px); }
+#grismont-board .legal-body { max-width: none; }
+#grismont-board .legal-body section { scroll-margin-top: 16px; padding: 32px 0; }
+#grismont-board .legal-body h2 { font-size: clamp(24px, 2.6vw, 30px); }
+#grismont-board .legal-body p, #grismont-board .legal-body li, #grismont-board .legal-body dd { font-size: 17px; line-height: 1.7; }
+#grismont-board .legal-notice { background: var(--gm-mist); border-radius: var(--gm-radius); }
+
+/* 404 */
+#grismont-board .sc-404-routes { list-style: none; padding: 0; margin: 28px 0 0; display: grid; gap: 0; max-width: 560px; }
+#grismont-board .sc-404-routes a { display: flex; justify-content: space-between; gap: 16px; padding: 16px 0; font-size: 18px; font-weight: 500; text-decoration: none; border-top: 1px solid var(--gm-line); }
+#grismont-board .sc-404-routes li:last-child a { border-bottom: 1px solid var(--gm-line); }
+#grismont-board .sc-404-routes a span { color: var(--gm-muted); transition: transform 160ms var(--gm-ease); }
+
+@media (hover: hover) and (pointer: fine) {
+  #grismont-board .sc-404-routes a:hover span { transform: translateX(3px); }
+}
+@media (max-width: 950px) {
+  #grismont-board .sc-intake-page { grid-template-columns: minmax(0, 1fr); grid-template-areas: "head" "form" "rest"; }
+  #grismont-board .sc-intake-page > .sc-intake { position: static; margin-top: 24px; }
+  #grismont-board .sc-summary { grid-template-columns: 1fr; }
+  #grismont-board .sc-summary > div + div { border-left: 0; border-top: 1px solid var(--gm-line); }
+  #grismont-board .legal-page { grid-template-columns: minmax(0, 1fr); grid-template-areas: "head" "body"; }
+  #grismont-board .legal-index { display: none; }
+}
+@media (max-width: 620px) {
+  #grismont-board .sc-keyhint { display: none; }
+  #grismont-board .sc-progress-meta { font-size: 13px; }
+  #grismont-board .sc-card-q { font-size: 25px; }
+  #grismont-board .sc-intake-page { padding-top: 24px; }
+  #grismont-board .sc-intake-page h1 { font-size: 36px; }
+  #grismont-board .sc-intake-page .gm-lead { font-size: 17px; }
+  #grismont-board .sc-preview-bars li { grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr) 28px; }
+}
+@media (hover: none) { #grismont-board .sc-keyhint { display: none; } }
+
+/* Breathing room: text never sits closer than its line spacing to a neighbour or a box edge. */
+#grismont-board .sc-intake { padding: clamp(24px, 3vw, 36px); }
+#grismont-board .sc-field { gap: 8px; }
+#grismont-board .sc-consent-optional { margin-top: 16px; }
+#grismont-board .sc-alert { padding: 14px 16px; }
+#grismont-board .sc-get-title { margin-bottom: 10px; }
+#grismont-board .sc-get li { padding: 13px 0; }
+#grismont-board .sc-preview { padding: clamp(24px, 2.8vw, 32px); }
+#grismont-board .sc-preview-bars { margin: 18px 0 22px; }
+#grismont-board .sc-preview-bars li { padding: 11px 0; line-height: 1.38; }
+#grismont-board .sc-preview-risk { padding-top: 18px; }
+#grismont-board .sc-preview-link { margin-top: 18px; }
+#grismont-board .sc-summary > div { padding: clamp(24px, 2.8vw, 32px); }
+#grismont-board .sc-summary dd { margin-top: 12px; line-height: 1.36; }
+#grismont-board .sc-summary dd small { margin-top: 10px; }
+#grismont-board .sc-profile-row { padding: 13px 0; }
+#grismont-board .sc-finding { padding: clamp(24px, 2.6vw, 30px); }
+#grismont-board .sc-finding h3 { margin: 12px 0 14px; line-height: 1.32; }
+#grismont-board .sc-finding p { margin-top: 14px; }
+#grismont-board .sc-do { padding: 16px 18px; margin-top: 16px; }
+#grismont-board .sc-why { margin-top: 14px; }
+#grismont-board .sc-why summary { padding: 11px 0; }
+#grismont-board .sc-why > p { padding-bottom: 8px; }
+#grismont-board .sc-finding .sc-done { padding-top: 14px; }
+#grismont-board .sc-wins { gap: 20px; }
+#grismont-board .sc-roadmap { gap: 36px; }
+#grismont-board .sc-roadmap h3 + .sc-small { margin-top: 6px; }
+#grismont-board .sc-roadmap li { padding: 18px 0; }
+#grismont-board .sc-roadmap li p { margin-top: 8px; line-height: 1.55; }
+#grismont-board .sc-quadrant { gap: 28px; }
+#grismont-board .sc-quadrant h3 { margin-bottom: 12px; }
+#grismont-board .sc-quote { line-height: 1.38; }
+#grismont-board .sc-choices { gap: 10px; }
+#grismont-board .sc-choice { padding: 15px 16px; gap: 16px; line-height: 1.45; }
+#grismont-board .sc-card-help { margin-top: 18px; }
+#grismont-board .sc-card-q { line-height: 1.3; }
+#grismont-board .sc-audit-metrics, #grismont-board .sc-audit-gates { gap: 16px; }
+#grismont-board .sc-audit-metrics article, #grismont-board .sc-audit-gates article { padding: 20px; }
+#grismont-board .sc-audit-gates strong { margin: 8px 0; }
+#grismont-board .sc-audit-dimension { padding: 15px 0; }
+#grismont-board .sc-audit-finding { padding: 15px 0; }
+#grismont-board .sc-audit-table th, #grismont-board .sc-audit-table td { padding: 15px; }
+#grismont-board .sc-audit-priorities article { padding: 26px; }
+#grismont-board .sc-audit-answers li { padding: 18px 0; }
+#grismont-board .sc-audit-answers p { margin-top: 8px; }
+#grismont-board .legal-body dd { margin-top: 8px; line-height: 1.6; }
+#grismont-board .legal-body dt { margin-top: 22px; }
+
+/* Night shift: inner pages. One focal point per page; the flow line is the only thing that lights up. */
+#grismont-board:has(.sc-intake-page), #grismont-board:has(.sc-report-head) { position: relative; }
+#grismont-board:has(.sc-intake-page)::before, #grismont-board:has(.sc-report-head)::before { content: ''; position: absolute; inset: 0 0 auto; height: min(920px, 100svh); pointer-events: none; background: radial-gradient(52% 64% at 84% 12%, rgba(255, 46, 84, .15), transparent 72%), radial-gradient(44% 58% at 4% 60%, rgba(53, 240, 216, .07), transparent 72%); -webkit-mask-image: linear-gradient(#000 62%, transparent); mask-image: linear-gradient(#000 62%, transparent); }
+#grismont-board :is(.sc-intake-page, .sc-report) { position: relative; z-index: 1; }
+
+/* Controls */
+#grismont-board .sc-consent input { -webkit-appearance: none; appearance: none; width: 22px; height: 22px; margin: 0; display: grid; place-items: center; background: var(--gm-paper); border: 1px solid var(--gm-steel); border-radius: 2px; cursor: pointer; transition: background-color 140ms ease, border-color 140ms ease; }
+#grismont-board .sc-consent input::before { content: ''; width: 11px; height: 6px; margin-top: -3px; border: solid var(--gm-on-accent); border-width: 0 0 2px 2px; rotate: -45deg; scale: 0; transition: scale 140ms var(--gm-ease); }
+#grismont-board .sc-consent input:checked { background: var(--gm-flow); border-color: var(--gm-flow); }
+#grismont-board .sc-consent input:checked::before { scale: 1; }
+#grismont-board .sc-consent input[aria-invalid="true"] { border-width: 2px; border-color: var(--gm-crimson-deep); }
+#grismont-board .sc-field { font-size: 14px; }
+#grismont-board .sc-field input, #grismont-board .sc-field select { min-height: 52px; font-size: 16px; }
+#grismont-board .sc-error { font-size: 14px; }
+#grismont-board .sc-hint, #grismont-board .sc-small { font-size: 14px; }
+
+/* Intake */
+#grismont-board .sc-intake-page h1 { font-size: clamp(56px, 6.4vw, 96px); margin: 16px 0 26px; }
+#grismont-board .sc-intake { background: linear-gradient(90deg, var(--gm-crimson), var(--gm-flow)) top / 100% 2px no-repeat, var(--gm-white); }
+#grismont-board .sc-intake .sc-consent { line-height: 1.5; color: var(--gm-on-dark); }
+#grismont-board .sc-preview-bars i { height: 6px; }
+#grismont-board .sc-preview-bars b[data-tone="weak"] { background: var(--gm-crimson); }
+#grismont-board .sc-preview-bars b[data-tone="mid"] { background: var(--gm-on-dark); }
+
+/* Flow: one question on the void, and a thin line that clears behind you. */
+#grismont-board .sc-progress { height: 3px; gap: 3px; }
+#grismont-board .sc-seg { border-radius: 0; overflow: visible; }
+#grismont-board .sc-seg > span { border-radius: 0; }
+#grismont-board .sc-seg-sweep { overflow: hidden; }
+#grismont-board .sc-seg-current > span { box-shadow: 0 0 10px rgba(255, 46, 84, .75); }
+#grismont-board .sc-seg-done > span { box-shadow: 0 0 10px rgba(53, 240, 216, .5); }
+#grismont-board .sc-progress-wrap { padding-top: 16px; padding-bottom: 12px; }
+#grismont-board .sc-progress-meta { margin-top: 12px; }
+#grismont-board .sc-card-q { font-size: clamp(28px, 3.6vw, 42px); line-height: 1.22; }
+#grismont-board .sc-pipe { background: none; box-shadow: inset 0 -2px 0 var(--gm-steel); }
+#grismont-board .sc-choice { background: transparent; }
+#grismont-board .sc-choice[aria-checked="true"] { background: var(--gm-mist); border-color: var(--gm-flow); box-shadow: inset 4px 0 0 var(--gm-flow); font-weight: 600; }
+
+/* Report: the verdict is the focal point */
+#grismont-board .sc-report-head { padding-top: clamp(40px, 6vw, 80px); }
+#grismont-board .sc-report-head h1 { font-size: clamp(56px, 7.4vw, 112px); max-width: 16ch; line-height: 1; text-wrap: balance; margin: 16px 0 26px; }
+#grismont-board .sc-report-head .gm-lead { font-size: clamp(18px, 1.5vw, 21px); line-height: 1.55; max-width: 58ch; }
+#grismont-board .sc-summary { grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr) minmax(0, 1fr); margin-top: 44px; background: linear-gradient(90deg, var(--gm-crimson), var(--gm-flow)) top / 100% 2px no-repeat, var(--gm-white); }
+#grismont-board .sc-summary dt { color: var(--gm-muted); }
+#grismont-board .sc-summary dd { font-size: clamp(20px, 1.8vw, 24px); }
+#grismont-board .sc-summary > div:first-child dd { display: flex; flex-direction: column; gap: 10px; }
+#grismont-board .sc-summary > div:first-child small { order: -1; display: flex; align-items: baseline; gap: 12px; margin: 0; color: var(--gm-muted); }
+#grismont-board .sc-summary > div:first-child small b { font: 800 clamp(88px, 10vw, 148px)/.86 var(--gm-display); letter-spacing: 0; color: var(--gm-crimson); }
+#grismont-board .sc-report-head .gm-actions { margin-top: 36px; gap: 16px 28px; }
+#grismont-board:has(.sc-sample-banner) .sc-report-head .gm-cta { background: transparent; border: 1px solid var(--gm-steel); color: var(--gm-ink); box-shadow: none; filter: none; }
+#grismont-board .sc-sample-banner { padding: 16px var(--gm-gutter); margin-top: 0; max-width: none; background: var(--gm-mist); border-radius: 0; }
+#grismont-board .sc-sample-foot { margin-top: clamp(40px, 5vw, 64px); }
+#grismont-board .sc-block { padding-top: clamp(72px, 8vw, 120px); }
+#grismont-board .sc-two { gap: clamp(48px, 7vw, 96px); margin-top: 24px; padding-top: clamp(56px, 6vw, 88px); }
+#grismont-board .sc-block h2 { margin-top: 14px; margin-bottom: 32px; }
+#grismont-board .sc-profile-row { grid-template-columns: minmax(120px, 170px) minmax(0, 1fr) 124px; gap: 8px 16px; padding: 15px 0; }
+#grismont-board .sc-profile-row svg { height: 6px; }
+#grismont-board .sc-profile-row [role=cell] { line-height: 1.3; font-size: 13px; }
+#grismont-board .sc-profile-row [role=cell] b { display: block; font: 800 28px/1 var(--gm-display); color: var(--gm-ink); margin-bottom: 2px; }
+#grismont-board .sc-cap-note, #grismont-board .sc-quadrant figcaption { font-size: 14px; line-height: 1.55; }
+#grismont-board .sc-quadrant h3 { font-size: 24px; }
+#grismont-board .sc-quadrant p { color: var(--gm-muted); line-height: 1.55; }
+
+#grismont-board .sc-risk { max-width: none; margin-top: 20px; padding: clamp(28px, 4vw, 56px); display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 0 clamp(32px, 5vw, 72px); align-items: start; }
+#grismont-board .sc-risk > .gm-label { grid-area: 1 / 1 / auto / -1; margin-bottom: 14px; }
+#grismont-board .sc-risk > h3 { grid-area: 2 / 1 / auto / -1; }
+#grismont-board .sc-risk h3 { font: 800 clamp(40px, 5vw, 72px)/.98 var(--gm-display); letter-spacing: .004em; text-transform: uppercase; max-width: 22ch; margin: 0 0 clamp(24px, 3vw, 36px); }
+#grismont-board .sc-risk p { font-size: 17px; line-height: 1.55; margin-top: 16px; }
+#grismont-board .sc-risk > p:nth-of-type(1) { grid-area: 3 / 1; margin-top: 0; }
+#grismont-board .sc-risk > p:nth-of-type(2) { grid-area: 4 / 1; color: var(--gm-muted); }
+#grismont-board .sc-risk > p:nth-of-type(3) { grid-area: 3 / 2; margin-top: 0; }
+#grismont-board .sc-risk > p:nth-of-type(4) { grid-area: 4 / 2; padding-top: 16px; }
+
+#grismont-board .sc-finding p { line-height: 1.55; }
+#grismont-board .sc-do { border-radius: 0; background: var(--gm-mist); }
+#grismont-board .sc-wins { margin-top: 0; }
+
+#grismont-board .sc-roadmap { position: relative; padding-top: 32px; margin-top: 44px; gap: clamp(32px, 4vw, 56px); }
+#grismont-board .sc-roadmap::before { content: ''; position: absolute; inset: 0 0 auto; height: 2px; background: linear-gradient(90deg, var(--gm-crimson), var(--gm-flow)); box-shadow: 0 0 14px rgba(53, 240, 216, .28); }
+#grismont-board .sc-roadmap h3 { font: 800 clamp(34px, 3.4vw, 48px)/1 var(--gm-display); letter-spacing: .004em; text-transform: uppercase; }
+#grismont-board .sc-roadmap h3 + .sc-small { margin-top: 10px; }
+#grismont-board .sc-roadmap li > b { font-size: 17px; line-height: 1.35; }
+#grismont-board .sc-roadmap li p { font-size: 15px; }
+#grismont-board .sc-roadmap li p.sc-small { font-size: 14px; color: var(--gm-muted); }
+#grismont-board .sc-notes .gm-number { font: 800 28px/1 var(--gm-display); color: var(--gm-ink); width: 44px; }
+#grismont-board .sc-notes details > p { padding-left: 58px; max-width: 74ch; }
+#grismont-board .sc-report .gm-final { background: radial-gradient(60% 90% at 90% 100%, rgba(255, 46, 84, .13), transparent 72%), var(--gm-band); padding-block: clamp(72px, 9vw, 128px); border-top: 1px solid var(--gm-line); }
+
+/* Audit report: same hierarchy as the scorecard report */
+#grismont-board .sc-audit-downloads { margin-bottom: 20px; }
+#grismont-board .sc-audit-metrics { gap: 16px; margin: 36px 0 28px; }
+#grismont-board .sc-audit-metrics article > span, #grismont-board .sc-audit-gates article > span { font-size: 14px; line-height: 1.4; margin-bottom: 8px; }
+#grismont-board .sc-audit-metrics strong { font-size: clamp(44px, 4.6vw, 64px); line-height: 1; }
+#grismont-board .sc-audit-metrics article:first-child strong { color: var(--gm-crimson); }
+#grismont-board .sc-audit-metrics small { font-size: 14px; color: var(--gm-muted); }
+#grismont-board .sc-audit-gates small { font-size: 14px; line-height: 1.5; }
+#grismont-board .sc-audit-dimensions { max-width: none; }
+#grismont-board .sc-audit-dimension { padding: 16px 0; }
+#grismont-board .sc-audit-dimension > div:first-child { font-size: 15px; align-items: baseline; }
+#grismont-board .sc-audit-dimension > div:first-child span { font-size: 13px; }
+#grismont-board .sc-audit-dimension > b { font: 800 28px/1 var(--gm-display); }
+#grismont-board .sc-audit-track { height: 6px; border-radius: 0; }
+#grismont-board .sc-audit-track i { border-radius: 0; background: var(--gm-on-dark); }
+#grismont-board .sc-audit-track i[data-tone="weak"], #grismont-board .sc-audit-wastes .sc-audit-track i { background: var(--gm-crimson); }
+#grismont-board .sc-audit-track i[data-tone="strong"] { background: var(--gm-flow); }
+#grismont-board .sc-audit-report .sc-roadmap-band { padding-block: clamp(48px, 6vw, 88px); margin-top: clamp(72px, 8vw, 120px); }
+#grismont-board .sc-audit-report .sc-roadmap-band > .gm-shell { padding-inline: clamp(22px, 4vw, 56px); }
+#grismont-board .sc-audit-roadmap-group { position: relative; margin-top: 44px; padding-top: 28px; }
+#grismont-board .sc-audit-roadmap-group::before { content: ''; position: absolute; inset: 0 0 auto; height: 2px; background: var(--gm-steel); }
+#grismont-board .sc-audit-roadmap-group > h3, #grismont-board .sc-audit-later > h3 { font: 800 clamp(34px, 3.4vw, 48px)/1 var(--gm-display); letter-spacing: .004em; text-transform: uppercase; margin-bottom: 8px; }
+#grismont-board .sc-audit-action { padding-block: 24px; border-top: 1px solid var(--gm-line); margin-top: 20px; }
+#grismont-board .sc-audit-action h4 { font-size: 20px; line-height: 1.3; margin: 0 0 10px; }
+#grismont-board .sc-audit-action > div > span { display: block; font-size: 14px; color: var(--gm-muted); margin-bottom: 14px; }
+#grismont-board .sc-audit-action p { margin-top: 10px; line-height: 1.55; }
+#grismont-board .sc-audit-action li { padding-block: 4px; line-height: 1.5; }
+
+/* Legal: calm, long-form, no atmosphere under the text */
+#grismont-board .legal-page h1 { font-size: clamp(56px, 6vw, 88px); margin-top: 18px; }
+#grismont-board .legal-body p, #grismont-board .legal-body li, #grismont-board .legal-body dd { max-width: 68ch; color: var(--gm-on-dark); }
+#grismont-board .legal-body h2 { font-size: clamp(24px, 2.4vw, 30px); }
+#grismont-board .legal-notice { background: var(--gm-white); border: 1px solid var(--gm-line); border-left: 3px solid var(--gm-crimson); border-radius: 0; }
+#grismont-board .legal-index a[aria-current="true"], #grismont-board .legal-index a:focus-visible { color: var(--gm-ink); }
+
+/* 404: the line runs in, knots, and stops */
+#grismont-board .sc-404 { position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: center; min-height: min(86svh, 860px); padding-block: clamp(40px, 5vw, 72px) clamp(64px, 7vw, 104px); background: radial-gradient(46% 60% at 62% 24%, rgba(255, 46, 84, .17), transparent 72%), var(--gm-paper); }
+#grismont-board .sc-404 .gm-backdrop { position: absolute; inset: 0; z-index: 0; width: 100%; height: 100%; object-fit: cover; opacity: .5; pointer-events: none; }
+#grismont-board .sc-404 .gm-backdrop-tag { position: absolute; right: var(--gm-gutter); bottom: 10px; z-index: 0; font: 400 11px/1.4 var(--gm-mono); color: var(--gm-steel); pointer-events: none; }
+#grismont-board .sc-404-art { position: relative; z-index: 1; height: clamp(170px, 25vw, 340px); }
+#grismont-board .sc-404-art svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+#grismont-board .sc-404-art path { fill: none; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+#grismont-board .sc-404-clear { stroke: var(--gm-flow); filter: drop-shadow(0 0 7px rgba(53, 240, 216, .65)); }
+#grismont-board .sc-404-knot { stroke: var(--gm-crimson); filter: drop-shadow(0 0 8px rgba(255, 46, 84, .8)); }
+#grismont-board .sc-404-code { position: absolute; right: var(--gm-gutter); top: 50%; translate: 0 -50%; font: 800 clamp(112px, 22vw, 320px)/.8 var(--gm-display); letter-spacing: 0; color: transparent; -webkit-text-stroke: 2px var(--gm-steel); }
+#grismont-board .sc-404-body { position: relative; z-index: 1; width: 100%; }
+#grismont-board .sc-404-body h1 { font-size: clamp(56px, 8vw, 120px); margin: clamp(16px, 2vw, 28px) 0 24px; max-width: 16ch; }
+#grismont-board .sc-404-body .gm-lead { max-width: 54ch; font-size: clamp(18px, 1.5vw, 21px); line-height: 1.55; }
+#grismont-board .sc-404-routes { max-width: 640px; margin-top: 36px; }
+#grismont-board .sc-404-routes a { min-height: 44px; padding: 18px 0; align-items: center; transition: color 140ms ease; }
+#grismont-board .sc-404-routes a:focus-visible { outline: 2px solid var(--gm-flow); outline-offset: 2px; }
+@media (hover: hover) and (pointer: fine) {
+  #grismont-board .sc-404-routes a:hover span { color: var(--gm-flow); }
+}
+@media (prefers-reduced-motion: no-preference) {
+  #grismont-board .sc-404-art path { stroke-dasharray: 1; animation: sc-404-draw 800ms cubic-bezier(.4, 0, .6, 1) both; }
+  #grismont-board .sc-404-knot { animation-delay: 700ms !important; animation-duration: 1100ms !important; }
+}
+@keyframes sc-404-draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+
+@media (max-width: 950px) {
+  #grismont-board .sc-intake-page > .sc-intake { position: relative; }
+  #grismont-board .sc-intake-rest { margin-top: 44px; }
+  #grismont-board .sc-summary { grid-template-columns: 1fr; }
+  #grismont-board .sc-risk { grid-template-columns: minmax(0, 1fr); }
+  #grismont-board .sc-risk > :is(.gm-label, h3) { grid-area: auto; }
+  #grismont-board .sc-risk > p:nth-of-type(n) { grid-area: auto; margin-top: 16px; }
+}
+@media (max-width: 620px) {
+  #grismont-board .sc-intake-page h1 { font-size: clamp(48px, 15vw, 60px); }
+  #grismont-board .sc-report-head h1 { font-size: clamp(48px, 15vw, 64px); }
+  #grismont-board .sc-card-q { font-size: 26px; }
+  #grismont-board .sc-profile-row { grid-template-columns: minmax(0, 1fr) auto; padding: 16px 0; }
+  #grismont-board .sc-profile-row svg { grid-column: 1 / -1; grid-row: 2; }
+  #grismont-board .sc-notes details > p { padding-left: 0; }
+  #grismont-board .sc-404-code { -webkit-text-stroke-width: 1.5px; font-size: clamp(84px, 26vw, 112px); }
+  #grismont-board .sc-404-art svg { width: 66%; }
+  #grismont-board .sc-404-body h1 { font-size: clamp(48px, 15vw, 64px); }
+}
+html[lang="hu"] #grismont-board :is(.sc-intake-page, .sc-report-head) h1 { font-size: clamp(44px, 5.4vw, 80px); max-width: 20ch; }
+
+/* On paper the report needs the light palette: browsers drop dark backgrounds and keep the light text. */
+@media print {
+  #grismont-board { --gm-paper: #fff; --gm-white: #fff; --gm-mist: #f1f1f4; --gm-band: #fff; --gm-ink: #111; --gm-muted: #444; --gm-on-dark: #333; --gm-line: #bbb; --gm-steel: #666; --gm-crimson: #b81f33; --gm-crimson-deep: #b81f33; --gm-flow: #0a6b5f; }
+  #grismont-board::before, #grismont-board .gm-topbar, #grismont-board .gm-footer, #grismont-board .sc-sample-banner, #grismont-board .gm-actions { display: none !important; }
+  #grismont-board .sc-track { fill: #ddd; }
+  #grismont-board .sc-bar, #grismont-board .sc-ghost { fill: #333; }
+  #grismont-board .sc-q-cell { fill: #fff; stroke: #999; }
+  #grismont-board .sc-q-current { fill: #eee; }
+  #grismont-board .sc-q-dot { fill: #b81f33; stroke: #111; }
+  #grismont-board .gm-final, #grismont-board .sc-roadmap-band, #grismont-board .sc-summary { background: none !important; }
+  #grismont-board :is(.sc-finding, .sc-summary, .sc-preview) { clip-path: none; break-inside: avoid; }
+}
