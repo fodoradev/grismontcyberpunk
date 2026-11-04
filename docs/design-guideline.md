@@ -36,7 +36,7 @@ Token names are **roles**, kept from the earlier palette: `--gm-paper` is the li
 | Flow (jade) | `--gm-flow` | `#0E7C6B` | The clear part of the line, "after" states, resolved scores, focus rings |
 | On accent | `--gm-on-accent` | `#FFFFFF` | Text on crimson or jade |
 
-A `--gm-flow-text` token may be added for small jade text; check `app/globals.css` for whether it exists before relying on it.
+`--gm-flow-text` (`#0A6B5C`, defined in `app/globals.css`) is the jade for **small text** (section tags, numbers, meta labels, the "after" markers). It is darker than `--gm-flow` so it holds contrast on mist and band as well; fills, lines and rings keep `--gm-flow`. Inside the sumi-dark contact band it is re-pointed to `#4FC3AE` (`.home-contact` in `app/home.css`).
 
 **Measured contrast**, on paper / white / mist / band:
 
@@ -46,7 +46,7 @@ A `--gm-flow-text` token may be added for small jade text; check `app/globals.cs
 | Crimson deep `#A81C28` | 6.63 | 7.34 | 6.01 | 5.63 |
 | Flow jade `#0E7C6B` | 4.61 | 5.10 | 4.18 | 3.92 |
 
-So **small jade text only on paper or white**; on mist and band jade is for large text, lines, fills and icons. White on crimson is 5.6:1. Steel is for control borders (3:1). Line is 1.3-1.5:1, so decorative dividers only, never the only sign of a control.
+So **small jade text uses `--gm-flow-text`**; plain `--gm-flow` on mist and band is for large text, lines, fills and icons. White on crimson is 5.6:1. Steel is for control borders (3:1). Line is 1.3-1.5:1, so decorative dividers only, never the only sign of a control.
 
 **Vermilion budget.** One primary button in view, plus small rules, markers, hanko seals and chart points. Never a section background.
 
@@ -92,7 +92,10 @@ Capitals belong to Big Shoulders display lines and mono labels. Everything else 
 
 - One clear focal point per section, with generous margins (`--gm-space`).
 - A plain-language heading on every section.
-- **The hero is a pale dawn:** an oversized headline over a pale dawn skyline (mist towers in soft blue-grey tints, a pagoda roofline), a thin red sun disc (hinomaru) behind the towers, the samurai standing at the right, and a **red 流れ hanko seal** (a square vermilion stamp) beside them. The flow line leaves the headline's underlined word ("admin", Hungarian "adminisztrációval") and runs out straight: a knotted vermilion SVG stroke under the word, then a straight vermilion-to-jade rule (`.home-tangles::after`) running to the right edge. Without `heroCity`, the hero rests on the skyline drawn in code (`NightCity` in `components/NightCity.tsx`, name kept; it also exports `FlowSamurai` and `HankoMark`, used by `app/page.tsx`). Its fills are inline hex so they hold whatever the stylesheet says.
+- **The hero is a pale dawn:** an oversized headline over a pale dawn skyline (mist towers in soft blue-grey tints, a pagoda roofline), a thin red sun disc (hinomaru) behind the towers, the samurai standing at the right, and a **red 流れ hanko seal** (a square vermilion stamp) beside them. The flow line leaves the headline's underlined word ("admin", Hungarian "adminisztrációval") and runs out straight: a knotted vermilion SVG stroke under the word, then a straight vermilion-to-jade rule (`.home-tangles::after`) running to the right edge. On phones (up to 860 px) the order is headline, then the samurai and 流れ sign (`.home-hero-stage`), then the lead text and the one button; `.home-hero-copy` becomes `display: contents` so the stage can sit between them. Without `heroCity`, the hero rests on the skyline drawn in code (`NightCity` in `components/NightCity.tsx`, name kept; it also exports `FlowSamurai` and `HankoMark`, used by `app/page.tsx`). Its fills are inline hex so they hold whatever the stylesheet says.
+- **Quiet washi frames for empty slots:** an unfilled content slot (`.gm-visual-quiet`, drawn by `VisualSlot`) is one 1 px hairline (ink at 14%) on a paper-to-mist tint, a tiny mono name label at the bottom and one faint sumi-e brush line. No dashed border, no brief or size text on the page; offer cards drop the border entirely. It keeps the ratio of the picture that will replace it.
+- **Contact-band skyline:** the sumi band keeps a tone-on-tone skyline, `<NightCity tone="ink" />` (`InkCity` in `components/NightCity.tsx`): three steps just above the ink, pale hairline roof edges and seeded circuit traces (right-angle runs, square pads), no glow, no colour. It fades out upward by a mask; the default `tone="paper"` is the hero skyline.
+- **Coordinates tag:** from 1240 px a small vertical mono line (`.home-coords`, "47.50° N · 19.04° E · flow") sits in the left gutter of the hero, `aria-hidden`, muted, 11 px. Hidden below 1240 px.
 - **Washi touches:** a hairline above section headings, and small square hanko-style labels (vermilion on paper) for section numbers and tags. Thin circuit lines may join sections; they stay hairline and below the content.
 - Hairlines and simple grids do the grouping. Cards only for content that is genuinely raised (offers, forms, the explorer, report findings).
 - **Spacing floor:** related text sits at least 8 px apart (label to value, heading to its text at least 10 px), list rows have at least 11 px above and below, boxed text has at least 14 px of padding on small chips and 22 px in cards, and body text has a line height of at least 1.45. Phones shorten structure, never this spacing.
@@ -103,7 +106,7 @@ Capitals belong to Big Shoulders display lines and mono labels. Everything else 
 
 All generated and supplied art is listed in `data/visuals.ts` (slots V01-V12) and briefed in **[asset-prompts.md](asset-prompts.md)**, which holds a ready-to-paste prompt for each slot in the washi dawn style: light, matte, pale mist, sumi ink, one vermilion accent and, where something runs clear, one jade element.
 
-- **Content slots** (V01 samurai, V03 portrait, V04 training photo, and the offer art V05 training, V06 workshop, V12 programme, V07 delivery) carry a `{{FILL: …}}` marker until the file exists, so `npm run check:launch` lists them and `components/VisualSlot.tsx` draws a labelled frame of the right shape (now a light, paper-toned frame). V03 uses `site.photo` and V04 is optional with `src: null`; the training photo is not on the homepage unless a file exists.
+- **Content slots** (V01 samurai, V03 portrait, V04 training photo, and the offer art V05 training, V06 workshop, V12 programme, V07 delivery) carry a `{{FILL: …}}` marker until the file exists, so `npm run check:launch` lists them and `components/VisualSlot.tsx` draws a labelled frame of the right shape (the quiet washi frame above). V03 uses `site.photo` and V04 is optional with `src: null`; the training photo is not on the homepage unless a file exists.
 - **Backdrop slots** (V02 dawn city, V08 calculator, V09 method, V10 contact, V11 404) are optional atmosphere with `src: null`, placed with `VisualBackdrop`. Without a file the CSS atmosphere and the drawn skyline stand alone and the section is complete.
 - **Optional new ideas N01-N04** (hanko seal mark, vertical 流れ brush sign, paper-texture tile, sumi-e flow-line brush stroke) are in `asset-prompts.md` only. They are not slots in `data/visuals.ts`; if one is used, add a backdrop slot with `src: null` or place the file in `public/art/`.
 - **Real people stay real.** The portrait and team training image are real photographs, only graded to match (warm, light). Never generate a person or a client session and present it as real.
@@ -124,8 +127,8 @@ Interaction should let visitors find out something real, never pressure them.
 
 ## Inner pages and footer
 
-- **Sign blade:** a thin white vertical plate with a vermilion top edge and the 流れ glyphs set vertically (`.sc-report-head::after`, `.sc-404-art::after`), aligned to the page column. One per page, hidden under 950 px (report) or 620 px (404).
-- **Footer:** wordmark and tagline left, three link columns right behind a thin vertical hairline, one horizontal hairline aligned to the shell. Links are quiet muted text (44 px targets); hover and focus add ink colour, a vermilion underline on hover and the jade ring on focus.
+- **Sign blade:** a thin white vertical plate with a vermilion top edge and the 流れ glyphs set vertically, drawn as `::after` on the report header (`.sc-report-head`, top right) and on the 404 art (`.sc-404-art`, aligned to the page column). One per page, hidden under 950 px (report) or 620 px (404).
+- **Footer** (`app/inner.css`): wordmark and tagline left, three link columns right behind a thin vertical hairline (dropped under 950 px), one horizontal hairline aligned to the shell. It is hidden on the focused flow pages and in print. Links are quiet muted text (44 px targets); hover and focus add ink colour, a vermilion underline on hover and the jade ring on focus.
 - Sample banner content lines up with the page column.
 
 ## Interaction and motion
@@ -143,7 +146,7 @@ Interaction should let visitors find out something real, never pressure them.
 
 - Body text meets AA, and non-text controls meet 3:1 (use Steel, not Line, for control borders).
 - Interactive targets are at least 44 px high. Keyboard focus is always visible, and a jade ring means focus everywhere.
-- Small jade text only on paper or white (see the contrast table).
+- Small jade text uses `--gm-flow-text`, never plain `--gm-flow` (see the contrast table).
 - Test at 320, 390, 768 and 1440 px, in both languages. Hungarian runs longer: the longest headline word must fit at 320 px, and small screens reduce button and header sizes rather than clipping.
 - Informative visuals have text alternatives (localized); purely decorative motifs are `aria-hidden`.
 
@@ -155,13 +158,13 @@ English and Hungarian are equal first-class versions. Keep labels, buttons, char
 
 ## Reports, PDFs and emails
 
-**Print stays on paper, and the web is now paper too.** PDFs keep the light palette (`COLORS` in `chart-geometry.ts`): paper background, ink text, Figtree, crimson for chart points. Keep charts legible in grayscale print, and include a title, date and page numbers on multi-page files. Emails use system fonts and the same light colours, with a crimson primary button. The web report now follows the light washi dawn palette through `WEB_COLORS` in `chart-geometry.ts`; if that constant still holds the old night hex values, bringing it in line with the token table is the remaining task.
+**Print stays on paper, and the web is now paper too.** PDFs keep the light palette (`COLORS` in `chart-geometry.ts`): paper background, ink text, Figtree, crimson for chart points. Keep charts legible in grayscale print, and include a title, date and page numbers on multi-page files. Emails use system fonts and the same light colours, with a crimson primary button. The web report is light too: `WEB_COLORS` in `chart-geometry.ts` holds the washi dawn values (paper `#F6F3EE`, panel white, ink `#14161C`, crimson `#C8242E`, flow `#0E7C6B`), so web and PDF differ in layout, not palette.
 
 ## Design review checklist
 
 - Is there one focal point per section, and is the flow line still the most memorable thing?
 - Do vermilion and jade keep their meanings? Is anything glowing, shining or neon? (Nothing should.)
-- Is the contact band the only dark surface, and is small jade text only on paper or white?
+- Is the contact band the only dark surface, and is small jade text set in `--gm-flow-text`?
 - Is the hero a pale dawn, with hinomaru disc, samurai and the red 流れ hanko seal, and no flicker on load?
 - Does meaning survive without colour and without motion?
 - Are "Lean Six Sigma" and "AI automation" easy to find in the copy?

@@ -789,3 +789,27 @@ html[lang="hu"] #grismont-board .gm-home :is(#problems, #method, #scorecard, #se
   #grismont-board .home-services { grid-template-columns: minmax(0, 1fr); }
   #grismont-board .home-service .gm-visual-quiet { aspect-ratio: 3 / 1 !important; }
 }
+
+/* ===== Final polish: one header treatment, no stray ticks, no repeated credentials in the hero. ===== */
+/* The hair-thin vertical rule above each heading carried no meaning and read as a rendering glitch. The red square in the label is the single marker. */
+#grismont-board .gm-home .home-lead::before, #grismont-board .gm-home .home-lead-wide::before { content: none; }
+/* Section signs: one size for the five numbered sections, one smaller size for the two quiet utility sections. */
+#grismont-board .gm-home :is(#problems, #method, #scorecard, #services, #about) h2 { font-size: clamp(40px, 4.9vw, 72px); max-width: 22ch; }
+html[lang="hu"] #grismont-board .gm-home :is(#problems, #method, #scorecard, #services, #about) h2 { font-size: clamp(32px, 3.9vw, 56px); }
+#grismont-board .gm-home .home-method-pin h2 { font-size: clamp(40px, 4.9vw, 72px); }
+html[lang="hu"] #grismont-board .gm-home .home-method-pin h2 { font-size: clamp(32px, 3.9vw, 56px); }
+#grismont-board .gm-home .home-lead > .gm-label { margin-bottom: 14px; }
+/* The hero attribution repeats the credentials row directly beneath it. It returns only when a real portrait exists. */
+#grismont-board .home-person:has(.home-person-photo.gm-visual-empty) { display: none; }
+#grismont-board .home-hero .gm-under { margin-top: 18px; }
+/* Hero: the label line reads as a quiet kicker, not a second paragraph. */
+#grismont-board .home-eyebrow { max-width: 46ch; margin-bottom: 18px; }
+/* Price block of the lead card keeps its air when the card stacks. */
+@media (max-width: 1000px) {
+  #grismont-board .home-service-featured .home-service-buy { padding: 4px 22px 26px; }
+}
+/* Header controls: a visible hover on the light surface. */
+@media (hover: hover) and (pointer: fine) {
+  #grismont-board .gm-header-cta:hover { background: var(--gm-ink); color: var(--gm-paper); border-color: var(--gm-ink); }
+}
+@media (max-width: 860px) { #grismont-board .home-eyebrow { margin-bottom: 0; } }

@@ -2,6 +2,20 @@
 
 Everything to generate or shoot for the washi dawn look: a bright, quiet, Japanese-futurist city at first light, warm paper whites, sumi ink, one calm vermilion accent and a deep jade for work that runs clear. Direction and rules are in [design-guideline.md](design-guideline.md). The slots are defined in `data/visuals.ts`.
 
+## Quick start: generate these 5 first
+
+These five change the look of the page most. Everything else is optional atmosphere.
+
+| Slot | Save as (`public/art/`) | Size | `data/visuals.ts` key |
+|---|---|---|---|
+| V01 Flow Samurai (transparent) | `flow-samurai.webp` | 960 x 1200, 4:5 | `samurai` |
+| V02 Dawn city (hero backdrop) | `hero-city.webp` | 2520 x 1080, 21:9 | `heroCity` |
+| V05 Training offer | `offer-training.webp` | 1200 x 800, 3:2 | `offerTraining` |
+| V06 Workshop offer | `offer-workshop.webp` | 1200 x 800, 3:2 | `offerWorkshop` |
+| V07 Delivery offer | `offer-delivery.webp` | 1200 x 800, 3:2 | `offerDelivery` |
+
+Steps for each: (1) paste the slot's prompt + Style block below, generate, grade; (2) `cwebp -q 80 in.png -o public/art/<file>`; (3) in `data/visuals.ts` set that key's `src` to `"/art/<file>"` (replacing the `{{FILL: …}}` marker, or `null` for V02); (4) reload. V12 (programme offer art) is the sixth content slot: `check:launch` stays red until it has a file too.
+
 ## How to use this
 
 1. Pick a slot below. Paste its **Prompt**, then the **Style block**, into your generator. Add the **Negative block** where the model has a negative field, or see [Model notes](#model-notes).

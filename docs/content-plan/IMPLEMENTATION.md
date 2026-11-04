@@ -96,3 +96,9 @@ Status: ✅ done · 🟡 done, waiting on a value from Attila · ⏳ in progress
 - `npm test`: 150 unit tests pass (incl. no-placeholder and EN/HU parity checks for the home page, contact validation, follow-up schedule and emails, sample report completeness).
 - `npx playwright test`: 41 browser tests pass (home, contact form send, scorecard intake → step 3 → report, HU flow, Advanced audit with and without email, sample report, 320–1440 px layouts).
 - Manually: owner contact email and follow-up day-2 email written to `.outbox/`; daily cron sends a follow-up once only; unsubscribe page stops the series.
+
+## Washi dawn review pass (2026-11-04)
+
+- Visual direction is the light "washi dawn" look; `docs/design-guideline.md` now covers quiet washi frames for empty slots, the ink contact-band skyline (`NightCity tone="ink"`), the vertical coordinates tag (>= 1240 px), `--gm-flow-text`, the light `WEB_COLORS`, footer and sign blade, and the phone hero order. No copy or unresolved values changed.
+- `docs/asset-prompts.md` was checked against `data/visuals.ts` (V01-V12: file, ratio and size all match) and gained a "Quick start: generate these 5 first" list (V01, V02, V05-V07).
+- `npm test`: 162 unit tests pass (`--testTimeout=60000`). E2E specs were reviewed and need no change (no colour, snapshot or dark-look assertions). Playwright was not run: it needs a database (no `.env.local`/`DATABASE_URL` here) and no browsers are installed.
