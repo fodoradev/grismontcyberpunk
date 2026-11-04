@@ -87,7 +87,7 @@ function Quadrant({ r, locale }: { r: ReportModel; locale: Locale }) {
           ))}
           <g transform={`translate(0 ${band})`}>
             {cells.map(([key, c]) => <rect key={key} x={c.x} y={c.y} width={c.w} height={c.h} fill={key === quadrant ? WEB_COLORS.mist : WEB_COLORS.panel} stroke={WEB_COLORS.line} className={key === quadrant ? "sc-q-cell sc-q-current" : "sc-q-cell"} />)}
-            <circle cx={p.x} cy={p.y} r={radius} fill={WEB_COLORS.crimson} stroke={WEB_COLORS.ink} strokeWidth="3" className="sc-q-dot" />
+            <circle cx={p.x} cy={p.y} r={radius} fill={WEB_COLORS.crimson} stroke={WEB_COLORS.panel} strokeWidth="3" className="sc-q-dot" />
           </g>
         </svg>
         <figcaption><span aria-hidden="true">↑ </span>{QUADRANT_AXES.up}<br /><span aria-hidden="true">→ </span>{QUADRANT_AXES.right}</figcaption>

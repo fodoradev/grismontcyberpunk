@@ -6,7 +6,7 @@ import { AREAS, type AreaId, type Level, type Quadrant, type ReportModel } from 
 export const COLORS = { paper: "#F7F5F0", ink: "#20232B", crimson: "#D9273D", mist: "#EEF0F1", line: "#D9DEE2", muted: "#59616B", ghost: "#C5CBD0" };
 
 /** The night palette for the web report. PDFs and print keep COLORS above. */
-export const WEB_COLORS = { paper: "#07060F", panel: "#100F20", mist: "#191731", ink: "#F3F0FF", line: "#34314F", steel: "#807CA6", onDark: "#CFCBE6", crimson: "#FF2E54", flow: "#35F0D8" };
+export const WEB_COLORS = { paper: "#F6F3EE", panel: "#FFFFFF", mist: "#ECE8E0", ink: "#14161C", line: "#D8D2C6", steel: "#77746C", onDark: "#4B4F5B", crimson: "#C8242E", flow: "#0E7C6B" };
 
 /** Colour role of a score on the web: crimson is friction, mint is resolved. The number and level label always carry it too. */
 export function levelTone(level: Level) { return level === "Ad hoc" || level === "Person-dependent" ? "weak" : level === "Documented" ? "mid" : "strong"; }

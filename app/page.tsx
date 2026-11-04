@@ -47,6 +47,7 @@ export default async function Home() {
 
       <section className="home-hero-band" id="home" aria-labelledby="hero-title">
         <div className="home-atmos" aria-hidden="true"><VisualBackdrop id="heroCity" priority />{getBackdrop("heroCity") ? null : <NightCity sun={false} />}</div>
+        <span className="home-coords" aria-hidden="true">47.50° N · 19.04° E · flow</span>
         <div className="gm-shell home-hero">
         <div className="home-hero-copy">
           <p className="home-eyebrow">{c.hero.eyebrow}</p>

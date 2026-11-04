@@ -13,18 +13,9 @@
 #grismont-board .home-lead > p:not(.gm-label) { margin-top: 24px; font-size: clamp(18px, 1.6vw, 21px); line-height: 1.5; color: var(--gm-muted); max-width: 52ch; }
 #grismont-board .home-section-foot { margin-top: 36px; color: var(--gm-muted); font-size: 16px; line-height: 1.6; display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: baseline; }
 
-/* Visual placeholders: right shape, deliberately unfinished, easy to swap (data/visuals.ts, docs/asset-prompts.md). */
+/* Visual placeholders: right shape, deliberately unfinished, easy to swap (data/visuals.ts, docs/asset-prompts.md). Corner marks come from VisualSlot's own washi frame. */
 #grismont-board .gm-visual { --gm-cut: clamp(14px, 2.4vw, 22px); display: block; width: 100%; height: auto; border-radius: 0; object-fit: cover; clip-path: polygon(0 0, calc(100% - var(--gm-cut)) 0, 100% var(--gm-cut), 100% 100%, 0 100%); }
 #grismont-board .gm-visual-empty { position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; gap: 8px; padding: clamp(22px, 2.4vw, 32px); color: var(--gm-ink); border: 1px solid var(--gm-line); background: var(--gm-mist); }
-/* Three corner ticks; the fourth corner is the katana cut, traced by ::after. */
-#grismont-board .gm-visual-empty::before { content: ''; position: absolute; inset: 10px; pointer-events: none; background:
-  linear-gradient(var(--gm-steel), var(--gm-steel)) 0 0 / 12px 1px no-repeat,
-  linear-gradient(var(--gm-steel), var(--gm-steel)) 0 0 / 1px 12px no-repeat,
-  linear-gradient(var(--gm-steel), var(--gm-steel)) 0 100% / 12px 1px no-repeat,
-  linear-gradient(var(--gm-steel), var(--gm-steel)) 0 100% / 1px 12px no-repeat,
-  linear-gradient(var(--gm-steel), var(--gm-steel)) 100% 100% / 12px 1px no-repeat,
-  linear-gradient(var(--gm-steel), var(--gm-steel)) 100% 100% / 1px 12px no-repeat; }
-#grismont-board .gm-visual-empty::after { content: ''; position: absolute; top: -1px; right: -1px; width: var(--gm-cut); height: var(--gm-cut); pointer-events: none; background: linear-gradient(to top right, transparent calc(50% - 1px), var(--gm-steel) calc(50% - 1px), var(--gm-steel) calc(50% + 1px), transparent calc(50% + 1px)); }
 #grismont-board .gm-visual-empty svg { position: absolute; inset: 0; width: 100%; height: 100%; opacity: .6; }
 #grismont-board .gm-visual-empty path { fill: none; stroke-width: 1.5; }
 /* Composition guide for the hero figure: fades out where the label sits. */
@@ -46,7 +37,6 @@
 #grismont-board .home-person-photo.gm-visual-empty::before, #grismont-board .home-person-photo.gm-visual-empty::after, #grismont-board .home-person-photo :is(svg, .gm-visual-meta) { display: none; }
 /* Decorative section art: absolute, behind the band's content. */
 #grismont-board .gm-backdrop { position: absolute; inset: 0; z-index: 0; width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
-#grismont-board .gm-backdrop-tag { position: absolute; right: var(--gm-gutter); bottom: 10px; z-index: 0; font: 400 11px/1.4 var(--gm-mono); color: var(--gm-steel); pointer-events: none; }
 
 /* Hero: a sign in a city at night. The atmosphere stands alone until a backdrop file exists. */
 #grismont-board .home-hero-band { position: relative; overflow: hidden; isolation: isolate; background: var(--gm-paper); }
@@ -659,7 +649,6 @@ html[lang="hu"] #grismont-board .gm-home .home-contact h2 { font-size: clamp(38p
 #grismont-board .gm-visual-name { font-weight: 700; }
 #grismont-board .gm-visual-meta { color: var(--gm-muted); }
 #grismont-board .gm-visual-figure .gm-figure-sword { stroke: var(--gm-steel); }
-#grismont-board .gm-visual-empty::before { opacity: .6; }
 /* Fewer borders: quiet cards sit on tonal steps, hairlines carry the rest. */
 #grismont-board .home-explorer, #grismont-board .home-service, #grismont-board .home-proof-card { border-color: var(--gm-line); }
 #grismont-board .home-service-featured .gm-label { color: var(--gm-crimson-deep); }
@@ -684,4 +673,48 @@ html[lang="hu"] #grismont-board .gm-home .home-contact h2 { font-size: clamp(38p
 #grismont-board .home-contact .gm-home .home-lead::before, #grismont-board .home-contact-grid::before { content: none; }
 @media (max-width: 860px) {
   #grismont-board .home-hero-band { background: var(--gm-paper); }
+}
+
+/* ===== Review 2: skyline back, calmer rhythm, readable mint, composed phone hero. ===== */
+/* Mint for small text: AA on paper, white, mist and band. The bright --gm-flow stays for lines, fills and large marks. */
+#grismont-board .home-method-tag, #grismont-board .home-section-foot > span:first-child, #grismont-board .home-method-foot > span:first-child, #grismont-board .home-flow-divider, #grismont-board .home-flow-after li + li::before, #grismont-board .gm-visual-meta, #grismont-board .home-report-offer li::before { color: var(--gm-flow-text); }
+#grismont-board .home-method-list li[data-state='done'] .home-method-number { color: var(--gm-flow-text); }
+#grismont-board .home-contact { --gm-flow-text: #4FC3AE; }
+
+/* Rhythm: less air between sections, a shorter ma rule. */
+#grismont-board .home-section { padding-block: clamp(64px, 8vw, 116px); }
+#grismont-board .gm-home .home-lead::before, #grismont-board .gm-home .home-lead-wide::before { height: 36px; margin-bottom: 18px; }
+#grismont-board .home-credentials { margin-top: clamp(8px, 2vw, 24px); }
+#grismont-board .home-next { padding-bottom: clamp(40px, 6vw, 80px); }
+
+/* Hero skyline: pale, low on the left under the words, rising to the right behind the samurai. */
+#grismont-board .home-hero-band .home-atmos { display: block; }
+#grismont-board .home-hero-band .home-city { height: min(62%, 520px); opacity: .85; -webkit-mask-image: linear-gradient(90deg, transparent 0, transparent 28%, #000 62%); mask-image: linear-gradient(90deg, transparent 0, transparent 28%, #000 62%); }
+#grismont-board .home-hero-band .home-atmos::after { background: linear-gradient(0deg, var(--gm-paper) 0, transparent 22%); }
+/* Hero placeholders that have no photo yet stay out of the first screen. */
+#grismont-board .home-person-photo.gm-visual-empty { display: none; }
+#grismont-board .home-person { gap: 0; }
+/* Small mono coordinates, set vertically in the gutter: a map reference, not decoration for its own sake. */
+#grismont-board .home-coords { display: none; }
+@media (min-width: 1240px) {
+  #grismont-board .home-coords { display: block; position: absolute; z-index: 1; left: 22px; bottom: 140px; writing-mode: vertical-rl; transform: rotate(180deg); font: 400 11px/1 var(--gm-mono); letter-spacing: .18em; color: var(--gm-muted); text-transform: uppercase; }
+}
+
+/* Phones: headline, then the samurai under the sign, then the words and the one button. */
+@media (max-width: 860px) {
+  #grismont-board .home-hero-band .home-city { height: 36%; opacity: .7; -webkit-mask-image: none; mask-image: none; }
+  #grismont-board .home-hero-band .home-atmos::after { background: linear-gradient(0deg, var(--gm-paper) 0, transparent 40%); }
+  #grismont-board .gm-shell.home-hero { row-gap: 18px; padding-block: 24px 36px; }
+  #grismont-board .home-hero-copy { display: contents; }
+  #grismont-board .home-hero-copy > :nth-child(-n+2) { order: 0; }
+  #grismont-board .home-hero-stage { order: 1; justify-content: center; align-items: flex-end; gap: 14px; padding: 6px 0 2px; background: radial-gradient(circle at 44% 56%, color-mix(in srgb, var(--gm-crimson) 9%, transparent) 0 46%, transparent 46.5%); }
+  #grismont-board .home-hero-copy > :nth-child(n+3) { order: 2; }
+  #grismont-board .home-hero-visual { flex: none; width: min(56vw, 250px); min-width: 0; }
+  #grismont-board .home-nagare { font-size: 34px; padding: 12px 6px; align-self: flex-start; }
+  #grismont-board .home-eyebrow { font-size: 14px; }
+  #grismont-board .gm-home .home-hero h1 { margin: 10px 0 0; }
+  #grismont-board .home-tangles { margin-bottom: .3em; }
+  #grismont-board .home-hero .gm-actions { margin-top: 4px; }
+  #grismont-board .home-hero .gm-hero-text { font-size: 17px; }
+  #grismont-board .home-person { margin-top: 0; }
 }

@@ -44,7 +44,8 @@ Status: ✅ done · 🟡 done, waiting on a value from Attila · ⏳ in progress
 | D-order | Homepage order changed for the funnel: problems, calculator, method, scorecard, services, about, next, FAQ, contact. See `docs/design-assessment.md`. | `app/page.tsx` |
 | D-copy | New copy, EN and HU: hours calculator, hero person line, sample preview labels, "score a process like this". Calculator assumes 46 working weeks and a 40-hour week, stated on the page. Please review the Hungarian wording. | `content/site/home.ts` |
 | D-visuals | All image slots are placeholders until supplied: samurai, portrait, training photo and four offer images. Backdrops are optional. Each has a prompt in `docs/asset-prompts.md`; the portrait and training photo must be real photographs. The training photo is not on the homepage now but `check:launch` still lists it. | `data/visuals.ts` |
-| D-night | Site redesigned to the cyberpunk "night shift" system. Copy, offers and facts are unchanged. PDFs and emails stay on the light palette. | `docs/design-guideline.md` |
+| D-night | Superseded by D-washi (2026-11-04). The site had been redesigned to a dark cyberpunk "night shift" system; copy, offers and facts were unchanged. | `docs/design-guideline.md` |
+| D-washi | 2026-11-04: retheme to the light "washi dawn" look (paper `#F6F3EE`, sumi ink, vermilion, jade, no glow, one sumi-dark contact band, pale dawn skyline with hinomaru, red 流れ hanko seal, display weight 700). Tokens, art, placeholders and prompts updated (commit c96fc3e). Copy, offers, facts and EN/HU parity are unchanged; no new unresolved values. Image slots V01-V12 unchanged in role, optional ideas N01-N04 live only in `asset-prompts.md`. PDFs and emails stay light, and the web report is light too. | `docs/design-guideline.md` |
 
 ## Workstreams
 

@@ -62,5 +62,7 @@ export function VisualBackdrop({ id, className = "", priority = false }: { id: B
   const src = getBackdrop(id);
   const v = visuals[id];
   if (src) return <img className={`gm-backdrop ${className}`} src={src} alt="" aria-hidden="true" width={v.width} height={v.height} loading={priority ? "eager" : "lazy"} />;
-  return isDev ? <span className="gm-backdrop-tag" data-visual={id} aria-hidden="true">BACKDROP {v.promptId} · {v.file}</span> : null;
+  // No file: render nothing. The band rests on its CSS atmosphere; data/visuals.ts lists the missing slot.
+  void v;
+  return null;
 }
