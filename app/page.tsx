@@ -163,7 +163,7 @@ export default async function Home() {
         {c.faq.items.map(faq => <details key={faq.question} name="home-faq"><summary>{faq.question}</summary><p>{faq.answer}</p></details>)}
       </div></section>
 
-      <section className="home-contact" id="contact" aria-labelledby="contact-title"><div className="home-atmos" aria-hidden="true"><VisualBackdrop id="contactBackdrop" />{getBackdrop("contactBackdrop") ? null : <NightCity seed={23} />}</div><div className="gm-shell home-section home-contact-grid">
+      <section className="home-contact" id="contact" aria-labelledby="contact-title"><div className="home-atmos" aria-hidden="true"><VisualBackdrop id="contactBackdrop" />{getBackdrop("contactBackdrop") ? null : <NightCity seed={23} tone="ink" />}</div><div className="gm-shell home-section home-contact-grid">
         <div><p className="gm-label">{c.contact.label}</p><h2 id="contact-title">{c.contact.title}</h2><p>{c.contact.text}</p><ContactForm locale={locale} /></div>
         <div className="home-contact-aside"><FlowMark className="home-contact-mark" />
           {bookingUrl ? <><p>{c.contact.preferTalk}</p><a className="gm-cta light" href={bookingUrl} target="_blank" rel="noopener">{c.contact.book} <span aria-hidden="true">↗</span></a></> : null}

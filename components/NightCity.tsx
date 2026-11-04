@@ -56,7 +56,27 @@ function Blade({ x, y, h, red }: { x: number; y: number; h: number; red?: boolea
   );
 }
 
-export default function NightCity({ seed = 7, className = "", sun = true }: { seed?: number; className?: string; sun?: boolean }) {
+/** Pale-ink circuit traces for the dark band: right-angle runs with square pads, hairline, no glow. Seeded. */
+function Circuit({ seed }: { seed: number }) {
+  let s = seed * 7919;
+  const next = () => (s = (s * 1664525 + 1013904223) % 4294967296) / 4294967296;
+  const traces = Array.from({ length: 9 }, () => {
+    const x = 40 + Math.floor(next() * 1500);
+    const y = 150 + Math.floor(next() * 220);
+    const a = 40 + Math.floor(next() * 120);
+    const b = 30 + Math.floor(next() * 80);
+    const c = 60 + Math.floor(next() * 160);
+    return { x, y, d: `M${x} ${y} h${a} v${-b} h${c}`, ex: x + a + c, ey: y - b };
+  });
+  return (
+    <g fill="none" stroke="#F6F3EE" strokeOpacity=".2" strokeWidth="1">
+      {traces.map(t => <g key={t.x}><path d={t.d} /><rect x={t.x - 3} y={t.y - 3} width="6" height="6" /><rect x={t.ex - 2} y={t.ey - 2} width="4" height="4" fill="#F6F3EE" fillOpacity=".16" stroke="none" /></g>)}
+    </g>
+  );
+}
+
+export default function NightCity({ seed = 7, className = "", sun = true, tone = "paper" }: { seed?: number; className?: string; sun?: boolean; tone?: "paper" | "ink" }) {
+  if (tone === "ink") return <InkCity seed={seed} className={className} />;
   const far = towers(seed, 34, 100, 250);
   const mid = towers(seed * 5 + 3, 30, 60, 175);
   const near = towers(seed * 3 + 1, 26, 30, 110);
@@ -93,6 +113,25 @@ export default function NightCity({ seed = 7, className = "", sun = true }: { se
         {near.filter((t, i) => t.x > 900 && i % 3 === 0).map((t, i) => <Blade key={t.x} x={t.x + t.w - 4} y={t.y + 10} h={34 + (i % 3) * 14} red={i === 1} />)}
       </g>
       <rect width="1600" height="420" fill={`url(#${rain})`} opacity=".1" />
+    </svg>
+  );
+}
+
+/** Tone-on-tone skyline for the sumi band: three steps just above the ink, pale hairline roof edges, circuit traces. No glow, no colour. */
+function InkCity({ seed, className }: { seed: number; className: string }) {
+  const far = towers(seed, 34, 100, 250);
+  const mid = towers(seed * 5 + 3, 30, 60, 175);
+  const near = towers(seed * 3 + 1, 26, 30, 110);
+  return (
+    <svg className={`home-city home-city-ink ${className}`} viewBox="0 0 1600 420" preserveAspectRatio="xMidYMax slice" aria-hidden="true" focusable="false">
+      <Layer list={far} fill="#191C24" masts />
+      <Layer list={mid} fill="#1E222B" masts />
+      <Layer list={near} fill="#242834" />
+      <g fill="none" stroke="#F6F3EE" strokeOpacity=".12" strokeWidth="1">
+        {far.map(t => <path key={t.x} d={`M${t.x} ${t.y + (t.kind === 2 ? 16 : 0)} H${t.x + t.w}`} />)}
+      </g>
+      <Circuit seed={seed} />
+      <g>{near.filter((t, i) => t.x > 900 && i % 3 === 0).map((t, i) => <path key={t.x} d={`M${t.x + t.w - 4} ${t.y + 10} v${34 + (i % 3) * 14}`} stroke="#F6F3EE" strokeOpacity=".18" fill="none" />)}</g>
     </svg>
   );
 }

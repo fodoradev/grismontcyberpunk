@@ -122,6 +122,12 @@ Interaction should let visitors find out something real, never pressure them.
 - **Show the person early:** name and credential in the hero, not at 60% of the page.
 - **Never:** fake urgency, countdowns, invented numbers or social proof, analytics, or browser storage.
 
+## Inner pages and footer
+
+- **Sign blade:** a thin white vertical plate with a vermilion top edge and the 流れ glyphs set vertically (`.sc-report-head::after`, `.sc-404-art::after`), aligned to the page column. One per page, hidden under 950 px (report) or 620 px (404).
+- **Footer:** wordmark and tagline left, three link columns right behind a thin vertical hairline, one horizontal hairline aligned to the shell. Links are quiet muted text (44 px targets); hover and focus add ink colour, a vermilion underline on hover and the jade ring on focus.
+- Sample banner content lines up with the page column.
+
 ## Interaction and motion
 
 - **Hover:** at most a 1–2 px lift or a colour shift, gated by `(hover: hover) and (pointer: fine)`.

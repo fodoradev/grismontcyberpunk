@@ -8,37 +8,35 @@ export default function VisualSlot({ id, locale, className = "", priority = fals
   const v = getVisual(id, locale);
   const ratio = `${v.width} / ${v.height}`;
   if (v.src) return <img className={`gm-visual ${className}`} src={v.src} alt={v.alt} width={v.width} height={v.height} loading={priority ? "eager" : "lazy"} style={{ aspectRatio: ratio }} />;
+  if (id === "samurai") {
+    return (
+      <div className={`gm-visual gm-visual-empty ${className}`} style={{ aspectRatio: ratio, ...washiFrame }} data-visual={id} aria-hidden="true">
+        <SamuraiGuide />
+        <span className="gm-visual-name" style={{ color: "var(--gm-ink, #14161C)" }}>{v.name}</span>
+        <span className="gm-visual-brief" style={{ color: "var(--gm-muted, #5B5F69)" }}>{v.brief}</span>
+        {isDev ? <span className="gm-visual-meta" style={{ color: "var(--gm-muted, #5B5F69)", letterSpacing: ".04em" }}><span>{v.file} · {v.ratio}</span><span>PROMPT {v.promptId} · docs/asset-prompts.md</span></span> : null}
+      </div>
+    );
+  }
+  // Any other empty slot: a quiet washi frame. One hairline, a tiny label, and one faint sumi-e line that starts tangled and runs straight.
   return (
-    <div className={`gm-visual gm-visual-empty ${className}`} style={{ aspectRatio: ratio, ...washiFrame }} data-visual={id} aria-hidden="true">
-      {id === "samurai" ? <SamuraiGuide /> : <svg viewBox="0 0 100 100" preserveAspectRatio="none">
-        <path className="gm-visual-tangle" d="M0 34 C8 20 16 48 24 32 S34 16 40 34 S48 46 52 32" vectorEffect="non-scaling-stroke" style={{ stroke: "var(--gm-crimson, #C8242E)", strokeWidth: 1, opacity: 0.8 }} />
-        <path className="gm-visual-clear" d="M52 32 H100" vectorEffect="non-scaling-stroke" style={{ stroke: "var(--gm-flow, #0E7C6B)", strokeWidth: 1 }} />
-      </svg>}
-      <Marks />
-      <span className="gm-visual-name" style={{ color: "var(--gm-ink, #14161C)" }}>{v.name}</span>
-      <span className="gm-visual-brief" style={{ color: "var(--gm-muted, #5B5F69)" }}>{v.brief}</span>
-      {isDev ? <span className="gm-visual-meta" style={{ color: "var(--gm-muted, #5B5F69)", letterSpacing: ".04em" }}><span>{v.file} · {v.ratio}</span><span>PROMPT {v.promptId} · docs/asset-prompts.md</span></span> : null}
+    <div className={`gm-visual gm-visual-empty gm-visual-quiet ${className}`} style={{ aspectRatio: ratio, ...washiFrame }} data-visual={id} aria-hidden="true">
+      <svg className="gm-visual-motif" viewBox="0 0 100 100" preserveAspectRatio="none" focusable="false">
+        <path d="M0 62 H100" vectorEffect="non-scaling-stroke" style={{ stroke: "var(--gm-ink, #14161C)", strokeWidth: 1, opacity: 0.07 }} />
+        <path d="M6 54 C14 38 22 70 30 52 S42 36 48 54 S58 66 62 58 C66 54 68 58 72 58 H94" vectorEffect="non-scaling-stroke" style={{ stroke: "var(--gm-ink, #14161C)", strokeWidth: 1, opacity: 0.2, fill: "none", strokeLinecap: "round" }} />
+      </svg>
+      <span className="gm-visual-name" style={{ color: "var(--gm-muted, #5B5F69)" }}>{v.name}</span>
+      {isDev ? <span className="gm-visual-meta" style={{ color: "var(--gm-muted, #5B5F69)" }}><span>{v.promptId}</span></span> : null}
     </div>
   );
 }
 
-/** Washi tone with a thin dashed sumi hairline frame. Inline so it holds whatever the stylesheet draws around it. */
+/** Washi tone with a thin hairline frame. Inline so it holds whatever the stylesheet draws around it. */
 const washiFrame = {
-  background: "var(--gm-paper, #F6F3EE)",
-  border: "1px dashed color-mix(in srgb, var(--gm-ink, #14161C) 38%, transparent)",
+  background: "color-mix(in srgb, var(--gm-paper, #F6F3EE) 55%, var(--gm-mist, #ECE8E0))",
+  border: "1px solid color-mix(in srgb, var(--gm-ink, #14161C) 14%, transparent)",
   color: "var(--gm-ink, #14161C)",
 } as const;
-
-/** A registration tick at the top left and a small vermilion hanko square at the top right: quiet, and the only red. */
-function Marks() {
-  return (
-    <svg className="gm-visual-marks" viewBox="0 0 60 16" aria-hidden="true" style={{ position: "absolute", inset: "auto", top: 10, left: 10, width: 60, height: 16, opacity: 1 }}>
-      <path d="M0.5 15.5 V0.5 H15.5" fill="none" stroke="var(--gm-ink, #14161C)" strokeWidth="1" opacity="0.55" vectorEffect="non-scaling-stroke" />
-      <rect x="44" y="0" width="16" height="16" fill="var(--gm-crimson, #C8242E)" opacity="0.9" />
-      <rect x="48" y="4" width="8" height="8" fill="none" stroke="var(--gm-paper, #F6F3EE)" strokeWidth="1" />
-    </svg>
-  );
-}
 
 /** Where the figure stands in the V01 art: calm, faceless under the hat, sword sheathed, one vermilion plate. */
 function SamuraiGuide() {

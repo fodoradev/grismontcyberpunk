@@ -718,3 +718,74 @@ html[lang="hu"] #grismont-board .gm-home .home-contact h2 { font-size: clamp(38p
   #grismont-board .home-hero .gm-hero-text { font-size: 17px; }
   #grismont-board .home-person { margin-top: 0; }
 }
+
+/* ===== Review 3: quiet washi frames, fewer boxes, one focal point per section, ink skyline in the dark band. ===== */
+/* Empty content slots: one hairline, a tiny label, one faint brush line. Same shape as the picture that will replace them. */
+#grismont-board .gm-visual-quiet { justify-content: flex-end; gap: 0; padding: 14px 16px; background: color-mix(in srgb, var(--gm-paper) 55%, var(--gm-mist)); border: 1px solid color-mix(in srgb, var(--gm-ink) 14%, transparent); }
+#grismont-board .gm-visual-quiet svg.gm-visual-motif { display: block; opacity: 1; }
+#grismont-board .gm-visual-quiet svg.gm-visual-motif path { stroke-width: 1; }
+#grismont-board .gm-visual-quiet .gm-visual-name { font: 400 10.5px/1.4 var(--gm-mono); letter-spacing: .14em; text-transform: uppercase; font-weight: 400; color: var(--gm-muted); opacity: .8; }
+#grismont-board .gm-visual-quiet .gm-visual-meta { display: none; }
+#grismont-board .gm-visual-quiet .gm-visual-brief { display: none; }
+#grismont-board .home-service .gm-visual-quiet { border: 0; border-bottom: 0; }
+#grismont-board .home-about-visual .gm-visual-quiet { min-height: 0; }
+#grismont-board .home-service-featured .gm-visual-quiet { border-right: 0; }
+
+/* Problems explorer: one tonal surface, no inner hairlines; the open tab is marked by tone and one short rule. */
+#grismont-board .home-explorer { border: 0; background: var(--gm-white); }
+#grismont-board .home-example-options { border-bottom: 0; background: var(--gm-mist); }
+#grismont-board .home-example-options button + button { border-left: 0; }
+#grismont-board .home-example-options button { font-weight: 500; }
+#grismont-board .home-example-options button[aria-pressed='true'] { background: var(--gm-white); box-shadow: inset 0 3px 0 var(--gm-crimson); font-weight: 600; }
+#grismont-board .home-example-diagram { border-right: 0; }
+#grismont-board .home-example-thinking { background: color-mix(in srgb, var(--gm-mist) 50%, var(--gm-white)); }
+#grismont-board .home-example-result .gm-label { border-top: 0; padding-top: 6px; }
+#grismont-board .home-flow-before li { border: 0; background: color-mix(in srgb, var(--gm-crimson) 7%, var(--gm-white)); }
+#grismont-board .home-flow-after li { border: 0; background: color-mix(in srgb, var(--gm-flow) 10%, var(--gm-white)); }
+
+/* Report preview: a single white sheet on the mist band; rows are spaced, not ruled. The score bars are the focal point. */
+#grismont-board .home-report { border: 0; }
+#grismont-board .home-report-bars li { border-top: 0; border-bottom: 0; padding-block: 10px; }
+#grismont-board .home-report-facts { border-top: 0; padding-top: 12px; }
+#grismont-board .home-report-offer { border-top: 0; background: var(--gm-paper); }
+#grismont-board .home-areas details { border-color: color-mix(in srgb, var(--gm-line) 60%, transparent); }
+
+/* Offers: one lead card, three quiet cards. Tone separates them; hairlines inside the cards go. */
+#grismont-board .home-service { border: 0; }
+#grismont-board .home-service .gm-visual { border: 0; }
+#grismont-board .home-service li { border-top: 0; padding: 7px 0; }
+#grismont-board .home-service li::before { content: ''; display: inline-block; width: 12px; height: 1px; background: var(--gm-steel); vertical-align: middle; margin-right: 12px; }
+#grismont-board .home-service-buy { border-top: 0; padding-top: 6px; }
+#grismont-board .home-service-featured .home-service-buy { border-left: 0; background: color-mix(in srgb, var(--gm-mist) 55%, var(--gm-white)); }
+#grismont-board .home-service-featured { background: var(--gm-white); }
+#grismont-board .home-service:not(.home-service-featured) { background: color-mix(in srgb, var(--gm-white) 55%, var(--gm-paper)); }
+#grismont-board .home-service:not(.home-service-featured) h3 { font-size: clamp(30px, 2.5vw, 38px); }
+#grismont-board .home-service:not(.home-service-featured) .home-price strong { font-size: 32px; }
+#grismont-board .home-launch { border-left: 0; }
+@media (hover: hover) and (pointer: fine) { #grismont-board .home-service:hover { border-color: transparent; } }
+
+/* Heading scale: section signs are clearly the largest thing after the hero; card and step titles stay a clear step down. */
+#grismont-board .gm-home :is(#problems, #method, #scorecard, #services, #about) h2 { font-size: clamp(42px, 5.6vw, 84px); line-height: .94; max-width: 20ch; }
+html[lang="hu"] #grismont-board .gm-home :is(#problems, #method, #scorecard, #services, #about) h2 { font-size: clamp(34px, 4.4vw, 64px); max-width: 18ch; overflow-wrap: break-word; hyphens: auto; }
+#grismont-board .home-lead { margin-bottom: clamp(40px, 5.5vw, 72px); }
+
+/* Contact: the sumi band keeps its skyline, tone on tone, with pale circuit traces and no glow. */
+#grismont-board .home-contact > .home-atmos { display: block; }
+#grismont-board .home-contact .home-city { display: block; height: min(70%, 520px); -webkit-mask-image: linear-gradient(0deg, #000 30%, transparent 100%); mask-image: linear-gradient(0deg, #000 30%, transparent 100%); }
+#grismont-board .home-contact-aside { border-left: 0; padding-left: 0; }
+#grismont-board .home-contact .sc-field :is(input, textarea) { border-color: color-mix(in srgb, var(--gm-ink) 22%, transparent); }
+#grismont-board .home-contact-interest span { border-color: color-mix(in srgb, var(--gm-ink) 22%, transparent); }
+@media (max-width: 700px) {
+  #grismont-board .home-service .gm-visual-quiet:not(.home-service-visual-x) { aspect-ratio: 3 / 1 !important; }
+  #grismont-board .home-service-featured .gm-visual-quiet { min-height: 0; }
+}
+#grismont-board .home-report-offer { border-top: 0; }
+@media (max-width: 1000px) {
+  #grismont-board .home-service-featured { grid-template-columns: minmax(0, 1fr); }
+  #grismont-board .home-service-featured .gm-visual { min-height: 0; height: auto; aspect-ratio: 3 / 1 !important; }
+  #grismont-board .home-service-featured .home-service-buy { background: transparent; padding-top: 0; }
+}
+@media (max-width: 860px) {
+  #grismont-board .home-services { grid-template-columns: minmax(0, 1fr); }
+  #grismont-board .home-service .gm-visual-quiet { aspect-ratio: 3 / 1 !important; }
+}
