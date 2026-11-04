@@ -72,7 +72,7 @@ html[lang="hu"] #grismont-board .gm-home .home-hero h1 { font-size: clamp(40px, 
 #grismont-board .home-person-photo { flex: 0 0 52px; width: 52px; height: 52px; aspect-ratio: 1 !important; border-radius: 50%; padding: 0; }
 #grismont-board .home-person-photo :is(.gm-visual-name, .gm-visual-brief) { display: none; }
 #grismont-board .home-hero-stage { position: relative; z-index: 2; display: flex; align-items: flex-start; gap: clamp(14px, 1.6vw, 26px); }
-#grismont-board .home-hero-visual { width: min(30vw, calc((100svh - 170px) * .8)); min-width: 260px; }
+#grismont-board .home-hero-visual { width: min(30vw, 520px, calc((100svh - 170px) * .8)); min-width: 260px; }
 /* A real sign: a framed vertical tube, lit in the friction colour. */
 #grismont-board .home-nagare { flex: none; writing-mode: vertical-rl; padding: 16px 8px; font: 400 clamp(36px, 4vw, 64px)/1 var(--gm-sign); letter-spacing: .08em; color: var(--gm-on-accent); background: var(--gm-crimson); border: 0; }
 
