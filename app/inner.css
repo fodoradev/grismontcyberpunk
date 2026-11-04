@@ -74,9 +74,9 @@
 #grismont-board .sc-summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 28px 0 0; background: var(--gm-mist); color: var(--gm-ink); border: 1px solid var(--gm-line); overflow: hidden; }
 #grismont-board .sc-summary > div { padding: clamp(20px, 2.5vw, 28px); min-width: 0; }
 #grismont-board .sc-summary > div + div { border-left: 1px solid var(--gm-line); }
-#grismont-board .sc-summary dt { font: 500 12px/1.4 var(--gm-mono); letter-spacing: .05em; text-transform: uppercase; color: var(--gm-on-dark); }
+#grismont-board .sc-summary dt { font: 500 12px/1.4 var(--gm-mono); letter-spacing: .05em; text-transform: uppercase; color: var(--gm-muted); }
 #grismont-board .sc-summary dd { margin: 10px 0 0; font-size: 20px; font-weight: 600; line-height: 1.3; letter-spacing: -.01em; }
-#grismont-board .sc-summary dd small { display: block; margin-top: 8px; font-size: 15px; font-weight: 400; line-height: 1.5; letter-spacing: 0; color: var(--gm-on-dark); }
+#grismont-board .sc-summary dd small { display: block; margin-top: 8px; font-size: 15px; font-weight: 400; line-height: 1.5; letter-spacing: 0; color: var(--gm-muted); }
 #grismont-board .sc-summary dd b { font-variant-numeric: tabular-nums; }
 #grismont-board .sc-profile-row { font-size: 15px; }
 #grismont-board .sc-profile-row [role=cell] { font-variant-numeric: tabular-nums; }
@@ -187,7 +187,7 @@
 
 /* Night shift: inner pages. One focal point per page; the flow line is the only thing that lights up. */
 #grismont-board:has(.sc-intake-page), #grismont-board:has(.sc-report-head) { position: relative; }
-#grismont-board:has(.sc-intake-page)::before, #grismont-board:has(.sc-report-head)::before { content: ''; position: absolute; inset: 0 0 auto; height: min(920px, 100svh); pointer-events: none; background: radial-gradient(52% 64% at 84% 12%, rgba(255, 46, 84, .15), transparent 72%), radial-gradient(44% 58% at 4% 60%, rgba(53, 240, 216, .07), transparent 72%); -webkit-mask-image: linear-gradient(#000 62%, transparent); mask-image: linear-gradient(#000 62%, transparent); }
+#grismont-board:has(.sc-intake-page)::before, #grismont-board:has(.sc-report-head)::before { content: ''; position: absolute; inset: 0 0 auto; height: min(920px, 100svh); pointer-events: none; background: none; }
 #grismont-board :is(.sc-intake-page, .sc-report) { position: relative; z-index: 1; }
 
 /* Controls */
@@ -204,18 +204,16 @@
 /* Intake */
 #grismont-board .sc-intake-page h1 { font-size: clamp(56px, 6.4vw, 96px); margin: 16px 0 26px; }
 #grismont-board .sc-intake { background: linear-gradient(90deg, var(--gm-crimson), var(--gm-flow)) top / 100% 2px no-repeat, var(--gm-white); }
-#grismont-board .sc-intake .sc-consent { line-height: 1.5; color: var(--gm-on-dark); }
+#grismont-board .sc-intake .sc-consent { line-height: 1.5; color: var(--gm-muted); }
 #grismont-board .sc-preview-bars i { height: 6px; }
 #grismont-board .sc-preview-bars b[data-tone="weak"] { background: var(--gm-crimson); }
-#grismont-board .sc-preview-bars b[data-tone="mid"] { background: var(--gm-on-dark); }
+#grismont-board .sc-preview-bars b[data-tone="mid"] { background: var(--gm-steel); }
 
 /* Flow: one question on the void, and a thin line that clears behind you. */
 #grismont-board .sc-progress { height: 3px; gap: 3px; }
 #grismont-board .sc-seg { border-radius: 0; overflow: visible; }
 #grismont-board .sc-seg > span { border-radius: 0; }
 #grismont-board .sc-seg-sweep { overflow: hidden; }
-#grismont-board .sc-seg-current > span { box-shadow: 0 0 10px rgba(255, 46, 84, .75); }
-#grismont-board .sc-seg-done > span { box-shadow: 0 0 10px rgba(53, 240, 216, .5); }
 #grismont-board .sc-progress-wrap { padding-top: 16px; padding-bottom: 12px; }
 #grismont-board .sc-progress-meta { margin-top: 12px; }
 #grismont-board .sc-card-q { font-size: clamp(28px, 3.6vw, 42px); line-height: 1.22; }
@@ -263,7 +261,7 @@
 #grismont-board .sc-wins { margin-top: 0; }
 
 #grismont-board .sc-roadmap { position: relative; padding-top: 32px; margin-top: 44px; gap: clamp(32px, 4vw, 56px); }
-#grismont-board .sc-roadmap::before { content: ''; position: absolute; inset: 0 0 auto; height: 2px; background: linear-gradient(90deg, var(--gm-crimson), var(--gm-flow)); box-shadow: 0 0 14px rgba(53, 240, 216, .28); }
+#grismont-board .sc-roadmap::before { content: ''; position: absolute; inset: 0 0 auto; height: 2px; background: linear-gradient(90deg, var(--gm-crimson), var(--gm-flow)); }
 #grismont-board .sc-roadmap h3 { font: 800 clamp(34px, 3.4vw, 48px)/1 var(--gm-display); letter-spacing: .004em; text-transform: uppercase; }
 #grismont-board .sc-roadmap h3 + .sc-small { margin-top: 10px; }
 #grismont-board .sc-roadmap li > b { font-size: 17px; line-height: 1.35; }
@@ -271,7 +269,7 @@
 #grismont-board .sc-roadmap li p.sc-small { font-size: 14px; color: var(--gm-muted); }
 #grismont-board .sc-notes .gm-number { font: 800 28px/1 var(--gm-display); color: var(--gm-ink); width: 44px; }
 #grismont-board .sc-notes details > p { padding-left: 58px; max-width: 74ch; }
-#grismont-board .sc-report .gm-final { background: radial-gradient(60% 90% at 90% 100%, rgba(255, 46, 84, .13), transparent 72%), var(--gm-band); padding-block: clamp(72px, 9vw, 128px); border-top: 1px solid var(--gm-line); }
+#grismont-board .sc-report .gm-final { background: var(--gm-band); padding-block: clamp(72px, 9vw, 128px); border-top: 1px solid var(--gm-line); }
 
 /* Audit report: same hierarchy as the scorecard report */
 #grismont-board .sc-audit-downloads { margin-bottom: 20px; }
@@ -287,7 +285,7 @@
 #grismont-board .sc-audit-dimension > div:first-child span { font-size: 13px; }
 #grismont-board .sc-audit-dimension > b { font: 800 28px/1 var(--gm-display); }
 #grismont-board .sc-audit-track { height: 6px; border-radius: 0; }
-#grismont-board .sc-audit-track i { border-radius: 0; background: var(--gm-on-dark); }
+#grismont-board .sc-audit-track i { border-radius: 0; background: var(--gm-steel); }
 #grismont-board .sc-audit-track i[data-tone="weak"], #grismont-board .sc-audit-wastes .sc-audit-track i { background: var(--gm-crimson); }
 #grismont-board .sc-audit-track i[data-tone="strong"] { background: var(--gm-flow); }
 #grismont-board .sc-audit-report .sc-roadmap-band { padding-block: clamp(48px, 6vw, 88px); margin-top: clamp(72px, 8vw, 120px); }
@@ -303,20 +301,20 @@
 
 /* Legal: calm, long-form, no atmosphere under the text */
 #grismont-board .legal-page h1 { font-size: clamp(56px, 6vw, 88px); margin-top: 18px; }
-#grismont-board .legal-body p, #grismont-board .legal-body li, #grismont-board .legal-body dd { max-width: 68ch; color: var(--gm-on-dark); }
+#grismont-board .legal-body p, #grismont-board .legal-body li, #grismont-board .legal-body dd { max-width: 68ch; color: var(--gm-ink); }
 #grismont-board .legal-body h2 { font-size: clamp(24px, 2.4vw, 30px); }
 #grismont-board .legal-notice { background: var(--gm-white); border: 1px solid var(--gm-line); border-left: 3px solid var(--gm-crimson); border-radius: 0; }
 #grismont-board .legal-index a[aria-current="true"], #grismont-board .legal-index a:focus-visible { color: var(--gm-ink); }
 
 /* 404: the line runs in, knots, and stops */
-#grismont-board .sc-404 { position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: center; min-height: min(86svh, 860px); padding-block: clamp(40px, 5vw, 72px) clamp(64px, 7vw, 104px); background: radial-gradient(46% 60% at 62% 24%, rgba(255, 46, 84, .17), transparent 72%), var(--gm-paper); }
+#grismont-board .sc-404 { position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: center; min-height: min(86svh, 860px); padding-block: clamp(40px, 5vw, 72px) clamp(64px, 7vw, 104px); background: var(--gm-paper); }
 #grismont-board .sc-404 .gm-backdrop { position: absolute; inset: 0; z-index: 0; width: 100%; height: 100%; object-fit: cover; opacity: .5; pointer-events: none; }
 #grismont-board .sc-404 .gm-backdrop-tag { position: absolute; right: var(--gm-gutter); bottom: 10px; z-index: 0; font: 400 11px/1.4 var(--gm-mono); color: var(--gm-steel); pointer-events: none; }
 #grismont-board .sc-404-art { position: relative; z-index: 1; height: clamp(170px, 25vw, 340px); }
 #grismont-board .sc-404-art svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
 #grismont-board .sc-404-art path { fill: none; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
-#grismont-board .sc-404-clear { stroke: var(--gm-flow); filter: drop-shadow(0 0 7px rgba(53, 240, 216, .65)); }
-#grismont-board .sc-404-knot { stroke: var(--gm-crimson); filter: drop-shadow(0 0 8px rgba(255, 46, 84, .8)); }
+#grismont-board .sc-404-clear { stroke: var(--gm-flow); }
+#grismont-board .sc-404-knot { stroke: var(--gm-crimson); }
 #grismont-board .sc-404-code { position: absolute; right: var(--gm-gutter); top: 50%; translate: 0 -50%; font: 800 clamp(112px, 22vw, 320px)/.8 var(--gm-display); letter-spacing: 0; color: transparent; -webkit-text-stroke: 2px var(--gm-steel); }
 #grismont-board .sc-404-body { position: relative; z-index: 1; width: 100%; }
 #grismont-board .sc-404-body h1 { font-size: clamp(56px, 8vw, 120px); margin: clamp(16px, 2vw, 28px) 0 24px; max-width: 16ch; }
@@ -366,3 +364,27 @@ html[lang="hu"] #grismont-board :is(.sc-intake-page, .sc-report-head) h1 { font-
   #grismont-board .gm-final, #grismont-board .sc-roadmap-band, #grismont-board .sc-summary { background: none !important; }
   #grismont-board :is(.sc-finding, .sc-summary, .sc-preview) { clip-path: none; break-inside: avoid; }
 }
+
+
+/* ===== Washi dawn: inner pages. Quiet paper, hairlines, one focal point per page. ===== */
+#grismont-board .sc-intake-page h1 { font-size: clamp(44px, 5.4vw, 76px); font-weight: 700; line-height: 1; }
+#grismont-board .sc-report-head h1 { font-size: clamp(44px, 5.8vw, 84px); font-weight: 700; line-height: 1.02; }
+#grismont-board .sc-404-body h1 { font-size: clamp(44px, 6vw, 88px); }
+#grismont-board .legal-page h1 { font-size: clamp(44px, 5vw, 68px); }
+#grismont-board .sc-card-q { font-size: clamp(26px, 3.2vw, 38px); font-weight: 600; }
+#grismont-board .sc-risk h3, #grismont-board .sc-roadmap h3, #grismont-board .sc-audit-roadmap-group > h3, #grismont-board .sc-audit-later > h3 { font-weight: 700; }
+#grismont-board .sc-risk h3 { font-size: clamp(32px, 3.8vw, 52px); line-height: 1.02; }
+#grismont-board .sc-summary > div:first-child small b { font-weight: 700; font-size: clamp(72px, 8vw, 112px); }
+#grismont-board .sc-profile-row [role=cell] b, #grismont-board .sc-audit-dimension > b, #grismont-board .sc-notes .gm-number { font-weight: 700; }
+#grismont-board .sc-intake { background: var(--gm-white); border: 1px solid var(--gm-line); box-shadow: inset 0 2px 0 var(--gm-crimson); }
+#grismont-board .sc-summary { background: var(--gm-white); box-shadow: inset 0 2px 0 var(--gm-crimson); }
+#grismont-board .sc-risk { background: var(--gm-white); border-color: var(--gm-line); border-left: 2px solid var(--gm-crimson); }
+#grismont-board .sc-do { background: var(--gm-mist); }
+#grismont-board .sc-choice { background: var(--gm-white); border-color: var(--gm-line); }
+#grismont-board .sc-choice[aria-checked="true"] { background: color-mix(in srgb, var(--gm-flow) 8%, var(--gm-white)); border-color: var(--gm-flow); box-shadow: inset 3px 0 0 var(--gm-flow); }
+#grismont-board .sc-seg { background: var(--gm-line); }
+#grismont-board .sc-progress-wrap { background: var(--gm-paper); }
+#grismont-board .sc-404-code { -webkit-text-stroke: 1px var(--gm-line); font-weight: 700; }
+#grismont-board .sc-404-clear, #grismont-board .sc-404-knot { filter: none; }
+#grismont-board .legal-notice { background: var(--gm-white); }
+#grismont-board .sc-sample-banner { background: var(--gm-mist); }

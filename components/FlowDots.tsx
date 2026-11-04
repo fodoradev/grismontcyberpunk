@@ -30,7 +30,7 @@ export default function FlowDots() {
         circles[i].setAttribute("visibility", dot.pending ? "hidden" : "visible");
         circles[i].setAttribute("cx", point.x.toFixed(2));
         circles[i].setAttribute("cy", point.y.toFixed(2));
-        circles[i].setAttribute("fill", dot.distance < route.gate ? "#FF2E54" : "#35F0D8");
+        circles[i].setAttribute("fill", dot.distance < route.gate ? "#C8242E" : "#0E7C6B");
         circles[i].setAttribute("data-flow-state", dot.pending ? "pending" : dot.distance >= route.gate ? "clear" : dot.stalled ? "stalled" : dot.velocity < 0 ? "recoil" : dot.velocity === 0 ? "waiting" : "moving");
       });
     };
@@ -79,9 +79,9 @@ export default function FlowDots() {
   }, []);
 
   return (
-    <g ref={group} className="home-art-moving-dots" stroke="#07060F" strokeWidth="2" aria-hidden="true">
+    <g ref={group} className="home-art-moving-dots" stroke="#F6F3EE" strokeWidth="1.5" aria-hidden="true">
       <g visibility="hidden">{FLOW_LANES.map((lane, i) => <path d={lane.path} key={i} />)}</g>
-      {FLOW_LANES.flatMap((lane, i) => lane.phases.map((_, j) => <circle key={`${i}-${j}`} cx="-20" cy="-20" r="8" fill="#FF2E54" />))}
+      {FLOW_LANES.flatMap((lane, i) => lane.phases.map((_, j) => <circle key={`${i}-${j}`} cx="-20" cy="-20" r="8" fill="#C8242E" />))}
     </g>
   );
 }

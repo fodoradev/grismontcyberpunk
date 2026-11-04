@@ -2,7 +2,7 @@ import type { Locale } from "../lib/i18n";
 import { known, site } from "./site";
 
 /**
- * Art still to be supplied; docs/asset-prompts.md has the brief for each `promptId`.
+ * Art still to be supplied (washi dawn look: light, matte, one vermilion accent); docs/asset-prompts.md has the brief for each `promptId`.
  * Content slots keep their content-pack marker until the file exists in public/, so `npm run check:launch` lists them
  * and <VisualSlot> draws a labelled frame of the right shape. Replace the marker with the slot's `file` and the image
  * appears. Backdrops are optional atmosphere: `src` stays null, without a marker, until a file exists.
@@ -26,16 +26,16 @@ export const visuals = {
     file: "/art/flow-samurai.webp", promptId: "V01", kind: "content", ratio: "4:5",
     width: 960, height: 1200,
     name: { en: "Flow Samurai", hu: "Flow szamuráj" },
-    brief: { en: "Hero character. 4:5, transparent background", hu: "Hős-karakter. 4:5, átlátszó háttér" },
-    alt: { en: "The Flow Samurai: a calm, faceless samurai in charcoal and silver with a crimson plate", hu: "A Flow szamuráj: nyugodt, arc nélküli szamuráj szénszürkében és ezüstben, karmazsin vérttel" },
+    brief: { en: "Hero character. 4:5, transparent background, lit softly from the left", hu: "Hős-karakter. 4:5, átlátszó háttér, balról lágyan megvilágítva" },
+    alt: { en: "The Flow Samurai: a calm, faceless samurai standing with a sheathed katana, in matte sumi-black armour with one vermilion plate", hu: "A Flow szamuráj: nyugodt, arc nélküli szamuráj hüvelyében pihenő katanával, matt szumi-fekete páncélban, egyetlen cinóberpiros lemezzel" },
   },
   heroCity: {
     src: null,
     file: "/art/hero-city.webp", promptId: "V02", kind: "backdrop", ratio: "21:9",
     width: 2520, height: 1080,
-    name: { en: "Night city", hu: "Éjszakai város" },
-    brief: { en: "Hero backdrop. 21:9, dark on the left for the headline", hu: "Hős-háttér. 21:9, bal oldalon sötét a címnek" },
-    alt: { en: "A rain-wet alley at night with one lit line running through it", hu: "Esőtől nedves sikátor éjszaka, rajta egyetlen világító vonal fut végig" },
+    name: { en: "Dawn city", hu: "Hajnali város" },
+    brief: { en: "Hero backdrop. 21:9, pale and empty on the left for the headline", hu: "Hős-háttér. 21:9, bal oldalon világos és üres a címnek" },
+    alt: { en: "A quiet Tokyo-style street at dawn in soft mist, with one thin ink line running through it and a vermilion torii far away", hu: "Csendes tokiói hangulatú utca hajnali ködben, rajta egyetlen vékony tusvonal fut végig, a távolban cinóberpiros torii" },
   },
   portrait: {
     src: site.photo,
@@ -59,56 +59,56 @@ export const visuals = {
     file: "/art/offer-training.webp", promptId: "V05", kind: "content", ratio: "3:2",
     width: 1200, height: 800,
     name: { en: "Training", hu: "Tréning" },
-    brief: { en: "Offer art. An empty whiteboard room seen through rain glass. 3:2", hu: "Ajánlati kép. Üres táblás terem esős üvegen át. 3:2" },
-    alt: { en: "An empty training room at night with a process sketched on the whiteboard, seen through rain on glass", hu: "Üres tréningterem éjszaka, a táblán felvázolt folyamattal, esős üvegen át nézve" },
+    brief: { en: "Offer art. An empty tatami training room with a shoji screen in morning light. 3:2", hu: "Ajánlati kép. Üres tatamis tréningterem shoji ernyővel, reggeli fényben. 3:2" },
+    alt: { en: "An empty training room in morning light, a process sketched in ink on a paper screen, seen through a shoji doorway", hu: "Üres tréningterem reggeli fényben, a papírernyőn tussal felvázolt folyamat, shoji ajtónyíláson át nézve" },
   },
   offerWorkshop: {
     src: "{{FILL: workshop offer art, 3:2, WebP}}",
     file: "/art/offer-workshop.webp", promptId: "V06", kind: "content", ratio: "3:2",
     width: 1200, height: 800,
     name: { en: "Workshops", hu: "Workshopok" },
-    brief: { en: "Offer art. A process map of glowing threads on a table. 3:2", hu: "Ajánlati kép. Világító szálakból álló folyamattérkép egy asztalon. 3:2" },
-    alt: { en: "A process map made of glowing threads laid out on a dark table", hu: "Világító szálakból kirakott folyamattérkép egy sötét asztalon" },
+    brief: { en: "Offer art. A process map of ink threads on a washi table. 3:2", hu: "Ajánlati kép. Tusszálakból álló folyamattérkép egy washi asztalon. 3:2" },
+    alt: { en: "A process map made of fine ink threads laid out on a pale washi-paper table, tangled in red on one side and straight on the other", hu: "Finom tusszálakból kirakott folyamattérkép egy világos washi asztalon, az egyik oldalán pirosan összegubancolódva, a másikon egyenesen" },
   },
   offerProgramme: {
     src: "{{FILL: programme offer art, 3:2, WebP}}",
     file: "/art/offer-programme.webp", promptId: "V12", kind: "content", ratio: "3:2",
     width: 1200, height: 800,
     name: { en: "Programme", hu: "Program" },
-    brief: { en: "Offer art. Eight blank panels lighting from crimson to mint. 3:2", hu: "Ajánlati kép. Nyolc üres panel, karmazsintól mentaszínig világítva. 3:2" },
-    alt: { en: "Eight blank wall panels in a dark corridor, lit one after another from crimson to mint", hu: "Nyolc üres falpanel egy sötét folyosón, egymás után karmazsintól mentaszínig megvilágítva" },
+    brief: { en: "Offer art. Eight blank paper panels, from one vermilion to one jade. 3:2", hu: "Ajánlati kép. Nyolc üres papírpanel, cinóberpirostól jádezöldig. 3:2" },
+    alt: { en: "Eight blank paper panels in a pale corridor, softly lit one after another, the first marked vermilion and the last jade", hu: "Nyolc üres papírpanel egy világos folyosón, egymás után lágyan megvilágítva, az első cinóberpiros, az utolsó jádezöld jelöléssel" },
   },
   offerDelivery: {
     src: "{{FILL: delivery offer art, 3:2, WebP}}",
     file: "/art/offer-delivery.webp", promptId: "V07", kind: "content", ratio: "3:2",
     width: 1200, height: 800,
     name: { en: "Delivery", hu: "Megvalósítás" },
-    brief: { en: "Offer art. One clean machine line, running. 3:2", hu: "Ajánlati kép. Egyetlen tiszta, működő gépsor. 3:2" },
-    alt: { en: "One clean machine line running through a dark workshop, lit along its length", hu: "Egyetlen tiszta gépsor fut végig egy sötét műhelyen, teljes hosszában megvilágítva" },
+    brief: { en: "Offer art. One clean machine line in a bright, quiet workshop. 3:2", hu: "Ajánlati kép. Egyetlen tiszta gépsor egy világos, csendes műhelyben. 3:2" },
+    alt: { en: "One clean machine line of matte white and brushed steel running through a bright workshop, with a single jade indicator", hu: "Egyetlen tiszta, matt fehér és csiszolt acél gépsor fut végig egy világos műhelyen, egyetlen jádezöld jelzőfénnyel" },
   },
   calcBackdrop: {
     src: null,
     file: "/art/backdrop-calculator.webp", promptId: "V08", kind: "backdrop", ratio: "16:9",
     width: 1920, height: 1080,
     name: { en: "Stacked hours", hu: "Felgyűlt órák" },
-    brief: { en: "Calculator backdrop. 16:9, very dark and quiet", hu: "A kalkulátor háttere. 16:9, nagyon sötét és nyugodt" },
-    alt: { en: "Stacks of wet paper ledgers in a dark room, lit from one side", hu: "Nedves papírfőkönyvek halmai sötét szobában, egy oldalról megvilágítva" },
+    brief: { en: "Calculator backdrop. 16:9, pale, quiet, detail only at the edges", hu: "A kalkulátor háttere. 16:9, világos és nyugodt, részletek csak a szélén" },
+    alt: { en: "Stacks of paper ledgers in morning light, rising at the edges of a pale room", hu: "Papírfőkönyvek halmai reggeli fényben, egy világos szoba szélein magasodva" },
   },
   methodBackdrop: {
     src: null,
     file: "/art/backdrop-method.webp", promptId: "V09", kind: "backdrop", ratio: "16:9",
     width: 1920, height: 1080,
     name: { en: "Knot to fibre", hu: "A csomótól a szálig" },
-    brief: { en: "Method backdrop. 16:9, a cable knot resolving to one lit fibre", hu: "A módszer háttere. 16:9, kábelcsomó, amelyből egyetlen világító szál lesz" },
-    alt: { en: "A knot of dark cables resolving into one lit fibre", hu: "Sötét kábelek csomója, amelyből egyetlen világító szál fut ki" },
+    brief: { en: "Method backdrop. 16:9, a knot of cord resolving to one straight line", hu: "A módszer háttere. 16:9, zsinórcsomó, amelyből egyetlen egyenes vonal lesz" },
+    alt: { en: "A knot of dark cord on pale paper resolving into one straight jade thread", hu: "Sötét zsinór csomója világos papíron, amelyből egyetlen egyenes jádezöld szál fut ki" },
   },
   contactBackdrop: {
     src: null,
     file: "/art/backdrop-contact.webp", promptId: "V10", kind: "backdrop", ratio: "21:9",
     width: 2520, height: 1080,
-    name: { en: "One lit window", hu: "Egy világító ablak" },
-    brief: { en: "Contact backdrop. 21:9, a dark skyline with one lit window", hu: "A kapcsolat háttere. 21:9, sötét látkép egyetlen világító ablakkal" },
-    alt: { en: "A dark city skyline in the rain with one window lit", hu: "Sötét városi látkép esőben, egyetlen világító ablakkal" },
+    name: { en: "One red lantern", hu: "Egy piros lámpás" },
+    brief: { en: "Contact backdrop. 21:9, a dawn skyline with one red lantern-window", hu: "A kapcsolat háttere. 21:9, hajnali látkép egyetlen piros lámpásablakkal" },
+    alt: { en: "A pale dawn skyline in mist with one small vermilion lantern in a window", hu: "Világos hajnali városkép ködben, egyetlen ablakban apró cinóberpiros lámpással" },
   },
   notFound: {
     src: null,
@@ -116,7 +116,7 @@ export const visuals = {
     width: 1600, height: 900,
     name: { en: "Dead end", hu: "Zsákutca" },
     brief: { en: "Art for the 404 page. 16:9, a line that stops at a wall", hu: "A 404-es oldal képe. 16:9, egy falnál megálló vonal" },
-    alt: { en: "A lit line running down an alley and stopping at a wall", hu: "Sikátoron végigfutó világító vonal, amely egy falnál megáll" },
+    alt: { en: "A thin ink line running down a pale lane and stopping at a plain wall", hu: "Világos sikátoron végigfutó vékony tusvonal, amely egy sima falnál megáll" },
   },
 } satisfies Record<string, Visual>;
 

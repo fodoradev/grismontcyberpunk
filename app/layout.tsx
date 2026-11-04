@@ -6,7 +6,7 @@ import "./globals.css";
 import "./inner.css";
 import { getLocale, getPublicPath } from "../lib/i18n-server";
 
-export const viewport: Viewport = { themeColor: "#07060F" };
+export const viewport: Viewport = { themeColor: "#F6F3EE", colorScheme: "light" };
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale();

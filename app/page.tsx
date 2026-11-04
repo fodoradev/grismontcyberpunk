@@ -4,7 +4,7 @@ import FlowMark from "../components/FlowMark";
 import HomeMotion from "../components/HomeMotion";
 import HoursCalculator from "../components/HoursCalculator";
 import MethodSteps from "../components/MethodSteps";
-import NightCity from "../components/NightCity";
+import NightCity, { FlowSamurai, HankoMark } from "../components/NightCity";
 import ProcessExplorer from "../components/ProcessExplorer";
 import ScorecardShowcase from "../components/ScorecardShowcase";
 import StickyCta from "../components/StickyCta";
@@ -46,7 +46,7 @@ export default async function Home() {
       <HomeMotion />
 
       <section className="home-hero-band" id="home" aria-labelledby="hero-title">
-        <div className="home-atmos" aria-hidden="true"><VisualBackdrop id="heroCity" priority />{getBackdrop("heroCity") ? null : <NightCity />}</div>
+        <div className="home-atmos" aria-hidden="true"><VisualBackdrop id="heroCity" priority />{getBackdrop("heroCity") ? null : <NightCity sun={false} />}</div>
         <div className="gm-shell home-hero">
         <div className="home-hero-copy">
           <p className="home-eyebrow">{c.hero.eyebrow}</p>
@@ -56,7 +56,7 @@ export default async function Home() {
           <p className="gm-under">{c.hero.under}</p>
           <div className="home-person"><VisualSlot id="portrait" locale={locale} className="home-person-photo" /><span><strong>{business.firstName}, {c.hero.person}</strong><span>{c.hero.personNote}</span></span></div>
         </div>
-        <div className="home-hero-stage"><VisualSlot id="samurai" locale={locale} className="home-hero-visual" priority /><span className="home-nagare" aria-hidden="true" lang="ja">流れ</span></div>
+        <div className="home-hero-stage">{known(getVisual("samurai", locale).src) ? <VisualSlot id="samurai" locale={locale} className="home-hero-visual" priority /> : <div className="gm-visual home-hero-visual" role="img" aria-label={getVisual("samurai", locale).alt}><FlowSamurai /></div>}<span className="home-nagare" aria-hidden="true" lang="ja">流れ<HankoMark className="home-nagare-hanko" size="0.34em" /></span></div>
       </div></section>
 
       <div className="gm-shell home-credentials" aria-label={c.strip.label}>{c.strip.items.map(([title, text]) => <p key={title}><strong>{title}</strong><span>{text}</span></p>)}</div>
